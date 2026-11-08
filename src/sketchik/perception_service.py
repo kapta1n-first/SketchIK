@@ -81,25 +81,46 @@ def main():
     else:
         from sam3.model_builder import build_sam3_image_model
         from sam3.model.sam3_image_processor import Sam3Processor
+        from sam3.model import box_ops
+        from sam3.model.data_misc import FindStage, interpolate
         model = build_sam3_image_model(checkpoint_path=str(args.checkpoint.resolve()), device="cuda", load_from_HF=False)
         processor = Sam3Processor(model, confidence_threshold=.3, device="cuda")
         def infer(request):
-            image = Image.open(BytesIO(base64.b64decode(request["image_base64"], validate=True))).convert("RGB")
+            items = request.get("images")
+            if not isinstance(items, list) or len(items) != 2:
+                raise ValueError("Provide exactly two labelled RGB images in images")
+            if {v.get('camera') for v in items} != {'agentview', 'robot0_eye_in_hand'}:
+                raise ValueError("Expected unique agentview and robot0_eye_in_hand labels")
+            images = [Image.open(BytesIO(base64.b64decode(v["image_base64"], validate=True))).convert("RGB") for v in items]
             prompt = request["prompt"]
             if not isinstance(prompt, str) or not prompt.strip():
                 raise ValueError("SAM3 requires a nonempty target description")
             with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
-                state = processor.set_image(image)
-                output = processor.set_text_prompt(prompt=prompt, state=state)
-            masks = output["masks"].detach().cpu().numpy()
-            masks = masks.reshape(len(masks), image.height, image.width)
-            scores = output["scores"].detach().float().cpu().numpy().reshape(-1)
-            boxes = output["boxes"].detach().float().cpu().numpy().reshape(-1,4)
-            return {"prompt": prompt, "width": image.width, "height": image.height,
-                    "candidates": [{"id": i, "score": float(score), "box_xyxy": box.tolist(),
-                        "mask_shape": [image.height, image.width],
+                state = processor.set_image_batch(images)
+                state['backbone_out'].update(model.backbone.forward_text([prompt], device='cuda'))
+                find = FindStage(img_ids=torch.arange(2, device='cuda'), text_ids=torch.zeros(2, dtype=torch.long, device='cuda'),
+                                 input_boxes=None, input_boxes_mask=None, input_boxes_label=None,
+                                 input_points=None, input_points_mask=None)
+                output = model.forward_grounding(backbone_out=state['backbone_out'], find_input=find,
+                    geometric_prompt=model._get_dummy_prompt(num_prompts=2), find_target=None)
+                probabilities = (output['pred_logits'].sigmoid() * output['presence_logit_dec'].sigmoid().unsqueeze(1)).squeeze(-1)
+                views = []
+                for index, (item, image) in enumerate(zip(items, images)):
+                    keep = probabilities[index] > processor.confidence_threshold
+                    scores = probabilities[index][keep].float().cpu().numpy().reshape(-1)
+                    boxes = box_ops.box_cxcywh_to_xyxy(output['pred_boxes'][index][keep])
+                    boxes = (boxes * torch.tensor([image.width,image.height,image.width,image.height],device='cuda')).float().cpu().numpy()
+                    logits = output['pred_masks'][index][keep]
+                    masks = (interpolate(logits.unsqueeze(1), (image.height, image.width), mode='bilinear', align_corners=False).sigmoid() > .5).cpu().numpy()
+                    masks = masks.reshape(len(scores), image.height, image.width)
+                    h,w = image.height,image.width
+                    views.append({"camera": item['camera'], "width": w, "height": h,
+                        "candidates": [{"id": i, "score": float(score), "box_xyxy": box.tolist(),
+                        "mask_shape": [h, w],
                         "mask_packbits_base64": base64.b64encode(np.packbits(mask.astype(bool).ravel()).tobytes()).decode()}
-                        for i,(mask,score,box) in enumerate(zip(masks,scores,boxes))],
+                        for i,(mask,score,box) in enumerate(zip(masks,scores,boxes))]})
+            return {"prompt": prompt, "images": views, "batch_size": 2,
+                    "processing": "one batched image encoder and grounding call; per-camera masks, no cross-view identity certification",
                     "selection": "all returned candidates, no top-score selection", "threshold": .3}
     torch.cuda.synchronize()
     metadata = {"kind": args.kind, "pid": os.getpid(), "gpu": gpu, "port": args.port,

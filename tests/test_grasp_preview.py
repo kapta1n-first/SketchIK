@@ -4,52 +4,110 @@ import numpy as np
 from PIL import Image
 import pytest
 
-from sketchik.grasp_preview import mask_cloud
+from sketchik.grasp_preview import CAMERAS, mask_clouds, points_from_mask
 from sketchik.libero import back_project
 
 
-def make_observation(tmp_path):
-    folder = tmp_path / 'obs'
-    folder.mkdir()
-    Image.new('RGB', (4, 4), 'red').save(folder/'agentview.png')
+def frame_for_test():
     depth = np.full((4, 4), .6)
     depth[0, 0] = np.nan
     transform = np.eye(4)
     transform[:3, :3] = [[0, -1, 0], [1, 0, 0], [0, 0, 1]]
     transform[:3, 3] = [.1, -.2, .3]
-    frame = dict(depth_m=depth, K=np.array([[3., 0, 1], [0, 4., 1], [0, 0, 1]]),
-                 world_from_camera=transform)
-    np.savez(folder/'agentview.npz', **frame)
-    return folder, frame
+    return dict(depth_m=depth, K=np.array([[3., 0, 1], [0, 4., 1], [0, 0, 1]]),
+                world_from_camera=transform)
 
 
-def candidate(mask, index, score):
-    return dict(id=index, score=score, box_xyxy=[0, 0, 3, 3], mask_shape=list(mask.shape),
-                mask_packbits_base64=base64.b64encode(np.packbits(mask.ravel())).decode())
-
-
-def test_mask_retains_all_valid_points_in_calibrated_world_frame(tmp_path, monkeypatch):
-    folder, frame = make_observation(tmp_path)
+def test_mask_retains_all_valid_points_in_calibrated_world_frame():
+    frame = frame_for_test()
     mask = np.ones((4, 4), dtype=bool)
     mask[3, 3] = False
-    monkeypatch.setattr('sketchik.grasp_preview.request', lambda *a: dict(
-        candidates=[candidate(mask, 0, .7)], inference_wall_s=.1))
-    output = tmp_path/'result'
-    output.mkdir()
-    points, colors, _ = mask_cloud(folder, 'agentview', 'observed object', None, '', output)
+    points, colors = points_from_mask(frame, mask, Image.new('RGB', (4, 4), 'red'))
     pixels = [(x, y) for y in range(4) for x in range(4) if mask[y, x] and np.isfinite(frame['depth_m'][y, x])]
     assert len(points) == 14
     np.testing.assert_allclose(points, [back_project(frame, xy) for xy in pixels])
     np.testing.assert_allclose(colors, np.tile([1., 0, 0], (14, 1)))
 
 
-def test_multiple_masks_do_not_silently_select_highest_score(tmp_path, monkeypatch):
-    folder, _ = make_observation(tmp_path)
-    masks = [candidate(np.ones((4, 4), dtype=bool), i, score) for i, score in enumerate([.99, .6])]
-    monkeypatch.setattr('sketchik.grasp_preview.request', lambda *a: dict(candidates=masks, inference_wall_s=.1))
+def test_rgb_depth_mask_must_have_same_resolution():
+    with pytest.raises(ValueError, match='resolutions must match'):
+        points_from_mask(frame_for_test(), np.ones((3, 3), dtype=bool), Image.new('RGB', (4, 4)))
+
+
+def make_observation(tmp_path):
+    folder = tmp_path/'obs'
+    folder.mkdir()
+    for index, camera in enumerate(CAMERAS):
+        Image.new('RGB', (1024, 1024), 'red').save(folder/(camera+'.png'))
+        transform = np.eye(4)
+        transform[0, 3] = index
+        np.savez(folder/(camera+'.npz'), depth_m=np.ones((1024, 1024)), K=np.eye(3),
+                 world_from_camera=transform)
+    return folder
+
+
+def candidate(index, score):
+    mask = np.zeros((1024, 1024), dtype=bool)
+    mask[2, 3] = True
+    return dict(id=index, score=score, box_xyxy=[0, 0, 4, 4], mask_shape=list(mask.shape),
+                mask_packbits_base64=base64.b64encode(np.packbits(mask.ravel())).decode())
+
+
+def response(views):
+    return dict(images=views, inference_wall_s=.1, model_pid=123, request_index=1)
+
+
+def test_two_views_use_their_own_calibration_even_if_response_order_changes(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    views = [dict(camera=camera, candidates=[candidate(0, .7)]) for camera in reversed(CAMERAS)]
+    payloads = []
+    def call(url, payload):
+        payloads.append(payload)
+        return response(views)
+    monkeypatch.setattr('sketchik.grasp_preview.request', call)
     output = tmp_path/'result'
     output.mkdir()
-    with pytest.raises(ValueError, match='no top-score selection'):
-        mask_cloud(folder, 'agentview', 'observed object', None, '', output)
-    assert (output/'sam_masks.png').exists()
-    assert not (output/'observed_object.npz').exists()
+    points, _, source = mask_clouds(folder, 'observed object', {}, '', output)
+    assert len(payloads) == 1
+    assert [v['camera'] for v in payloads[0]['images']] == list(CAMERAS)
+    np.testing.assert_allclose(points, [[3, 2, 1], [4, 2, 1]])
+    np.testing.assert_array_equal(np.load(output/'observed_object.npz')['camera_index'], [0, 1])
+    assert source['cross_view_identity_certified'] is False
+
+
+def test_highest_score_selection_is_explicitly_recorded_and_can_be_overridden(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    views = [dict(camera=camera, candidates=[candidate(0, .99), candidate(1, .6)]) for camera in CAMERAS]
+    monkeypatch.setattr('sketchik.grasp_preview.request', lambda *a: response(views))
+    output = tmp_path/'result'
+    output.mkdir()
+    _, _, source = mask_clouds(folder, 'observed object', {CAMERAS[1]: 1}, '', output)
+    assert source['views'][0]['selected_candidate_id'] == 0
+    assert source['views'][0]['selected_score'] == .99
+    assert source['views'][0]['selection'] == 'highest_sam_score_per_view'
+    assert source['views'][1]['selected_candidate_id'] == 1
+    assert source['views'][1]['selection'] == 'explicit_candidate_id'
+    assert (output/'agentview/sam_masks.png').exists()
+    assert (output/'observed_object.npz').exists()
+
+
+def test_unobserved_view_does_not_get_a_fabricated_mask(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    views = [dict(camera=CAMERAS[0], candidates=[]), dict(camera=CAMERAS[1], candidates=[candidate(0, .7)])]
+    monkeypatch.setattr('sketchik.grasp_preview.request', lambda *a: response(views))
+    output = tmp_path/'result'
+    output.mkdir()
+    points, _, source = mask_clouds(folder, 'observed object', {}, '', output)
+    assert len(points) == 1
+    assert source['views'][0]['status'] == 'no_detection'
+    assert not (output/CAMERAS[0]/'selected_mask.png').exists()
+
+
+def test_saved_256_images_are_not_silently_upscaled(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    Image.new('RGB', (256, 256)).save(folder/'agentview.png')
+    def unexpected(*a):
+        raise AssertionError('must reject before invoking model')
+    monkeypatch.setattr('sketchik.grasp_preview.request', unexpected)
+    with pytest.raises(ValueError, match='do not upscale'):
+        mask_clouds(folder, 'object', {}, '', tmp_path)

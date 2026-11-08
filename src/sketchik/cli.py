@@ -9,13 +9,13 @@ import time
 def main():
     parser = argparse.ArgumentParser(description="Independent LIBERO IK primitives")
     parser.add_argument("command", choices=["probe", "smoke", "execute", "agent", "agent-smoke"])
-    parser.add_argument("--gpu-uuid", required=True, help="Exact idle GPU UUID; renderer only")
+    parser.add_argument("--gpu-uuid", required=True, help="Exact GPU UUID; renderer only")
+    parser.add_argument("--peer-pid", type=int, action="append", default=[], help="Allow this project's resident model PID on the renderer GPU")
     parser.add_argument("--variant", choices=["pro", "standard"], default="pro")
     parser.add_argument("--suite", default="libero_10")
     parser.add_argument("--task", type=int, default=0)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--init-state", type=int, default=0)
-    parser.add_argument("--size", type=int, default=256)
     parser.add_argument("--plan", type=Path)
     parser.add_argument("--env-file", type=Path, help="Literal SKETCHIK_* settings; not shell-sourced")
     parser.add_argument("--base-url")
@@ -40,13 +40,13 @@ def main():
     run = root / "runs" / (time.strftime("%Y%m%dT%H%M%S") + "_" + args.command)
     run.mkdir(parents=True, exist_ok=False)
     from .runtime import configure
-    gpu = configure(root, args.gpu_uuid, args.variant)
+    gpu = configure(root, args.gpu_uuid, args.variant, args.peer_pid)
     from .libero import LiberoRobot
     import numpy as np
     from PIL import Image
     start = time.perf_counter()
     try:
-        robot = LiberoRobot(args.variant, args.suite, args.task, args.seed, args.init_state, args.size,
+        robot = LiberoRobot(args.variant, args.suite, args.task, args.seed, args.init_state,
                             max_steps=args.max_episode_steps)
     except Exception as exc:
         import traceback

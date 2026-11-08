@@ -14,7 +14,7 @@ class LiberoRobot:
     cameras = ("agentview", "robot0_eye_in_hand")
 
     def __init__(self, variant="pro", suite="libero_10", task=0, seed=0, init_state=0,
-                 size=256, max_steps=2000):
+                 size=1024, max_steps=2000):
         import robosuite
         from robosuite.environments.manipulation.manipulation_env import ManipulationEnv
         from robosuite.controllers.parts.controller_factory import load_part_controller_config

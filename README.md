@@ -174,7 +174,7 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 | 类别 | 原版已有的能力 | SketchIK 当前状态与实际影响 |
 | --- | --- | --- |
 | 已有基本等价入口 | 模型调用、图像/状态、工具参数、执行回执、操作指南、文件/历史图片读取 | 已有基础实现；真实模型尚未联调，不能等同于原版完整运行验收 |
-| 输入配置有差别 | view_env_state 可附 policy 图、1024 前视图、1024 腕部图；前视和腕部来自两个相机，不是三个相机 | 当前默认两张 256 RGB；--size 可调，但尚未按原版高层高分辨率输入做同条件验收。不能宣称观测完全一致 |
+| 输入配置有差别 | view_env_state 可附 policy 图、1024 前视图、1024 腕部图；前视和腕部来自两个相机，不是三个相机 | 当前固定原生 1024 前视与腕部 RGB-D，不提供 256 policy 图；已实际渲染双视角与批量分割，但尚未做高层 API 同条件评测 |
 | 尚缺工程能力 | 长会话压缩 | 当前保留完整历史；长任务可能超出模型上下文 |
 | 尚缺工程能力 | 多种 Planner 后端（API、Codex、Claude Code 等） | 当前只有 Chat Completions 兼容客户端，不提供这些独立 Planner 接入 |
 | 尚缺工程能力 | 环境服务/RPC、Dashboard 和取消/交互等运行管理 | 当前主要单进程同步 CLI，不具备原版整套服务与交互管理 |
@@ -187,13 +187,13 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 同样，稳定的自动抓取/放置位姿生成、抓取评分和完整场景避障不能未经源码/实验依据就列为 HarnessVLA 已独立解决的模块。原版借助 Agent、几何工具和 VLA 完成操作；我们不用 VLA 后，需要自行补的操作能力，应与复刻框架的工程差距分开讨论。
 
 
-## 常驻分割与抓取候选预览（2026-11-09）
+## 常驻双视角分割与抓取候选预览（2026-11-09）
 
-`src/sketchik/perception_service.py` 是两个独立的本地 HTTP 服务。模型各加载一次，后续请求复用实例，不在每次 primitive 前重新加载。SAM3 返回全部超过 0.3 阈值的候选 Mask、检测框与分数；Mask 以无损 packbits/base64 传输，可恢复为与输入 RGB 同尺寸的布尔数组。没有在服务端取最高分。当前预览多个候选时要求明确指定 ID；唯一候选只用于预览，不认证物体身份。此预览尚未接入 Molmo 或高层自动目标选择。
+`src/sketchik/perception_service.py` 是两个独立的本地 HTTP 服务。模型各加载一次，后续请求复用实例，不在每次 primitive 前重新加载。SAM3 返回全部超过 0.3 阈值的候选 Mask、检测框与分数；Mask 以无损 packbits/base64 传输，可恢复为与输入 RGB 同尺寸的布尔数组。没有在服务端取最高分。按用户最新授权，当前预览每视角取 SAM3 分数最高的候选，也支持显式 ID 覆盖；记录选择依据和分数。最高分不能认证物体身份，两视角也可能各自选错，因此尚不能宣称跨视角匹配可靠。此预览没有接入 Molmo，也没有自动执行抓取。
 
-完整链路：保存的 RGB → SAM3 Mask → Mask 内所有有效深度像素 → 内外参反投影 → 可见物体点云 → GraspGen 的 Panda diffusion-discriminator → 128 个 4×4 位姿及模型评分。这里保留点云，不用中位数将物体压成一个点。GraspGen 内部按官方逻辑清理离群点并采样；输入不包含仿真物体 GT。模型评分不是实际成功率，也不代表可达或无碰撞。
+完整链路：同一机器人状态下原生渲染的两张 1024 RGB-D → 一次双图批量 SAM3 → 各相机 Mask → 各自 Mask 内所有有效深度像素 → 各自内外参反投影 → 在世界坐标系拼接可见点云 → GraspGen 的 Panda diffusion-discriminator → 128 个 4×4 位姿及模型评分。这里保留点云，不用中位数将物体压成一个点。GraspGen 内部按官方逻辑清理离群点并采样；输入不包含仿真物体 GT。模型评分不是实际成功率，也不代表可达或无碰撞。
 
-当前两个服务在 GPU2（UUID `GPU-d3ae1b42-968e-7d78-e774-7626c1233431`）常驻：SAM3 `127.0.0.1:18761`，GraspGen `127.0.0.1:18760`。`GET /health` 查看实际 PID、加载耗时和请求计数，`POST /infer` 执行推理。PID 与启动参数保存在 `.runtime/perception/`、`.runtime/*_launch.json`；日志在 `.runtime/sam3_service.log` 和 `.runtime/graspgen_service.log`。服务独立于本次终端，但尚未配置系统开机自启或崩溃自启。重启前必须重新检查 GPU，`--peer-pid` 仅允许同项目、同用户的已驻留模型服务；不会停止别人的进程。
+当前两个服务在 GPU2（UUID `GPU-d3ae1b42-968e-7d78-e774-7626c1233431`）常驻：SAM3 `127.0.0.1:18761`，GraspGen `127.0.0.1:18760`。`GET /health` 查看实际 PID、加载耗时和请求计数，`POST /infer` 执行推理。SAM3 输入为 `{"prompt":"目标描述","images":[{"camera":"agentview","image_base64":"…"},{"camera":"robot0_eye_in_hand","image_base64":"…"}]}`；旧单图 image_base64 输入已移除。图像编码器和 grounding 均按 batch=2 调用，不是拼图，也不是连续发送两个单图请求。模型内部仍按官方 1008 分辨率处理，返回 Mask 对齐各自原始 1024 图。PID 与启动参数保存在 `.runtime/perception/`、`.runtime/*_launch.json`；日志在 `.runtime/sam3_service.log` 和 `.runtime/graspgen_service.log`。服务独立于本次终端，但尚未配置系统开机自启或崩溃自启。重启前必须重新检查 GPU，`--peer-pid` 仅允许同项目、同用户的已驻留模型服务；不会停止别人的进程。
 
 首次部署使用 `.venv-grasp`，通过只读 pth 复用已有第三方 torch 2.7.1+cu126 等基础包，其他兼容依赖隔离安装；没有修改旧项目环境。PointNet2 扩展以 CUDA12.3 编译。GraspGen 使用 diffusers0.11.1、huggingface-hub0.25.2、transformers4.44.2；无需 FlashAttention。官方可信 checkpoint 加载显式沿用上游 torch.load 的非 weights-only 语义。SAM3 沿用已安装第三方包和只读权重。上游源码及模型留在 `.runtime`，不提交权重或环境到 Git。
 
@@ -204,13 +204,13 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 ```bash
 USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
   .venv-grasp/bin/python -m sketchik.grasp_preview \
-  --observation-dir runs/20261108T180605_smoke --camera agentview \
+  --observation-dir runs/20261109T021024_probe \
   --target 'a cylindrical can with a red and green label'
 ```
 
-也支持 `--sample-json` 读取官方真实点云样例，仅读取 pc/颜色，再实时推理，绝不拿样例存储的抓取结果冒充模型输出。每次新建运行目录，保存原图、完整 SAM 回应、Mask 叠图、选中 Mask、标定点云、原始候选/评分、三视角线框图、前三个 Panda 实体夹爪渲染、交互式 HTML 和耗时。`--candidate-id` 可显式选择多个候选中的一个。此程序不推进机器人，不调用 IK，不执行抓取。
+也支持 `--sample-json` 读取官方真实点云样例，仅读取 pc/颜色，再实时推理，绝不拿样例存储的抓取结果冒充模型输出。每次新建运行目录，保存原图、完整 SAM 回应、Mask 叠图、选中 Mask、标定点云、原始候选/评分、三视角线框图、前三个 Panda 实体夹爪渲染、交互式 HTML 和耗时。例如 `--candidate-id agentview=1 --candidate-id robot0_eye_in_hand=1` 可显式覆盖各相机的最高分选择。全部原始点云保留并记录相机来源；当前直接拼接，不去重，也不补全不可见部分。此程序不推进机器人，不调用 IK，不执行抓取。
 
-本次真实 GPU 结果：
+先前单张 256 图的真实 GPU 结果（历史对照，不是当前默认输入）：
 
 | 输入与阶段 | 结果 | 推理墙钟 |
 | --- | --- | --- |
@@ -220,8 +220,27 @@ USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 | 同一保存输入重复三次，SAM3 | 同一 PID，均返回 1 个候选 | 0.221 / 0.198 / 0.187s |
 | 同一点云重复三次，GraspGen | 同一 PID，均返回 128 个候选 | 0.172 / 0.143 / 0.144s |
 
-这些是当前 256 RGB、单物体、128 抓取候选的推理耗时，不含模型加载和绘图，不能推广为完整机器人任务耗时。两服务加载后 GPU 总占用约 6.6GiB（含缓存和 CUDA 上下文）；torch 单进程峰值 allocated 为 SAM3 5088MiB、GraspGen 737MiB，不能把它与 nvidia-smi 总占用混为同一指标。
+这些是此前单张 256 RGB、单物体、128 抓取候选的推理耗时，不含模型加载和绘图，不能推广为完整机器人任务耗时。两服务加载后 GPU 总占用约 6.6GiB（含缓存和 CUDA 上下文）；torch 单进程峰值 allocated 为 SAM3 5088MiB、GraspGen 737MiB，不能把它与 nvidia-smi 总占用混为同一指标。
 
 LIBERO 证据：`runs/20261109T015914_grasp_preview`，含 `metadata.json`、`result.json` 和 `resident_repeats.json`。官方样例证据：`runs/20261109T015805_grasp_preview`。首次 SAM 请求曾因 BF16 转 NumPy 报错，已修为 float32 后序列化并重启本项目服务，错误日志保留。最终 29 项 CPU 测试通过，包含所有有效 Mask 像素的三维转换和多候选不默选最高分。
 
 **本轮只验证生成与显示。** 部分高分罐子候选从下方接近，可能与桌面碰撞；没有场景碰撞筛选，不能直接执行。GraspGen 输出是其夹爪基座约定，后续必须对齐本机器人 grip_site/TCP，检查 IK、关节与场景碰撞，再验证真实抓取。渲染图不是已成功抓住的画面。
+
+
+当前默认观测已改为前视、腕部各 1024×1024 RGB-D；CLI 不再提供 --size 选项，也没有额外 256 policy 图。旧 runs 中的 256 证据保留，双图预览会拒绝旧 256 图，绝不上采样冒充原生高分辨率。高层仍收到带相机标签的两张图和各自标定。单张看不到目标时记录无检测，只使用另一视角的实际点，不伪造 Mask；两个视角均无检测则失败。
+
+当前双图实测（Pro task0 / seed0 / init_state0，机器人动作 0）：
+
+| 环节 | 实际结果 | 推理墙钟 |
+| --- | --- | --- |
+| 原生双视角渲染 | 两张 1024 RGB＋各自1024深度、内外参，未使用旧图放大 | 环境初始化 10.94s；不是分割耗时 |
+| SAM3 双图首个请求 | 前视2候选、腕部3候选，全部保留 | 1.260s |
+| SAM3 双图后续请求 | 同一实例、相同原生双图 | 0.451 / 0.465s |
+| 各视角最高分选择＋深度反投影 | 前视 ID1 12556 点，腕部 ID1 13885 点；共26441点 | 见 perception.json 的模型与客户端耗时 |
+| GraspGen，26441原始点＋128候选 | 两次均实时生成128候选 | 1.673 / 1.634s |
+
+双图点云比先前777点大得多，GraspGen 官方离群点处理等开销随之增加，不能沿用之前0.16s作为新条件速度。分割/GraspGen时间不含拍照、存图和渲染预览，实际完整程序还有对应开销。两模型仍常驻 GPU2，本轮结束 nvidia-smi 总占用约10.5GiB，含CUDA缓存。
+
+当前最高分规则的完整证据在 `runs/20261109T021343_grasp_preview`：sam_response.json、perception.json、metadata.json、result.json、两相机各自的输入/Mask/点云，以及合并点云、全部抓取位姿和可旋转 HTML。原生图来源为 `runs/20261109T021024_probe`。前一份 `runs/20261109T021246_grasp_preview` 显式指定了相同ID，不能混称为最高分自动选择。
+
+渲染进程可以通过明确的 --peer-pid 与本项目常驻模型共用 GPU；会核验进程所属用户、项目目录和启动模块，任何未授权占用进程仍阻止启动。没有停止他人进程，也没有修改旧项目。CPU 验证33项通过；包含各视角独立标定、响应顺序变化、最高分选择/ID覆盖、空检测不造点和拒绝256输入。真实抓取、场景碰撞和跨视角同物体认证仍未验证。

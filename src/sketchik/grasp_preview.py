@@ -22,51 +22,82 @@ def request(url, data=None, timeout=180):
         return json.load(response)
 
 
-def mask_cloud(folder, camera, target, candidate_id, sam_url, output):
-    image_path = folder / (camera+".png")
-    frame = np.load(folder / (camera+".npz"))
-    raw = image_path.read_bytes()
-    image = Image.open(image_path).convert("RGB")
-    result = request(sam_url+"/infer", {"image_base64": base64.b64encode(raw).decode(), "prompt": target})
-    (output/"sam_response.json").write_text(json.dumps(result))
-    image.save(output/"input_rgb.png")
-    masks = []
-    overlay = np.asarray(image).copy()
-    palette = [(255,80,40), (40,210,100), (100,100,255), (220,80,220)]
-    for candidate in result["candidates"]:
-        h,w = candidate["mask_shape"]
-        mask = np.unpackbits(np.frombuffer(base64.b64decode(candidate["mask_packbits_base64"]),dtype=np.uint8))[:h*w].reshape(h,w).astype(bool)
-        masks.append(mask)
-        color = np.array(palette[candidate["id"]%len(palette)])
-        overlay[mask] = (.5*overlay[mask]+.5*color).astype(np.uint8)
-    picture = Image.fromarray(overlay)
-    draw = ImageDraw.Draw(picture)
-    for c in result["candidates"]:
-        draw.rectangle(c["box_xyxy"], outline=palette[c["id"]%len(palette)], width=2)
-        draw.text(c["box_xyxy"][:2], f"ID {c['id']} score={c['score']:.2f}", fill="white")
-    picture.save(output/"sam_masks.png")
-    if candidate_id is None:
-        if len(masks) != 1:
-            raise ValueError(f"SAM returned {len(masks)} candidates. Inspect sam_masks.png and specify --candidate-id; no top-score selection.")
-        candidate_id = 0
-    if not 0 <= candidate_id < len(masks):
-        raise ValueError("Selected candidate does not exist")
-    mask = masks[candidate_id]
+CAMERAS = ("agentview", "robot0_eye_in_hand")
+
+
+def points_from_mask(frame, mask, image):
     depth = frame["depth_m"].squeeze()
+    if depth.shape != mask.shape or np.asarray(image).shape[:2] != mask.shape:
+        raise ValueError("RGB, depth and Mask resolutions must match")
     valid = mask & np.isfinite(depth) & (depth > .02) & (depth < 3.)
     y,x = np.nonzero(valid)
     rays = np.linalg.solve(frame["K"], np.vstack([x,y,np.ones(len(x))])).T
-    points_camera = rays * depth[y,x,None]
+    camera_points = rays * depth[y,x,None]
     transform = frame["world_from_camera"]
-    points = points_camera @ transform[:3,:3].T + transform[:3,3]
-    colors = np.asarray(image)[y,x]/255.
-    Image.fromarray((mask*255).astype(np.uint8)).save(output/"selected_mask.png")
-    np.savez_compressed(output/"observed_object.npz", points=points, colors=colors, mask=mask,
-                        K=frame["K"], world_from_camera=transform)
-    return points,colors,{"input": "saved LIBERO RGB-D plus SAM3 mask", "observation_directory": str(folder.resolve()),
-        "camera": camera, "target_description": target, "selected_candidate_id": candidate_id,
-        "sam_candidate_count": len(masks), "sam_inference_wall_s": result["inference_wall_s"],
-        "point_count": len(points), "geometry_source": "visible depth pixels only; no object GT"}
+    return camera_points @ transform[:3,:3].T + transform[:3,3], np.asarray(image)[y,x]/255.
+
+
+def mask_clouds(folder, target, candidate_ids, sam_url, output):
+    images = {c: Image.open(folder/(c+".png")).convert("RGB") for c in CAMERAS}
+    if any(image.size != (1024,1024) for image in images.values()):
+        raise ValueError("Dual-view preview requires native 1024x1024 RGB-D; do not upscale saved 256 images")
+    payload = {"prompt": target, "images": [{"camera": c, "image_base64": base64.b64encode(
+        (folder/(c+".png")).read_bytes()).decode()} for c in CAMERAS]}
+    begin = time.perf_counter()
+    result = request(sam_url+"/infer", payload)
+    client_wall = time.perf_counter()-begin
+    (output/"sam_response.json").write_text(json.dumps(result))
+    views = {v['camera']: v for v in result['images']}
+    if len(result['images']) != 2 or set(views) != set(CAMERAS):
+        raise ValueError("SAM response camera labels do not match the requested pair")
+    all_points,all_colors,origins,records = [],[],[],[]
+    palette = [(255,80,40), (40,210,100), (100,100,255), (220,80,220)]
+    for index,camera in enumerate(CAMERAS):
+        directory=output/camera;directory.mkdir()
+        image=images[camera];image.save(directory/"input_rgb.png")
+        masks={};overlay=np.asarray(image).copy()
+        for candidate in views[camera]['candidates']:
+            h,w=candidate['mask_shape']
+            if (h,w)!=(image.height,image.width):raise ValueError("Returned Mask size mismatch")
+            mask=np.unpackbits(np.frombuffer(base64.b64decode(candidate['mask_packbits_base64']),dtype=np.uint8))[:h*w].reshape(h,w).astype(bool)
+            masks[candidate['id']]=mask
+            color=np.array(palette[candidate['id']%len(palette)])
+            overlay[mask]=(.5*overlay[mask]+.5*color).astype(np.uint8)
+        picture=Image.fromarray(overlay);draw=ImageDraw.Draw(picture)
+        for candidate in views[camera]['candidates']:
+            draw.rectangle(candidate['box_xyxy'],outline=palette[candidate['id']%len(palette)],width=3)
+            draw.text(candidate['box_xyxy'][:2],f"ID {candidate['id']} score={candidate['score']:.2f}",fill='white')
+        picture.save(directory/"sam_masks.png")
+        selected=candidate_ids.get(camera)
+        record={"camera":camera,"width":image.width,"height":image.height,"sam_candidate_count":len(masks)}
+        if selected is None and not masks:
+            record.update(status="no_detection",point_count=0);records.append(record);continue
+        selection = "explicit_candidate_id" if selected is not None else "highest_sam_score_per_view"
+        if selected is None:
+            selected=max(views[camera]['candidates'],key=lambda candidate:candidate['score'])['id']
+        if selected not in masks:raise ValueError(f"{camera}: selected candidate does not exist")
+        mask=masks[selected]
+        with np.load(folder/(camera+".npz")) as frame:
+            points,colors=points_from_mask(frame,mask,image)
+            np.savez_compressed(directory/"observed_object.npz",points=points,colors=colors,mask=mask,
+                                K=frame['K'],world_from_camera=frame['world_from_camera'])
+        Image.fromarray((mask*255).astype(np.uint8)).save(directory/"selected_mask.png")
+        all_points.append(points);all_colors.append(colors);origins.append(np.full(len(points),index,dtype=np.uint8))
+        selected_score=next(c['score'] for c in views[camera]['candidates'] if c['id']==selected)
+        record.update(status="selected_for_preview",selected_candidate_id=selected,selection=selection,
+                      selected_score=selected_score,point_count=len(points));records.append(record)
+    source={"input":"native dual-view LIBERO RGB-D plus batched SAM3 masks","observation_directory":str(folder.resolve()),
+        "target_description":target,"views":records,"sam_inference_wall_s":result['inference_wall_s'],
+        "sam_client_wall_s":client_wall,"sam_model_pid":result['model_pid'],"sam_request_index":result['request_index'],
+        "geometry_source":"all valid visible depth pixels, separately calibrated then concatenated in world frame; no object GT",
+        "cross_view_identity_certified":False,"duplicate_points_removed":False}
+    (output/"perception.json").write_text(json.dumps(source,indent=2))
+    if not all_points:raise ValueError("Neither view returned an observed target Mask")
+    points,colors=np.concatenate(all_points),np.concatenate(all_colors)
+    np.savez_compressed(output/"observed_object.npz",points=points,colors=colors,camera_index=np.concatenate(origins),camera_names=np.array(CAMERAS))
+    source['point_count']=len(points)
+    (output/"perception.json").write_text(json.dumps(source,indent=2))
+    return points,colors,source
 
 
 def render(points, colors, grasps, scores, output, graspgen_root):
@@ -134,9 +165,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sample-json",type=Path)
     parser.add_argument("--observation-dir",type=Path)
-    parser.add_argument("--camera",default="agentview")
     parser.add_argument("--target")
-    parser.add_argument("--candidate-id",type=int)
+    parser.add_argument("--candidate-id",action="append",default=[],metavar="CAMERA=ID")
     parser.add_argument("--sam-url",default="http://127.0.0.1:18761")
     parser.add_argument("--grasp-url",default="http://127.0.0.1:18760")
     parser.add_argument("--num-grasps",type=int,default=128)
@@ -155,7 +185,12 @@ def main():
                 "stored_sample_grasps_used":False}
     else:
         if not args.target:parser.error("An observed target description is required")
-        points,colors,source=mask_cloud(args.observation_dir,args.camera,args.target,args.candidate_id,args.sam_url,output)
+        candidate_ids={}
+        for entry in args.candidate_id:
+            camera,value=entry.split('=',1)
+            if camera not in CAMERAS or camera in candidate_ids:parser.error("Expected unique CAMERA=ID entries")
+            candidate_ids[camera]=int(value)
+        points,colors,source=mask_clouds(args.observation_dir,args.target,candidate_ids,args.sam_url,output)
     if len(points)<64:raise ValueError("Too few observed points for meaningful grasp preview")
     metadata={"source":source,"service":request(args.grasp_url+"/health"),"robot_actions":0}
     (output/"metadata.json").write_text(json.dumps(metadata,indent=2))

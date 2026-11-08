@@ -1,5 +1,13 @@
 # 修改记录
 
+## 2026-11-09 — 常驻 SAM3、GraspGen 与真实候选预览
+
+- 新增独立 localhost 模型服务；SAM3 返回全部有效候选完整 Mask，GraspGen 复用已加载 Panda diffusion-discriminator。两服务目前驻留空闲 GPU2，不修改其他项目。
+- 保存 Mask 内所有有效 XYZ 点，接通保存 RGB-D → 分割 → 标定点云 → 候选生成 → 官方夹爪几何渲染；多个 Mask 不按最高分默选，暂由预览命令显式指定 ID。
+- 官方真实点云样例与本项目保存的 LIBERO 罐子均实际生成 128 个候选。首次 GraspGen 5.408s，LIBERO 暖机推理 0.161s；同输入三次复用服务验证见运行记录。
+- 修复实际 SAM3 BF16 分数/检测框转 NumPy 的序列化错误，保留失败日志；本项目私有环境和缓存不提交。
+- 保存原始 Mask、点云、候选、评分、PNG、交互 HTML 与耗时；没有执行机器人动作，没有完成 IK/场景碰撞/TCP 对齐验收，也没有宣称抓放成功。29 项 CPU 测试通过。
+
 ## 2026-11-09 — 文件工具与历史 RGB 读取
 
 - 补齐 read_text_file、write_text_file、list_dir、read_image，高层工具共 16 个；七个基础动作及 IK 控制方式不变。

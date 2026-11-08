@@ -2,7 +2,7 @@
 
 独立的机器人解析动作执行项目。目前接通 **高层会话/工具接口 → LIBERO 真实观测 → 数值动作计划 → IK → 关节轨迹 → 仿真反馈**，之后再接对象级草图的抓取与放置 Grounding。
 
-已实现兼容 Chat Completions 的高层 Agent 会话与独立操作说明，尚未通过真实收费模型验收。当前没有 VLA、SAM3、Molmo、memory、World Model 或异步规划。不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
+已实现兼容 Chat Completions 的高层 Agent 会话与独立操作说明，尚未通过真实收费模型验收。另有 SAM3＋GraspGen 常驻服务与只读候选预览，尚未接成自动抓取动作。当前没有 VLA、Molmo、memory、World Model 或异步规划。不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
 
 ## 当前动作
 
@@ -28,7 +28,7 @@
 
 IK 解的验收更严格，为 ≤0.5mm / 0.5°；它与真实控制跟踪误差分开记录。命令轨迹的速度限制不代表实际物理速度已经得到安全认证。
 
-**没有自动环境避障、自碰撞检查或物体碰撞模型。** 多路点可表达绕行路线，但路线需要调用方给定；终点可达不等于途中无碰撞。这里也没有抓取位姿评分、持物认证、容器可放区域估计或自动抓放技能。
+**没有自动环境避障、自碰撞检查或物体碰撞模型。** 多路点可表达绕行路线，但路线需要调用方给定；终点可达不等于途中无碰撞。动作执行器还没有持物认证、容器可放区域估计或自动抓放技能；GraspGen 另提供候选位姿及模型评分预览，尚不参与实际动作。
 
 ## 参数与朝向
 
@@ -45,7 +45,7 @@ cd /media/wsqlab/more/kaptainiii/projects/SketchIK
 ./run.sh --help
 ```
 
-启动前选择实际空闲的 GPU UUID。GPU 仅用于 EGL 渲染，IK 和物理仿真主要在 CPU 上运行。
+启动前选择实际空闲的 GPU UUID。仿真动作使用 GPU 进行 EGL 渲染，IK 和物理仿真主要在 CPU 上运行；独立 SAM3/GraspGen 服务也在 GPU 上推理。
 
 ```bash
 nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv
@@ -180,8 +180,48 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 | 尚缺工程能力 | 环境服务/RPC、Dashboard 和取消/交互等运行管理 | 当前主要单进程同步 CLI，不具备原版整套服务与交互管理 |
 | 尚缺工程能力 | 更完整的评测、经验导出与 replay 等流水线 | 当前只有单轮执行和证据记录，没有整套批量评测流水线 |
 | 用户暂缓 | memory/经验管理 | 暂不接；本轮 workspace 文件不等于长期经验库 |
-| 主动改变方案 | 原版解析运动＋冻结 VLA；有 SAM3 服务与分割工具 | 当前 IK＋关节控制，没有 VLA 或 SAM3。缺这些组件的接线，但不用 VLA 是路线选择，不是少写一个文件夹 |
+| 主动改变方案 | 原版解析运动＋冻结 VLA；有 SAM3 服务与分割工具 | 当前 IK＋关节控制，没有 VLA；另有 SAM3＋GraspGen 候选预览，尚未接入高层动作会话。不用 VLA 是路线选择，不是少写一个文件夹 |
 
 对象级草图、执行时自动 Grounding、三层恢复和异步规划属于本项目的研究设计/之前 AsyncSketch 的新增机制，不能算作 HarnessVLA 原版已具备而新项目漏实现的模块。当前 execute_plan 只是数值动作计划，不能冒充对象级草图。独立的新项目尚未迁移这整套机制。
 
 同样，稳定的自动抓取/放置位姿生成、抓取评分和完整场景避障不能未经源码/实验依据就列为 HarnessVLA 已独立解决的模块。原版借助 Agent、几何工具和 VLA 完成操作；我们不用 VLA 后，需要自行补的操作能力，应与复刻框架的工程差距分开讨论。
+
+
+## 常驻分割与抓取候选预览（2026-11-09）
+
+`src/sketchik/perception_service.py` 是两个独立的本地 HTTP 服务。模型各加载一次，后续请求复用实例，不在每次 primitive 前重新加载。SAM3 返回全部超过 0.3 阈值的候选 Mask、检测框与分数；Mask 以无损 packbits/base64 传输，可恢复为与输入 RGB 同尺寸的布尔数组。没有在服务端取最高分。当前预览多个候选时要求明确指定 ID；唯一候选只用于预览，不认证物体身份。此预览尚未接入 Molmo 或高层自动目标选择。
+
+完整链路：保存的 RGB → SAM3 Mask → Mask 内所有有效深度像素 → 内外参反投影 → 可见物体点云 → GraspGen 的 Panda diffusion-discriminator → 128 个 4×4 位姿及模型评分。这里保留点云，不用中位数将物体压成一个点。GraspGen 内部按官方逻辑清理离群点并采样；输入不包含仿真物体 GT。模型评分不是实际成功率，也不代表可达或无碰撞。
+
+当前两个服务在 GPU2（UUID `GPU-d3ae1b42-968e-7d78-e774-7626c1233431`）常驻：SAM3 `127.0.0.1:18761`，GraspGen `127.0.0.1:18760`。`GET /health` 查看实际 PID、加载耗时和请求计数，`POST /infer` 执行推理。PID 与启动参数保存在 `.runtime/perception/`、`.runtime/*_launch.json`；日志在 `.runtime/sam3_service.log` 和 `.runtime/graspgen_service.log`。服务独立于本次终端，但尚未配置系统开机自启或崩溃自启。重启前必须重新检查 GPU，`--peer-pid` 仅允许同项目、同用户的已驻留模型服务；不会停止别人的进程。
+
+首次部署使用 `.venv-grasp`，通过只读 pth 复用已有第三方 torch 2.7.1+cu126 等基础包，其他兼容依赖隔离安装；没有修改旧项目环境。PointNet2 扩展以 CUDA12.3 编译。GraspGen 使用 diffusers0.11.1、huggingface-hub0.25.2、transformers4.44.2；无需 FlashAttention。官方可信 checkpoint 加载显式沿用上游 torch.load 的非 weights-only 语义。SAM3 沿用已安装第三方包和只读权重。上游源码及模型留在 `.runtime`，不提交权重或环境到 Git。
+
+来源：[NVlabs/GraspGen](https://github.com/NVlabs/GraspGen)，源码提交 `2dd8852e1be60f5f9d277fafcc621835cdf59110`；Panda 权重与样例来自 [adithyamurali/GraspGenModels](https://huggingface.co/adithyamurali/GraspGenModels)。当前明确调用原始 diffusion-discriminator，不是上游 demo 新默认的 GraspMoE/OBB。源码没有修改，扩展编译产物除外。权重校验值、包版本与本次服务状态保存在 `.runtime/graspgen_setup.json`。
+
+生成可旋转的三维预览与 PNG：
+
+```bash
+USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
+  .venv-grasp/bin/python -m sketchik.grasp_preview \
+  --observation-dir runs/20261108T180605_smoke --camera agentview \
+  --target 'a cylindrical can with a red and green label'
+```
+
+也支持 `--sample-json` 读取官方真实点云样例，仅读取 pc/颜色，再实时推理，绝不拿样例存储的抓取结果冒充模型输出。每次新建运行目录，保存原图、完整 SAM 回应、Mask 叠图、选中 Mask、标定点云、原始候选/评分、三视角线框图、前三个 Panda 实体夹爪渲染、交互式 HTML 和耗时。`--candidate-id` 可显式选择多个候选中的一个。此程序不推进机器人，不调用 IK，不执行抓取。
+
+本次真实 GPU 结果：
+
+| 输入与阶段 | 结果 | 推理墙钟 |
+| --- | --- | --- |
+| 官方真实点云样例，GraspGen 首次推理 | 128 个候选 | 5.408s |
+| 保存的 LIBERO task0 前视 RGB，SAM3 首次成功推理 | 1 个 Mask，777 个有效三维点 | 0.898s |
+| 该 LIBERO 点云，GraspGen 已暖机 | 128 个候选 | 0.161s |
+| 同一保存输入重复三次，SAM3 | 同一 PID，均返回 1 个候选 | 0.221 / 0.198 / 0.187s |
+| 同一点云重复三次，GraspGen | 同一 PID，均返回 128 个候选 | 0.172 / 0.143 / 0.144s |
+
+这些是当前 256 RGB、单物体、128 抓取候选的推理耗时，不含模型加载和绘图，不能推广为完整机器人任务耗时。两服务加载后 GPU 总占用约 6.6GiB（含缓存和 CUDA 上下文）；torch 单进程峰值 allocated 为 SAM3 5088MiB、GraspGen 737MiB，不能把它与 nvidia-smi 总占用混为同一指标。
+
+LIBERO 证据：`runs/20261109T015914_grasp_preview`，含 `metadata.json`、`result.json` 和 `resident_repeats.json`。官方样例证据：`runs/20261109T015805_grasp_preview`。首次 SAM 请求曾因 BF16 转 NumPy 报错，已修为 float32 后序列化并重启本项目服务，错误日志保留。最终 29 项 CPU 测试通过，包含所有有效 Mask 像素的三维转换和多候选不默选最高分。
+
+**本轮只验证生成与显示。** 部分高分罐子候选从下方接近，可能与桌面碰撞；没有场景碰撞筛选，不能直接执行。GraspGen 输出是其夹爪基座约定，后续必须对齐本机器人 grip_site/TCP，检查 IK、关节与场景碰撞，再验证真实抓取。渲染图不是已成功抓住的画面。

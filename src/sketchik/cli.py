@@ -8,7 +8,7 @@ import time
 
 def main():
     parser = argparse.ArgumentParser(description="Independent LIBERO IK primitives")
-    parser.add_argument("command", choices=["probe", "smoke", "execute"])
+    parser.add_argument("command", choices=["probe", "smoke", "execute", "agent", "agent-smoke"])
     parser.add_argument("--gpu-uuid", required=True, help="Exact idle GPU UUID; renderer only")
     parser.add_argument("--variant", choices=["pro", "standard"], default="pro")
     parser.add_argument("--suite", default="libero_10")
@@ -17,7 +17,25 @@ def main():
     parser.add_argument("--init-state", type=int, default=0)
     parser.add_argument("--size", type=int, default=256)
     parser.add_argument("--plan", type=Path)
+    parser.add_argument("--env-file", type=Path, help="Literal SKETCHIK_* settings; not shell-sourced")
+    parser.add_argument("--base-url")
+    parser.add_argument("--model")
+    parser.add_argument("--reasoning-effort", help="Optional provider setting; no silent model-specific fallback")
+    parser.add_argument("--api-timeout", type=float, default=90)
+    parser.add_argument("--max-turns", type=int, default=40)
+    parser.add_argument("--max-tool-calls", type=int, default=100)
+    parser.add_argument("--max-episode-steps", type=int, default=2000)
     args = parser.parse_args()
+    if min(args.api_timeout, args.max_turns, args.max_tool_calls, args.max_episode_steps) <= 0:
+        parser.error("API timeout and execution budgets must be positive")
+    client = None
+    if args.command == "agent":
+        # Validate settings before acquiring a renderer or constructing the environment.
+        from .agent import ChatClient, load_settings
+        settings = load_settings(args.env_file)
+        client = ChatClient(args.base_url or settings.get("SKETCHIK_BASE_URL"),
+                            args.model or settings.get("SKETCHIK_MODEL"), settings.get("SKETCHIK_API_KEY"),
+                            args.reasoning_effort or settings.get("SKETCHIK_REASONING"), args.api_timeout)
     root = Path(__file__).resolve().parents[2]
     run = root / "runs" / (time.strftime("%Y%m%dT%H%M%S") + "_" + args.command)
     run.mkdir(parents=True, exist_ok=False)
@@ -28,7 +46,8 @@ def main():
     from PIL import Image
     start = time.perf_counter()
     try:
-        robot = LiberoRobot(args.variant, args.suite, args.task, args.seed, args.init_state, args.size)
+        robot = LiberoRobot(args.variant, args.suite, args.task, args.seed, args.init_state, args.size,
+                            max_steps=args.max_episode_steps)
     except Exception as exc:
         import traceback
         (run / "startup_error.json").write_text(json.dumps({
@@ -53,7 +72,8 @@ def main():
             print(json.dumps({"run": str(run), "metadata": metadata, "state": state}, indent=2))
         else:
             from .validation import run_validation, json_default
-            result = run_validation(robot, run, args.command, args.plan)
+            result = run_validation(robot, run, args.command, args.plan, client=client,
+                                    max_turns=args.max_turns, max_tool_calls=args.max_tool_calls)
             print(json.dumps({"run": str(run), "result": result}, default=json_default, indent=2))
             if not result["control_validation_passed"]:
                 raise SystemExit(1)

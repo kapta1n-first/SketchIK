@@ -1,8 +1,8 @@
 # SketchIK
 
-独立的机器人解析动作执行底座。第一版先把 **LIBERO 观测 → IK → 关节轨迹 → 真实仿真执行** 接通，之后再接符号草图、抓取与放置 Grounding。
+独立的机器人解析动作执行项目。目前接通 **高层会话/工具接口 → LIBERO 真实观测 → 数值动作计划 → IK → 关节轨迹 → 仿真反馈**，之后再接对象级草图的抓取与放置 Grounding。
 
-当前没有 Strong Agent、VLA、SAM3、Molmo、World Model 或异步规划。也不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
+已实现兼容 Chat Completions 的高层 Agent 会话与独立操作说明，尚未通过真实收费模型验收。当前没有 VLA、SAM3、Molmo、memory、World Model 或异步规划。不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
 
 ## 当前动作
 
@@ -72,7 +72,7 @@ nvidia-smi --query-gpu=index,uuid,memory.used,utilization.gpu --format=csv
 
 ## 输入与日志
 
-`examples/basic_motion.json` 是可直接运行的冻结基础动作示例，**不是抓放任务方案**。JSON 使用 `version=1` 和 `steps`；每步有 `primitive` 与 `params`。执行器不接入付费 API。
+`examples/basic_motion.json` 是手工填写、可直接运行的冻结基础动作测试，**不是抓放任务方案，也不是 Agent 生成结果**。JSON 使用 `version=1` 和 `steps`；每步有 `primitive` 与 `params`。`execute` 命令不调用 API；`agent` 命令则根据明确配置调用模型，由模型通过工具提供动作参数。
 
 `seed` 和 `init-state` 分开记录，不把 seed0 等同于全部初始化参数。每次创建环境前重新设随机种子，显式载入指定官方 init_state；载入后只用动作推进物理。没有自动 reset 或失败回滚。
 
@@ -102,3 +102,61 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 ```
 
 下一阶段可以在这个底座上分别接入 Grounding、抓取候选生成与放置目标生成；当前不会把可见表面点直接包装成可靠抓取或放置技能。
+
+## 高层 Agent 与操作说明（2026-11-09）
+
+| 文件 | 用途 |
+| --- | --- |
+| `prompts/system.md` | 真正发送给模型的完整操作说明：坐标、朝向、动作语义、观测、反馈与恢复。没有任务特定路线和 seed0 配方 |
+| `src/sketchik/tools.py` | 模型能调用的工具名称、JSON 参数 schema、参数校验与实际派发 |
+| `src/sketchik/agent.py` | API 客户端、图像/状态/工具回执的会话历史、调用预算、完整会话记录 |
+| `src/sketchik/cli.py` | `agent` 和 `agent-smoke` 启动入口 |
+
+AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在线模型的名称、URL、reasoning 设置均来自启动参数/配置；没有偷偷选定默认模型，暂未复制旧项目的 API 密钥或经验。
+
+高层共有 **12 个工具**：7 个基础动作、`observe`、`get_state`、`back_project`、`execute_plan`、`finish`。动作底层仍是之前的七个入口；没有新增一种运动控制器。
+
+### 每次实际传入模型什么
+
+首次请求：本项目 system 说明、工具 schema、官方任务文字、标注相机名/图像尺寸/source_step 的前视与腕部 RGB、当前关节/末端完整姿态/手指状态/夹爪命令、工具朝向轴、剩余动作额度，以及相机标定。
+
+后续请求：保留完整会话历史，加入模型上一轮调用、真实工具回执。每次基础动作或 execute_plan 返回后，再加入最新双视角 RGB 与机器人状态。只读 get_state/back_project 不额外渲染；observe 可以主动获取新图。**不逐仿真步请求模型，也不要求每个 primitive 都经过一次模型检查**；execute_plan 可以让多个动作在本地连续执行，出错即停止后缀。
+
+深度图保存在本地。高层通过 `back_project(observation_id, camera, pixel_xy)` 获取该观测像素的米制世界坐标；这是可见表面点，不是自动抓取点。历史测量返回原始步数和 current 标志，不静默伪装成新观测。官方 success 不发给模型作 oracle，只留在本地评测结果中。
+
+### 参数和回执
+
+例如模型调用 `move_relative`，参数为：
+
+```json
+{"source_step": 0, "params": {"delta_m": [0.0, 0.0, 0.02]}}
+```
+
+程序从 step0 的真实位姿上移 2cm，回执包含是否收敛、实际位置/朝向误差、动作步数、规划/执行耗时、最新状态。外层 ok 表示请求已处理，内层 converged 才是运动是否达到容差；两者都不能证明抓到物体或任务完成。
+
+模型也能调用 execute_plan 提交多个动作；参数同样由模型生成，不要求人手写 JSON。当前仍是**数值解析动作计划**，对象名字到抓放位姿的自动求解尚未接入。
+
+动作参数中的 source_step 需对应当前状态，以免执行基于旧画面计算的目标。一次回复中如果提交多个独立工具，按顺序执行；前一动作改变了环境步数后，旧 source_step 会被拒绝。多步连续动作应使用 execute_plan，或等新回执后继续调用。没有每子任务只能规划/恢复一次的规则。
+
+未收敛会返回当前状态供高层调整，不自动重播已执行前缀。参数错误、不可达目标可修正后继续；未知/异常执行停止会话。模型回复截断、工具调用 ID 重复或 HTTP 失败不执行隐式重试。API 总请求耗时与工具耗时分别记录；当前没有流式 TTFT 指标。
+
+### 启动与验收边界
+
+不联网的接口验收（脚本模拟回复，真实 LIBERO/IK 执行）：
+
+```bash
+./run.sh agent-smoke --gpu-uuid <空闲GPU的完整UUID>
+```
+
+真实模型需要同时支持图像输入与 Chat Completions function tools。填写本地配置 `.runtime/agent.env`，字段见 `.env.example`，不要提交密钥：
+
+```bash
+./run.sh agent --env-file .runtime/agent.env --task 0 --seed 0 --init-state 0 \
+  --gpu-uuid <空闲GPU的完整UUID>
+```
+
+只有显式运行 agent 才会请求所配置的 API，可能产生费用。没有自动网络重试；reasoning_effort 原样传给网关，不宣称网关支持任意值或会关闭推理。兼容格式依据 [OpenAI Chat Completions 文档](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 与 [function calling 文档](https://developers.openai.com/api/docs/guides/function-calling)；第三方网关兼容性仍需独立实测。
+
+会话目录除原有日志外，包含最终 system_prompt.md、tools.json、无密钥的 agent_config.json、transcript.json 和 observations/。transcript 中的图片使用哈希引用，原始像素/深度/标定保存在 observations；内存中的会话请求保留完整图片历史，不静默压缩。
+
+本轮 `runs/20261109T002029_agent-smoke` 已通过：真实 Pro task0 中完成上移 2cm＋wait，共 18 个物理步；旧 source_step 动作被拒绝且没有额外移动，之后成功结束会话。总墙钟约 1.55s，官方任务 success=false；`real_model_used=false`。本轮未发收费模型请求，不能据此宣称真实 Agent 规划或抓放已通过。CPU 测试累计 **18 passed**，其中包含本地 HTTP 请求格式、图像/状态打包、历史、重复 ID 拒绝、失败恢复、预算与旧观测拒绝。

@@ -25,7 +25,8 @@ def json_default(value):
     raise TypeError(type(value).__name__)
 
 
-def run_validation(robot, run: Path, command, plan_file):
+def run_validation(robot, run: Path, command, plan_file=None, *, client=None,
+                   max_turns=40, max_tool_calls=100):
     start = time.perf_counter()
     writer = imageio.get_writer(str(run / "video.mp4"), fps=20, codec="libx264", quality=7)
     log = (run / "events.jsonl").open("w", buffering=1)
@@ -60,6 +61,7 @@ def run_validation(robot, run: Path, command, plan_file):
     robot.on_step = record_step
     ok = True
     error = None
+    session = None
     try:
         executor = MotionExecutor(robot, emit)
         xml = robot.robot.robot_model.get_xml()
@@ -67,7 +69,24 @@ def run_validation(robot, run: Path, command, plan_file):
         emit({"event": "robot_model", "sha256": hashlib.sha256(xml.encode()).hexdigest(),
               "joint_limits_rad": executor.ik.limits, "no_environment_collision_planner": True})
         writer.append_data(robot.camera("agentview")["rgb"])
-        if command == "smoke":
+        if command in ("agent", "agent-smoke"):
+            from .agent import run_session, ScriptedClient
+            from .tools import ToolHub
+            if client is None and command == "agent":
+                raise ValueError("Online agent requires an explicitly configured provider")
+            hub = ToolHub(robot, executor, run, emit)
+            system = (Path(__file__).resolve().parents[2] / "prompts" / "system.md").read_text()
+            session = run_session(hub, client if client is not None else ScriptedClient(), system,
+                                  max_turns=max_turns, max_tool_calls=max_tool_calls)
+            ok = session["status"] == "finished"
+            error = session["error"]
+            if command == "agent-smoke":
+                tools = [r for r in records if r["event"] == "tool_result"]
+                ok = (ok and len(tools) == 3 and tools[0]["name"] == "execute_plan"
+                      and tools[0]["ok"] and tools[0]["result"]["all_commands_completed"]
+                      and not tools[1]["ok"] and tools[1]["action_count"] == 0
+                      and "Stale source_step" in tools[1]["error"])
+        elif command == "smoke":
             # Only relative free-space control probes. These are not manipulation recipes.
             executor.wait(steps=10)
             snapshot("00_settled")
@@ -139,5 +158,8 @@ def run_validation(robot, run: Path, command, plan_file):
               "render_encode_seconds": render_time, "official_task_success": robot.state()["official_success"],
               "note": "Basic control validation only; not a grasp/place task success test",
               "records": records}
+    if session is not None:
+        result["session"] = session
+        result["note"] = "Agent/session transport status and official task success are separate; see session.real_model_used."
     (run / "result.json").write_text(json.dumps(result, default=json_default, indent=2))
     return result

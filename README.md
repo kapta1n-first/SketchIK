@@ -285,3 +285,19 @@ CUDA_VISIBLE_DEVICES='' USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH
 初版无阈值最近邻查询过慢，在没有筛完时主动中断，证据保留在 `runs/20261109T022310_grasp_screen`，没有结果文件，不能当成完成轮次。改成阈值有界查询及遇到拒绝即停止后，完整跑完128项。36项CPU测试通过，其中新增验证接近方向、终点安全但接近段碰撞，以及阈值查询与直接距离计算的拒绝结论一致。
 
 **暂留不等于能执行或能抓住。** 当前只是稠密观测点对夹爪采样表面的近距离筛选，仍可能漏掉遮挡区域、物体内部穿透、采样间隙和完整机械臂碰撞；也没有从当前机械臂到接近起点的完整无碰撞路径规划、自碰撞检查或抓握接触认证。本轮机器人动作0，不能将IK成功或绿色候选解释为实际抓取成功。
+
+
+## 实体夹爪渲染（2026-11-09）
+
+`src/sketchik/grasp_render.py` 将筛后保留的原始位姿直接用于原生 Panda 视觉mesh渲染：灰色手掌、蓝/橙色两指、黑色指垫；箭头仅示意夹合方向。它不修改候选、不执行动作、不请求模型，也不模拟闭爪接触。对象和局部桌面仍来自真实RGB-D可见点，不用隐藏物体mesh补形。
+
+```bash
+USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
+  .venv-grasp/bin/python -m sketchik.grasp_render \
+  --screen runs/20261109T022431_grasp_screen \
+  --gpu-uuid <GPU_UUID> --peer-pid <SAM3_PID> --peer-pid <GraspGen_PID>
+```
+
+需要本项目 `.venv-grasp` 中的 pyrender0.1.45、pyglet1.5.31、freetype-py；EGL显式绑定GPU，沿用本项目模型同卡验证。只读复用机器人原生mesh，未改其他环境。
+
+实际输出 `runs/20261109T023521_grasp_render`：7个保留位姿的实体近景、完整拼图、原第28名沿最后10cm接近方向平移的42帧/3.5s MP4及GIF，以及将实体夹爪按相机标定投影回前视/腕部原照片的放大图（使用真实深度处理遮挡）。箭头和颜色为辅助标注；照片放大只是显示缩放，不改变输入观测。约9.8s生成全部输出，robot_actions=0。GPU渲染及视频帧数已实测并目视检查，尚未执行抓取。渲染也能看出部分低分保留项可能夹空，因此保留列表不能被称为已认证抓法。

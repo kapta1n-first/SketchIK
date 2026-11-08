@@ -114,7 +114,9 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 
 AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在线模型的名称、URL、reasoning 设置均来自启动参数/配置；没有偷偷选定默认模型，暂未复制旧项目的 API 密钥或经验。
 
-高层共有 **12 个工具**：7 个基础动作、`observe`、`get_state`、`back_project`、`execute_plan`、`finish`。动作底层仍是之前的七个入口；没有新增一种运动控制器。
+高层共有 **16 个工具**：7 个基础动作，`observe`、`get_state`、`back_project`、`execute_plan`、`finish`，以及 `read_text_file`、`write_text_file`、`list_dir`、`read_image`。动作底层仍是之前的七个入口；没有新增一种运动控制器。
+
+文件工具可读 README.md、changes.md、prompts/、examples/ 和本轮公开 observations/，临时计划只能写入本轮 workspace/，已有文件覆盖需显式 overwrite=true。不会开放 API 密钥、评测结果 GT 或其他项目。read_image 使用 observation_id＋camera 读取本轮已有历史 RGB，真实图像重新进入模型上下文，保留原始拍摄步数；不重新拍照、不推进物理。这些是普通运行工具，不是长期经验/memory 系统。
 
 ### 每次实际传入模型什么
 
@@ -123,6 +125,8 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 后续请求：保留完整会话历史，加入模型上一轮调用、真实工具回执。每次基础动作或 execute_plan 返回后，再加入最新双视角 RGB 与机器人状态。只读 get_state/back_project 不额外渲染；observe 可以主动获取新图。**不逐仿真步请求模型，也不要求每个 primitive 都经过一次模型检查**；execute_plan 可以让多个动作在本地连续执行，出错即停止后缀。
 
 深度图保存在本地。高层通过 `back_project(observation_id, camera, pixel_xy)` 获取该观测像素的米制世界坐标；这是可见表面点，不是自动抓取点。历史测量返回原始步数和 current 标志，不静默伪装成新观测。官方 success 不发给模型作 oracle，只留在本地评测结果中。
+
+职责上，高层根据 RGB 判断语义/选择像素，执行器用深度、内外参求 XYZ。目前观测文本仍包含标定矩阵；这不是高层每轮规划的必要输入，本轮文件工具改动没有改变原观测格式。不要把“执行器有深度与标定”误说成“高层直接读深度图或需要自行反投影”。
 
 ### 参数和回执
 
@@ -160,3 +164,24 @@ AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在�
 会话目录除原有日志外，包含最终 system_prompt.md、tools.json、无密钥的 agent_config.json、transcript.json 和 observations/。transcript 中的图片使用哈希引用，原始像素/深度/标定保存在 observations；内存中的会话请求保留完整图片历史，不静默压缩。
 
 本轮 `runs/20261109T002029_agent-smoke` 已通过：真实 Pro task0 中完成上移 2cm＋wait，共 18 个物理步；旧 source_step 动作被拒绝且没有额外移动，之后成功结束会话。总墙钟约 1.55s，官方任务 success=false；`real_model_used=false`。本轮未发收费模型请求，不能据此宣称真实 Agent 规划或抓放已通过。CPU 测试累计 **18 passed**，其中包含本地 HTTP 请求格式、图像/状态打包、历史、重复 ID 拒绝、失败恢复、预算与旧观测拒绝。
+
+随后补齐四个文件/历史图片工具，CPU 测试累计 **27 passed**，新增验证文件创建/读取/列目录/覆盖、指南只读、路径与软链接约束，以及历史 RGB 确实进入模型多模态请求且不重新拍照。新增文件工具未额外运行 GPU 或收费模型实验；原真实仿真记录对应此前 12 工具版本，不能冒充新工具的在线模型验证。
+
+## 与原版 HarnessVLA 的实际差别
+
+对照对象为独立 projects/harnessvla 仓库的原版在线运行链路；不是我们先前改造的 AsyncSketch。
+
+| 类别 | 原版已有的能力 | SketchIK 当前状态与实际影响 |
+| --- | --- | --- |
+| 已有基本等价入口 | 模型调用、图像/状态、工具参数、执行回执、操作指南、文件/历史图片读取 | 已有基础实现；真实模型尚未联调，不能等同于原版完整运行验收 |
+| 输入配置有差别 | view_env_state 可附 policy 图、1024 前视图、1024 腕部图；前视和腕部来自两个相机，不是三个相机 | 当前默认两张 256 RGB；--size 可调，但尚未按原版高层高分辨率输入做同条件验收。不能宣称观测完全一致 |
+| 尚缺工程能力 | 长会话压缩 | 当前保留完整历史；长任务可能超出模型上下文 |
+| 尚缺工程能力 | 多种 Planner 后端（API、Codex、Claude Code 等） | 当前只有 Chat Completions 兼容客户端，不提供这些独立 Planner 接入 |
+| 尚缺工程能力 | 环境服务/RPC、Dashboard 和取消/交互等运行管理 | 当前主要单进程同步 CLI，不具备原版整套服务与交互管理 |
+| 尚缺工程能力 | 更完整的评测、经验导出与 replay 等流水线 | 当前只有单轮执行和证据记录，没有整套批量评测流水线 |
+| 用户暂缓 | memory/经验管理 | 暂不接；本轮 workspace 文件不等于长期经验库 |
+| 主动改变方案 | 原版解析运动＋冻结 VLA；有 SAM3 服务与分割工具 | 当前 IK＋关节控制，没有 VLA 或 SAM3。缺这些组件的接线，但不用 VLA 是路线选择，不是少写一个文件夹 |
+
+对象级草图、执行时自动 Grounding、三层恢复和异步规划属于本项目的研究设计/之前 AsyncSketch 的新增机制，不能算作 HarnessVLA 原版已具备而新项目漏实现的模块。当前 execute_plan 只是数值动作计划，不能冒充对象级草图。独立的新项目尚未迁移这整套机制。
+
+同样，稳定的自动抓取/放置位姿生成、抓取评分和完整场景避障不能未经源码/实验依据就列为 HarnessVLA 已独立解决的模块。原版借助 Agent、几何工具和 VLA 完成操作；我们不用 VLA 后，需要自行补的操作能力，应与复刻框架的工程差距分开讨论。

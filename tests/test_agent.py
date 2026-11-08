@@ -183,3 +183,72 @@ def test_http_chat_payload_and_truncated_response_no_tool_execution():
         server.shutdown()
         server.server_close()
         thread.join()
+
+
+def test_run_files_create_read_list_and_explicit_overwrite(hub):
+    result, _ = hub.call("write_text_file", {"path": "workspace/plan.json", "content": '{"steps": []}'})
+    assert result["ok"]
+    result, _ = hub.call("list_dir", {"path": "workspace"})
+    assert result["result"]["entries"] == ["plan.json"]
+    result, _ = hub.call("read_text_file", {"path": "workspace/plan.json"})
+    assert result["result"]["content"] == '{"steps": []}'
+    result, _ = hub.call("write_text_file", {"path": "workspace/plan.json", "content": "replacement"})
+    assert not result["ok"]
+    assert (hub.workspace/"plan.json").read_text() == '{"steps": []}'
+    result, _ = hub.call("write_text_file", {"path": "workspace/plan.json", "content": "replacement", "overwrite": True})
+    assert result["ok"] and (hub.workspace/"plan.json").read_text() == "replacement"
+    assert hub.robot.steps == 0 and hub.executor.calls == 0
+
+
+@pytest.mark.parametrize("path", ["../outside.txt", "/etc/passwd", "observations/../result.json", "result.json", ".runtime/agent.env"])
+def test_file_tools_cannot_expose_private_or_evaluation_artifacts(hub, path):
+    (hub.run/"result.json").write_text('{"official_success": true}')
+    result, _ = hub.call("read_text_file", {"path": path})
+    assert not result["ok"] and "official_success" not in json.dumps(result)
+    assert not hub.fatal and hub.executor.calls == 0
+
+
+def test_file_tools_read_docs_but_do_not_overwrite_them(hub, tmp_path):
+    project = tmp_path/"project"
+    (project/"prompts").mkdir(parents=True)
+    (project/"prompts/system.md").write_text("tool instructions")
+    hub.project_root = project
+    result, _ = hub.call("read_text_file", {"path": "prompts/system.md", "max_chars": 4})
+    assert result["result"]["content"] == "tool" and result["result"]["truncated"]
+    result, _ = hub.call("write_text_file", {"path": "prompts/system.md", "content": "changed", "overwrite": True})
+    assert not result["ok"] and (project/"prompts/system.md").read_text() == "tool instructions"
+    (hub.workspace/"shortcut.txt").symlink_to(project/"prompts/system.md")
+    result, _ = hub.call("read_text_file", {"path": "workspace/shortcut.txt"})
+    assert not result["ok"]
+
+
+def test_read_historical_image_preserves_frame_step_and_does_not_render(hub, monkeypatch):
+    hub.observe()
+    hub.robot.steps = 12
+    def unexpected_render(name):
+        raise AssertionError("read_image must not capture a new image")
+    monkeypatch.setattr(hub.robot, "camera", unexpected_render)
+    result, images = hub.call("read_image", {"observation_id": "obs_00000", "camera": "agentview"})
+    assert result["ok"] and result["result"]["source_step"] == 0
+    assert result["result"]["current"] is False and result["source_step"] == 12
+    assert sum(p["type"] == "image_url" for p in images) == 1
+    assert hub.executor.calls == 0
+
+
+def test_file_tool_and_historical_image_in_full_conversation(hub):
+    class Client:
+        metadata = {"kind": "scripted_transport_test"}
+        def __init__(self):
+            self.round = 0
+        def complete(self, messages, tools):
+            self.round += 1
+            if self.round == 1:
+                request = call("read_image", {"observation_id": "obs_00000", "camera": "robot0_eye_in_hand"})
+            else:
+                # Historical RGB is still passed as a real multimodal image after tool replies.
+                assert messages[-1]["role"] == "user"
+                assert any(p["type"] == "image_url" for p in messages[-1]["content"])
+                request = call("finish", {"source_step": 0, "assessment": "blocked", "reason": "IO test"}, "id2")
+            return {"message": {"role": "assistant", "content": None, "tool_calls": [request]}}
+    result = run_session(hub, Client(), "IO instructions")
+    assert result["status"] == "finished" and hub.robot.steps == 0

@@ -1,4 +1,4 @@
-"""Model-facing tools. No arbitrary Python, shell, object GT or memory access."""
+"""Model-facing tools, public artifacts and per-run files. No shell or object GT."""
 from __future__ import annotations
 
 import base64
@@ -55,6 +55,16 @@ def tool_schemas():
     definitions = {
         "observe": ("Get current labelled agentview and wrist RGB, robot state, tool axes, remaining action budget and calibration; depth stays local for back_project.", obj({})),
         "get_state": ("Read current robot state without rendering images or advancing physics.", obj({})),
+        "read_text_file": ("Read project instructions/examples, your current-run workspace files, or saved public observation JSON. Paths are relative to list_dir roots; no raw simulator/credential files.", obj({
+            "path": {"type": "string", "minLength": 1},
+            "max_chars": {"type": "integer", "minimum": 1, "maximum": 40000}}, ["path"])),
+        "write_text_file": ("Save a temporary plan/note in workspace/ for this run. Project instructions and original observation artifacts are read-only. Existing files require explicit overwrite=true; no long-term memory.", obj({
+            "path": {"type": "string", "minLength": 1}, "content": {"type": "string", "maxLength": 100000},
+            "overwrite": {"type": "boolean"}}, ["path", "content"])),
+        "list_dir": ("List readable project instructions/examples, current-run workspace or saved public observations. Does not advance the robot.", obj({"path": {"type": "string"}})),
+        "read_image": ("View a saved RGB from a known observation_id and camera. Returns the actual historical image, its original source_step and whether it is still current. Does not capture a new frame or move the robot.", obj({
+            "observation_id": {"type": "string"}, "camera": {"enum": ["agentview", "robot0_eye_in_hand"]}},
+            ["observation_id", "camera"])),
         "back_project": ("Convert a pixel from a saved observation to observed world XYZ using that exact camera's metric depth. Historical results are labelled stale, not silently refreshed.", obj({
             "observation_id": {"type": "string"}, "camera": {"enum": ["agentview", "robot0_eye_in_hand"]},
             "pixel_xy": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}},
@@ -88,13 +98,65 @@ def public(value):
 
 
 class ToolHub:
-    def __init__(self, robot, executor, run: Path, emit):
+    def __init__(self, robot, executor, run: Path, emit, project_root=None):
         self.robot, self.executor, self.run, self.emit = robot, executor, run, emit
+        self.project_root = Path(project_root or Path(__file__).resolve().parents[2]).resolve()
+        self.workspace = self.run / "workspace"
+        self.workspace.mkdir(exist_ok=True)
         self.schemas = tool_schemas()
         self.validators = {t["function"]["name"]: Draft202012Validator(t["function"]["parameters"]) for t in self.schemas}
         self.observations = {}
         self.finished = None
         self.fatal = False
+
+    def file_path(self, name, write=False):
+        """Only public docs/examples, observation artifacts, and this run's scratch files.
+
+        Raw run logs/results may contain evaluation GT; do not expose them via IO.
+        """
+        relative = Path(name)
+        if relative.is_absolute() or ".." in relative.parts or not relative.parts:
+            raise ValueError("Use a relative path under the listed roots")
+        key = relative.parts[0]
+        if key == "workspace":
+            base, tail = self.workspace, relative.parts[1:]
+        elif key == "observations" and not write:
+            base, tail = self.run / "observations", relative.parts[1:]
+        elif not write and key in ("prompts", "examples"):
+            base, tail = self.project_root / key, relative.parts[1:]
+        elif not write and name in ("README.md", "changes.md"):
+            path = self.project_root / name
+            if path.is_symlink():
+                raise ValueError("Symlink paths are not supported")
+            return path
+        else:
+            raise ValueError("Readable roots: README.md, changes.md, prompts/, examples/, observations/, workspace/; only workspace/ is writable")
+        path = base.joinpath(*tail)
+        # Reject symlink components instead of following links into raw run/private files.
+        current = base
+        if current.is_symlink():
+            raise ValueError("Symlink paths are not supported")
+        for part in tail:
+            current = current / part
+            if current.is_symlink():
+                raise ValueError("Symlink paths are not supported")
+        if not path.resolve().is_relative_to(base.resolve()):
+            raise ValueError("Path escapes listed root")
+        return path
+
+    def read_image(self, observation_id, camera):
+        frames = self.observations.get(observation_id)
+        if frames is None:
+            raise ValueError("Unknown observation_id; use list_dir or observe")
+        frame = frames[camera]
+        description = {"observation_id": observation_id, "camera": camera,
+                       "source_step": frame["step"], "current": frame["step"] == self.robot.steps,
+                       "width": frame["rgb"].shape[1], "height": frame["rgb"].shape[0],
+                       "meaning": "Historical RGB, not a new observation"}
+        buffer = BytesIO()
+        Image.fromarray(frame["rgb"]).save(buffer, format="PNG")
+        return description, [{"type": "text", "text": json.dumps(description)},
+            {"type": "image_url", "image_url": {"url": "data:image/png;base64,"+base64.b64encode(buffer.getvalue()).decode()}}]
 
     def state(self):
         from scipy.spatial.transform import Rotation
@@ -151,6 +213,33 @@ class ToolHub:
                 value, images = self.observe()
             elif name == "get_state":
                 value = self.state()
+            elif name == "read_text_file":
+                path = self.file_path(arguments["path"])
+                if path.suffix.lower() not in (".md", ".txt", ".json", ".jsonl", ".yaml", ".yml", ".csv"):
+                    raise ValueError("Use read_image for RGB; only text files can be read here")
+                limit = arguments.get("max_chars", 20000)
+                with path.open(encoding="utf-8") as stream:
+                    content = stream.read(limit+1)
+                value = {"path": arguments["path"], "content": content[:limit], "truncated": len(content)>limit}
+            elif name == "write_text_file":
+                path = self.file_path(arguments["path"], write=True)
+                if not path.suffix.lower() in (".md", ".txt", ".json", ".jsonl", ".yaml", ".yml", ".csv"):
+                    raise ValueError("Only temporary text/plan files may be written")
+                path.parent.mkdir(parents=True, exist_ok=True)
+                with path.open("w" if arguments.get("overwrite", False) else "x", encoding="utf-8") as stream:
+                    stream.write(arguments["content"])
+                value = {"path": arguments["path"], "characters_written": len(arguments["content"]),
+                         "scope": "current run workspace, not long-term memory"}
+            elif name == "list_dir":
+                name = arguments.get("path", "")
+                if name in ("", "."):
+                    value = {"path": "", "entries": ["README.md", "changes.md", "prompts/", "examples/", "observations/", "workspace/"]}
+                else:
+                    path = self.file_path(name)
+                    value = {"path": name, "entries": [p.name + ("/" if p.is_dir() else "")
+                              for p in sorted(path.iterdir()) if not p.is_symlink()]}
+            elif name == "read_image":
+                value, images = self.read_image(**arguments)
             elif name == "back_project":
                 frames = self.observations.get(arguments["observation_id"])
                 if frames is None:

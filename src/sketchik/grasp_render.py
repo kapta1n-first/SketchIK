@@ -98,6 +98,11 @@ def main():
             if len(ids)>120000:ids=np.random.default_rng(0).choice(ids,120000,replace=False)
             scene.add(pyrender.Mesh.from_points(xyz[ids],colors=colors[ids]))
         return scene,nodes
+    render_timings={'photo':[],'candidate':[],'animation':[]}
+    def timed_render(renderer, scene, bucket, **kwargs):
+        begin=time.perf_counter();result=renderer.render(scene,**kwargs)
+        render_timings[bucket].append(time.perf_counter()-begin)
+        return result
     def pose_nodes(scene,nodes,g):
         for node in nodes:scene.set_pose(node,g)
     # Calibrated projection onto original photos, with real depth occlusion.
@@ -110,7 +115,7 @@ def main():
         cam=overlay_scene.add(pyrender.IntrinsicsCamera(K[0,0],K[1,1],K[0,2],K[1,2],znear=.01,zfar=5.),pose=T)
         light=overlay_scene.add(pyrender.DirectionalLight(color=np.ones(3),intensity=2.),pose=T)
         pose_nodes(overlay_scene,nodes,grasps[selected[0]])
-        image,depth=renderer.render(overlay_scene,flags=pyrender.RenderFlags.RGBA)
+        image,depth=timed_render(renderer,overlay_scene,'photo',flags=pyrender.RenderFlags.RGBA)
         visible=(depth>0)&((~np.isfinite(frame['depth_m']))|(depth<=frame['depth_m']+.002))
         composed=rgb.copy();composed[visible]=image[visible,:3]
         # Crop around the actual projected gripper and observed target.
@@ -163,7 +168,7 @@ def main():
     renderer=pyrender.OffscreenRenderer(900,760,point_size=3.)
     panels=[]
     for index in selected:
-        pose_nodes(scene,nodes,grasps[index]);view,_=fitting_camera(grasps[index]);scene.set_pose(camera,view);image,_=renderer.render(scene)
+        pose_nodes(scene,nodes,grasps[index]);view,_=fitting_camera(grasps[index]);scene.set_pose(camera,view);image,_=timed_render(renderer,scene,'candidate')
         pic=caption(image,[f'Original rank {index+1} | model score {scores[index]:.3f}', 'Blue/orange = two fingers; grey = palm; black = pads', 'Observed target only; pose preview, no grasp physics'])
         pic=closing_arrows(pic,grasps[index],view)
         pic.save(output/f'rank_{index+1:03d}_solid.png');panels.append(pic)
@@ -176,7 +181,7 @@ def main():
     gif_frames=[]
     for t in np.r_[np.linspace(0,1,30),np.ones(12)]:
         pose=g.copy();pose[:3,3]-=g[:3,2]*result['approach_m']*(1-t)
-        pose_nodes(scene,nodes,pose);image,_=renderer.render(scene)
+        pose_nodes(scene,nodes,pose);image,_=timed_render(renderer,scene,'animation')
         pic=caption(image,[f'Rank {selected[0]+1}: approach pose demonstration',f'Remaining approach: {100*result["approach_m"]*(1-t):.1f} cm', 'Fingers stay open. No closure, contact or robot execution.'])
         movie.append_data(np.asarray(pic));small=pic.resize((600,507));gif_frames.append(small)
     movie.close();gif_frames[0].save(output/'approach.gif',save_all=True,append_images=gif_frames[1:],duration=83,loop=0)
@@ -185,7 +190,9 @@ def main():
         'native_gripper_calibration':calibration,'displayed_original_ranks':[i+1 for i in selected],
         'object_geometry':'observed colored RGB-D points only, no hidden mesh','robot_actions':0,
         'render_type':'native visual gripper meshes, original RGB with depth occlusion, and kinematic approach animation',
-        'fingers_close':False,'contact_simulated':False,'render_wall_s':time.perf_counter()-start},indent=2))
+        'fingers_close':False,'contact_simulated':False,'render_frame_wall_s':render_timings,
+        'frame_timing_scope':'OffscreenRenderer.render including GPU rendering and CPU readback; excludes pose/camera setup, caption, file encoding and saving',
+        'render_wall_s':time.perf_counter()-start},indent=2))
     print(json.dumps({'output':str(output),'wall_s':time.perf_counter()-start,'robot_actions':0},indent=2))
 
 

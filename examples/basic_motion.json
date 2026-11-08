@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "steps": [
+    {"primitive": "wait", "params": {"steps": 10}},
+    {"primitive": "move_relative", "params": {"delta_m": [0.0, 0.0, 0.04]}},
+    {"primitive": "move_waypoints", "params": {"waypoints": [
+      {"relative_m": [0.02, 0.0, 0.0]},
+      {"relative_m": [-0.02, 0.0, 0.0]}
+    ]}},
+    {"primitive": "set_gripper", "params": {"command": "close", "steps": 15}},
+    {"primitive": "release", "params": {"steps": 15}}
+  ]
+}

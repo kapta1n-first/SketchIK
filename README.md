@@ -319,7 +319,7 @@ PYTHONPATH=src .venv-grasp/bin/python -m sketchik.grasp_trial select \
 ```
 
 - `prompts/grasp_trial.md` 是高层真实输入说明。高层确定当前应抓的对象、想抓的部位/方式，并提交 `submit_grasp_sketch`：例如 `move_to(selected_grasp.pregrasp)`、开爪、`move_to(selected_grasp.grasp)`、闭爪。pregrasp沿候选自身接近轴后退，不是固定世界上方。顺序由高层决定，工具不会强制上述顺序。原始API回复、完整实际提示、usage和墙钟时间均留在run内。
-- 身份描述用简洁的类别、外观及必要方位/参照；不混入抓法推理。SAM3接收高层显式`sam_prompt`（缺省使用target_description），保留类别和必要外观/部件/方位线索；Mask选择Molmo接收完整`target_description`。这与旧项目将整段描述再拼接给SAM的规则不同，实际输入分别保存。SAM3保留两图全部有效Mask；`prompts/mask_selector.md`让Molmo选对应同一目标的候选，每相机最多一个，可拒绝唯一候选或两个都拒绝。程序不做左右排序，不强迫最高分。选择是模型判断，不能认证跨视角身份。
+- 身份描述用简洁的类别、外观及必要方位/参照；不混入抓法推理。SAM3接收高层显式`sam_prompt`（缺省使用target_description），保留类别和必要外观/部件/方位线索；Mask选择Molmo同时接收完整`target_description`和实际`sam_prompt`，分别用于辨认所属物体及所需分割范围。高层可自行选择整物或可见部件；部件Mask仅代表局部可见几何，GraspGen实际接收该Mask点云，其余场景保留用于现有邻近筛选。这与旧项目将整段描述再拼接给SAM的规则不同，实际输入分别保存。SAM3保留两图全部有效Mask；`prompts/mask_selector.md`让Molmo选对应同一目标的候选，每相机最多一个，可拒绝唯一候选或两个都拒绝。程序不做左右排序，不强迫最高分。选择是模型判断，不能认证跨视角身份。
 - 选中Mask的所有有效RGB-D点进入GraspGen；可见点不补隐藏几何。原始128候选保持完整，按已有场景/IK筛选保存每项拒绝原因。每个保留候选都产生一张独立的双视角实体夹爪照片叠加图，原始编号不重排。`--stills-only`跳过动画，没有为模型选择生成无用视频。
 - `prompts/grasp_selector.md` 是独立的**抓取位姿选择说明**，不是Mask说明。常驻Molmo看原始双图、全部保留候选图和高层grasp_preference，返回原编号或null/NONE，必须给可见理由。超过14候选时全部分组展示，再比较各组选择；不暗中只给最高分。不是训练过的抓握评估器，可能选错或拒绝所有候选，真实能力需由实验验证。
 - 位姿选定后，按机器人模型实测的base→grip_site转换，绑定高层符号动作的位置和完整朝向，保存`bound_numeric_plan.json`。仅保存、不派发动作；没有闭爪物理验证、完整机械臂路径碰撞或后续放置实现。0动作不能算task9成功。

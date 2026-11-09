@@ -49,7 +49,7 @@ def validate_mask_choice(answer, mapping):
     return {mapping[i]['camera']:mapping[i]['local_id'] for i in ids}
 
 
-def select_masks(folder, views, target, molmo_url, output):
+def select_masks(folder, views, target, molmo_url, output, sam_prompt=None):
     mapping={};items=[];next_id=1
     for camera in CAMERAS:
         image=Image.open(folder/(camera+'.png')).convert('RGB');overlay=np.array(image);labels=[]
@@ -71,7 +71,7 @@ def select_masks(folder, views, target, molmo_url, output):
     if not mapping:
         (output/'molmo_mask_selection.json').write_text(json.dumps({'selected_ids':[],'reason':'SAM returned no candidates; Molmo not called'}))
         return {},set(CAMERAS)
-    prompt=(Path(__file__).resolve().parents[2]/'prompts/mask_selector.md').read_text()+'\n'+json.dumps({'target_description':target,'candidate_mapping':mapping})
+    prompt=(Path(__file__).resolve().parents[2]/'prompts/mask_selector.md').read_text()+'\n'+json.dumps({'target_description':target,'segmentation_description':sam_prompt or target,'candidate_mapping':mapping})
     (output/'molmo_mask_input.json').write_text(json.dumps({'prompt':prompt,'image_files':[c+'_mask_choices.png' for c in CAMERAS]},indent=2))
     start=time.perf_counter();response=request(molmo_url+'/infer',{'prompt':prompt,'images':items})
     response['client_wall_s']=time.perf_counter()-start
@@ -98,7 +98,7 @@ def mask_clouds(folder, target, candidate_ids, sam_url, output, sam_prompt=None,
     rejected_views=set()
     if molmo_url:
         if candidate_ids:raise ValueError('Do not combine forced Mask IDs with semantic Molmo selection')
-        candidate_ids,rejected_views=select_masks(folder,views,target,molmo_url,output)
+        candidate_ids,rejected_views=select_masks(folder,views,target,molmo_url,output,sam_prompt=query)
     all_points,all_colors,origins,records = [],[],[],[]
     palette = [(255,80,40), (40,210,100), (100,100,255), (220,80,220)]
     for index,camera in enumerate(CAMERAS):

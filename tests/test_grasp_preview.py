@@ -111,3 +111,25 @@ def test_saved_256_images_are_not_silently_upscaled(tmp_path, monkeypatch):
     monkeypatch.setattr('sketchik.grasp_preview.request', unexpected)
     with pytest.raises(ValueError, match='do not upscale'):
         mask_clouds(folder, 'object', {}, '', tmp_path)
+
+
+def test_part_query_reaches_sam_and_mask_selector_without_replacing_parent_identity(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    views = [dict(camera=c, candidates=[candidate(0, .7)]) for c in CAMERAS]
+    calls = []
+    def call(url, payload):
+        calls.append(payload)
+        if len(calls) == 1:
+            return response(views)
+        return {'answer': '{"selected_ids": [1], "reason": "requested visible part"}'}
+    monkeypatch.setattr('sketchik.grasp_preview.request', call)
+    output = tmp_path/'result'
+    output.mkdir()
+    _, _, source = mask_clouds(folder, 'yellow and white mug', {}, 'sam', output,
+                               sam_prompt='yellow handle of the yellow and white mug', molmo_url='molmo')
+    assert calls[0]['prompt'] == 'yellow handle of the yellow and white mug'
+    import json
+    intent = json.loads(calls[1]['prompt'].splitlines()[-1])
+    assert intent['target_description'] == 'yellow and white mug'
+    assert intent['segmentation_description'] == calls[0]['prompt']
+    assert source['views'][1]['status'] == 'molmo_none'

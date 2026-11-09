@@ -2,7 +2,28 @@
 
 独立的机器人解析动作执行项目。目前接通 **高层会话/工具接口 → LIBERO 真实观测 → 数值动作计划 → IK → 关节轨迹 → 仿真反馈**，之后再接对象级草图的抓取与放置 Grounding。
 
-已实现兼容 Chat Completions 的高层 Agent 会话与独立操作说明，尚未通过真实收费模型验收。另有 SAM3＋GraspGen 常驻服务与只读候选预览，尚未接成自动抓取动作。当前没有 VLA、Molmo、memory、World Model 或异步规划。不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
+已实现兼容 Chat Completions 的高层 Agent 会话与独立操作说明。当前独立抓取诊断已接通真实高层请求、SAM3＋Molmo 身份选择、GraspGen 候选、机器人 IK 检查、实体夹爪渲染和 Molmo 位姿选择，并已执行保存的抓取计划；这不等于正常会话已有自动完整抓放技能。SAM3、Molmo2-ER 与 GraspGen 服务常驻。另有 AnyPlace 离线放置候选诊断，尚未接入正常动作或通过实放验证。当前没有 VLA、memory、World Model 或异步规划。不导入 AsyncSketch / HarnessVLA 的执行器、会话、memory 或纠错代码。
+
+## AnyPlace 放置候选诊断
+
+`place_preview` 使用官方 [AnyPlace](https://github.com/ac-rad/anyplace) 源码和公开权重；低层输入为持物可见点云与目的地区域可见点云，输出物体相对当前世界姿态的 SE(3) 变换。它不直接读取任务语言，不负责关门。模型未启用成功分类器，所有候选都须另外核验。夹爪目标为 `T_world_delta @ T_world_current_EEF`，前提是物体相对夹爪刚性保持；不是单纯给目标点加高度。
+
+```bash
+PYTHONPATH=src .venv-grasp/bin/python -m sketchik.place_preview \
+  --checkpoint .runtime/anyplace_ckpts/anyplace_multitask/model.pth \
+  --held-cloud <抓取后SAM/Molmo提取的observed_object.npz> \
+  --held-state <同一帧state.json> \
+  --destination-observation <目的地双视角RGB-D目录> \
+  --destination-point <包含实测world_xyz的选点记录.json> \
+  --gpu-uuid <空闲GPU或已批准模型服务所在GPU的UUID> \
+  --peer-pid <本项目常驻模型PID> --output runs/<新结果目录>
+```
+
+依赖官方源码位于 `.runtime/AnyPlace`，环境另需 yacs、healpy 和已有 torch_cluster/scatter。保留官方推理与严格权重加载；只抑制 Meshcat 展示、将 airobot 日志映射到标准日志。未安装的旧 knn_cuda 分支一旦实际调用会明确失败，不以假计算代替。当前是独立诊断进程，不宣称 AnyPlace 已成为常驻服务。
+
+`--crop-radius` 指定围绕已观测目的地点的局部立方体区域；可选 `--plane-range low high` 进一步按实测局部平面裁剪。这些是诊断输入选择，不能证明整个腔体可通行。下采样只选择真实点，不补全隐藏面。`place_inspect --preview <结果目录> --robot-observation <保存robot_only.xml与metadata.json的目录> --gpu-uuid ... --peer-pid ...` 渲染实体夹爪与变换后的可见物体点云，并检查最终IK、直线段IK和局部平面高度；它不包含机械臂完整避碰、开口识别、撤出规划或释放授权。
+
+2026-11-10 的 task9 诊断共生成80个候选：宽区域20个悬空；窄区域、stacking权重和排除底面以下杂点的另外60个出现底面以下点。宽区域和最后一组共40个完成双视角实体渲染与IK检查，均未通过局部底面间隙检查；未实放。抓取后观测与目的地观察来自两个独立诊断回合，不能直接混合作为在线规划状态。汇总为 `runs/20261110_anyplace_prepare/summary.json`，可见点云图为该目录的 `microwave_cloud.png`，可旋转版本为 `microwave_cloud.html`。这些结果仅说明当前权重/输入组合尚不可用，不足以否定该方法在其原评测条件下的表现。
 
 ## 当前动作
 

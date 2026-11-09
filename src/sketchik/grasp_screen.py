@@ -154,10 +154,11 @@ def main():
     parser.add_argument('--preview',type=Path,required=True)
     parser.add_argument('--clearance-m',type=float,default=.005)
     parser.add_argument('--approach-m',type=float,default=.10)
+    parser.add_argument('--output',type=Path)
     args=parser.parse_args()
     if not 0<args.clearance_m<=.03 or not 0<args.approach_m<=.3:parser.error('Invalid diagnostic bounds')
     root=Path(__file__).resolve().parents[2]
-    output=root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_screen');output.mkdir()
+    output=args.output or root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_screen');output.mkdir()
     start=time.perf_counter()
     metadata=json.loads((args.preview/'metadata.json').read_text())
     observation=Path(metadata['source']['observation_directory'])

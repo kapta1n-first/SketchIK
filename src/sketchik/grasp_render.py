@@ -65,6 +65,8 @@ def main():
     parser.add_argument('--screen',type=Path,required=True)
     parser.add_argument('--gpu-uuid',required=True)
     parser.add_argument('--peer-pid',type=int,action='append',default=[])
+    parser.add_argument('--output',type=Path)
+    parser.add_argument('--stills-only',action='store_true')
     args=parser.parse_args();root=Path(__file__).resolve().parents[2]
     from .runtime import configure
     gpu=configure(root,args.gpu_uuid,'pro',args.peer_pid)
@@ -73,7 +75,7 @@ def main():
     import imageio.v2 as imageio
     from .kinematics import RobotIK
     from .grasp_screen import robot_gripper
-    start=time.perf_counter();output=root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_render');output.mkdir()
+    start=time.perf_counter();output=args.output or root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_render');output.mkdir()
     result=json.loads((args.screen/'result.json').read_text());preview=Path(result['source_preview']);observation=Path(result['source_observation'])
     candidates=np.load(preview/'candidates.npz');grasps,scores=candidates['grasps'],candidates['scores']
     state=json.loads((observation/'initial_state.json').read_text());meta=json.loads((observation/'metadata.json').read_text())
@@ -108,32 +110,37 @@ def main():
     # Calibrated projection onto original photos, with real depth occlusion.
     overlay_scene,nodes=create_scene()
     renderer=pyrender.OffscreenRenderer(1024,1024,point_size=2.)
-    photo_panels=[]
+    photo_panels={index:[] for index in selected}
     for camera_name in ['agentview','robot0_eye_in_hand']:
         rgb=np.asarray(Image.open(observation/(camera_name+'.png')).convert('RGB'))
         frame=np.load(observation/(camera_name+'.npz'));K=frame['K'];T=frame['world_from_camera']@np.diag([1,-1,-1,1])
         cam=overlay_scene.add(pyrender.IntrinsicsCamera(K[0,0],K[1,1],K[0,2],K[1,2],znear=.01,zfar=5.),pose=T)
         light=overlay_scene.add(pyrender.DirectionalLight(color=np.ones(3),intensity=2.),pose=T)
-        pose_nodes(overlay_scene,nodes,grasps[selected[0]])
-        image,depth=timed_render(renderer,overlay_scene,'photo',flags=pyrender.RenderFlags.RGBA)
-        visible=(depth>0)&((~np.isfinite(frame['depth_m']))|(depth<=frame['depth_m']+.002))
-        composed=rgb.copy();composed[visible]=image[visible,:3]
-        # Crop around the actual projected gripper and observed target.
-        target=np.asarray(Image.open(preview/camera_name/'selected_mask.png'))>0
-        ys,xs=np.nonzero(visible|target)
-        left,right=max(0,int(xs.min())-65),min(1024,int(xs.max())+65)
-        top,bottom=max(0,int(ys.min())-65),min(1024,int(ys.max())+65)
-        crop=Image.fromarray(composed).crop((left,top,right,bottom))
-        scale=min(760/crop.width,650/crop.height)
-        crop=crop.resize((int(crop.width*scale),int(crop.height*scale)),Image.Resampling.LANCZOS)
-        panel=Image.new('RGB',(800,740),'white');panel.paste(crop,((800-crop.width)//2,80+(650-crop.height)//2))
-        panel=caption(np.asarray(panel),[f'Original rank {selected[0]+1} | {camera_name}', 'Solid native gripper on original RGB; depth-aware occlusion'])
-        panel.save(output/(camera_name+'_photo_overlay.png'));photo_panels.append(panel)
+        mask_path=preview/camera_name/'selected_mask.png'
+        target=np.asarray(Image.open(mask_path))>0 if mask_path.exists() else np.zeros(rgb.shape[:2],dtype=bool)
+        for index in selected:
+            pose_nodes(overlay_scene,nodes,grasps[index])
+            image,depth=timed_render(renderer,overlay_scene,'photo',flags=pyrender.RenderFlags.RGBA)
+            visible=(depth>0)&((~np.isfinite(frame['depth_m']))|(depth<=frame['depth_m']+.002))
+            composed=rgb.copy();composed[visible]=image[visible,:3]
+            ys,xs=np.nonzero(visible|target)
+            if len(xs):
+                box=(max(0,int(xs.min())-65),max(0,int(ys.min())-65),min(1024,int(xs.max())+65),min(1024,int(ys.max())+65))
+            else:box=(0,0,1024,1024)
+            crop=Image.fromarray(composed).crop(box)
+            scale=min(760/crop.width,650/crop.height)
+            crop=crop.resize((int(crop.width*scale),int(crop.height*scale)),Image.Resampling.LANCZOS)
+            panel=Image.new('RGB',(800,740),'white');panel.paste(crop,((800-crop.width)//2,80+(650-crop.height)//2))
+            panel=caption(np.asarray(panel),[f'Candidate ID {index+1} | {camera_name}', 'Solid native gripper on original RGB; depth-aware occlusion'])
+            panel.save(output/f'rank_{index+1:03d}_{camera_name}.png');photo_panels[index].append(panel)
+            if index==selected[0]:panel.save(output/(camera_name+'_photo_overlay.png'))
         overlay_scene.remove_node(cam);overlay_scene.remove_node(light)
     renderer.delete()
-    photos=Image.new('RGB',(1600,740),'white')
-    for i,panel in enumerate(photo_panels):photos.paste(panel,(800*i,0))
-    photos.save(output/'grasp_on_original_photos.png')
+    for index,panels in photo_panels.items():
+        photos=Image.new('RGB',(1600,740),'white')
+        for i,panel in enumerate(panels):photos.paste(panel,(800*i,0))
+        photos.save(output/f'rank_{index+1:03d}_photos.png')
+        if index==selected[0]:photos.save(output/'grasp_on_original_photos.png')
     # Close-up render with native solid gripper and observed target points.
     scene,nodes=create_scene(cloud=True)
     centre=np.median(candidates['points'],axis=0);g=grasps[selected[0]]
@@ -172,24 +179,25 @@ def main():
         pic=caption(image,[f'Original rank {index+1} | model score {scores[index]:.3f}', 'Blue/orange = two fingers; grey = palm; black = pads', 'Observed target only; pose preview, no grasp physics'])
         pic=closing_arrows(pic,grasps[index],view)
         pic.save(output/f'rank_{index+1:03d}_solid.png');panels.append(pic)
-    gallery=Image.new('RGB',(900*4,760*2),(245,247,250))
+    gallery=Image.new('RGB',(900*min(4,len(panels)),760*((len(panels)+3)//4)),(245,247,250))
     for i,pic in enumerate(panels):gallery.paste(pic,((i%4)*900,(i//4)*760))
     gallery.save(output/'all_retained_grippers.png')
     # Keep exact orientation; translate from 10cm back to the saved pose, then hold.
-    movie=imageio.get_writer(str(output/f'rank{selected[0]+1:03d}_approach.mp4'),fps=12,codec='libx264',quality=8,macro_block_size=2)
-    view,_=fitting_camera(g,include_approach=True);scene.set_pose(camera,view)
-    gif_frames=[]
-    for t in np.r_[np.linspace(0,1,30),np.ones(12)]:
-        pose=g.copy();pose[:3,3]-=g[:3,2]*result['approach_m']*(1-t)
-        pose_nodes(scene,nodes,pose);image,_=timed_render(renderer,scene,'animation')
-        pic=caption(image,[f'Rank {selected[0]+1}: approach pose demonstration',f'Remaining approach: {100*result["approach_m"]*(1-t):.1f} cm', 'Fingers stay open. No closure, contact or robot execution.'])
-        movie.append_data(np.asarray(pic));small=pic.resize((600,507));gif_frames.append(small)
-    movie.close();gif_frames[0].save(output/'approach.gif',save_all=True,append_images=gif_frames[1:],duration=83,loop=0)
+    if not args.stills_only:
+        movie=imageio.get_writer(str(output/f'rank{selected[0]+1:03d}_approach.mp4'),fps=12,codec='libx264',quality=8,macro_block_size=2)
+        view,_=fitting_camera(g,include_approach=True);scene.set_pose(camera,view)
+        gif_frames=[]
+        for t in np.r_[np.linspace(0,1,30),np.ones(12)]:
+            pose=g.copy();pose[:3,3]-=g[:3,2]*result['approach_m']*(1-t)
+            pose_nodes(scene,nodes,pose);image,_=timed_render(renderer,scene,'animation')
+            pic=caption(image,[f'Rank {selected[0]+1}: approach pose demonstration',f'Remaining approach: {100*result["approach_m"]*(1-t):.1f} cm', 'Fingers stay open. No closure, contact or robot execution.'])
+            movie.append_data(np.asarray(pic));small=pic.resize((600,507));gif_frames.append(small)
+        movie.close();gif_frames[0].save(output/'approach.gif',save_all=True,append_images=gif_frames[1:],duration=83,loop=0)
     renderer.delete()
     (output/'render_metadata.json').write_text(json.dumps({'screen_source':str(args.screen.resolve()),'gpu':gpu,
         'native_gripper_calibration':calibration,'displayed_original_ranks':[i+1 for i in selected],
         'object_geometry':'observed colored RGB-D points only, no hidden mesh','robot_actions':0,
-        'render_type':'native visual gripper meshes, original RGB with depth occlusion, and kinematic approach animation',
+        'render_type':'native visual gripper meshes and original RGB with depth occlusion','animation_created':not args.stills_only,
         'fingers_close':False,'contact_simulated':False,'render_frame_wall_s':render_timings,
         'frame_timing_scope':'OffscreenRenderer.render including GPU rendering and CPU readback; excludes pose/camera setup, caption, file encoding and saving',
         'render_wall_s':time.perf_counter()-start},indent=2))

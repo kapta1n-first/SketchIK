@@ -304,3 +304,46 @@ USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 
 
 单帧耗时拆分实测：`runs/20261109T024416_grasp_render/render_metadata.json` 新增 render_frame_wall_s。当前3090上，1024照片叠加渲染第一帧0.054s、第二帧0.0167s；900×760候选实体渲染第一帧0.043s、后六帧中位0.0112s；动画42帧的后续中位0.0124s。计时包含GPU渲染与读回CPU，不含准备相机/位姿、文字标注、PNG/GIF/MP4编码及存盘。全部演示资产生成9.04s，独立命令从进程启动到结束11.73s；不能将暖机单帧时间等同于完整工具耗时。渲染器当前仍为按命令创建/销毁，尚未实现常驻渲染或高层候选ID选择回合。候选选择若要接Agent，需另测图像输入、API决策和总闭环延迟。
+
+
+## 当前抓取草图 → 常驻 Molmo 位姿选择试验
+
+这是 `grasp_trial` 独立静态诊断，不是完整 task9 执行。正常高层会话的七个动作不变。诊断分两阶段：
+
+```bash
+PYTHONPATH=src .venv-grasp/bin/python -m sketchik.grasp_trial plan \
+  --observation runs/<当前task9观测> --env-file .runtime/agent.env
+PYTHONPATH=src .venv-grasp/bin/python -m sketchik.grasp_trial select \
+  --trial runs/<grasp_trial目录> --gpu-uuid <UUID> \
+  --peer-pid <SAM_PID> --peer-pid <GraspGen_PID> --peer-pid <Molmo_PID>
+```
+
+- `prompts/grasp_trial.md` 是高层真实输入说明。高层确定当前应抓的对象、想抓的部位/方式，并提交 `submit_grasp_sketch`：例如 `move_to(selected_grasp.pregrasp)`、开爪、`move_to(selected_grasp.grasp)`、闭爪。pregrasp沿候选自身接近轴后退，不是固定世界上方。顺序由高层决定，工具不会强制上述顺序。原始API回复、完整实际提示、usage和墙钟时间均留在run内。
+- 身份描述用简洁的类别、外观及必要方位/参照；不混入抓法推理。SAM3接收高层显式`sam_prompt`（缺省使用target_description），保留类别和必要外观/部件/方位线索；Mask选择Molmo接收完整`target_description`。这与旧项目将整段描述再拼接给SAM的规则不同，实际输入分别保存。SAM3保留两图全部有效Mask；`prompts/mask_selector.md`让Molmo选对应同一目标的候选，每相机最多一个，可拒绝唯一候选或两个都拒绝。程序不做左右排序，不强迫最高分。选择是模型判断，不能认证跨视角身份。
+- 选中Mask的所有有效RGB-D点进入GraspGen；可见点不补隐藏几何。原始128候选保持完整，按已有场景/IK筛选保存每项拒绝原因。每个保留候选都产生一张独立的双视角实体夹爪照片叠加图，原始编号不重排。`--stills-only`跳过动画，没有为模型选择生成无用视频。
+- `prompts/grasp_selector.md` 是独立的**抓取位姿选择说明**，不是Mask说明。常驻Molmo看原始双图、全部保留候选图和高层grasp_preference，返回原编号或null/NONE，必须给可见理由。超过14候选时全部分组展示，再比较各组选择；不暗中只给最高分。不是训练过的抓握评估器，可能选错或拒绝所有候选，真实能力需由实验验证。
+- 位姿选定后，按机器人模型实测的base→grip_site转换，绑定高层符号动作的位置和完整朝向，保存`bound_numeric_plan.json`。仅保存、不派发动作；没有闭爪物理验证、完整机械臂路径碰撞或后续放置实现。0动作不能算task9成功。
+- Molmo服务是`sketchik.perception_service molmo`，FP16、最多2 crops/image、最多128输出token（不是必须输出128；理由要求不超过12词）；与SAM3/GraspGen同卡常驻。加载/暖机与每次真实推理分别记录。只有显式合法JSON ID才接收，不从自然语言猜编号；允许NONE且不自动重问。
+- 稠密点云在GraspGen原版预处理会建立N×N GPU距离矩阵。当前wrapper将相同的“20近邻L1平均距离<0.014m”规则换成CPU cKDTree，保留点次序，不做体素降采样；官方diffusion-discriminator保持不变。服务返回输入/保留点数和CPU过滤耗时。`/release_cache`仅释放空闲CUDA缓存，模型保持常驻。
+- 密钥位于git忽略且权限0600的`.runtime/agent.env`，不进提示/日志/仓库。用户授权试验采用之前第三方`deepseek-v4.1-flash`、reasoning=`low`，仍有推理，不称no-reasoning。无自动付费重试。
+
+本轮真实验证见 `runs/20261109T031758_grasp_trial/trial_review.json`。高层先交草图，SAM/Molmo选中双视角目标后，GraspGen生成128姿态，场景/IK保留34个，34个均渲染，Molmo按14/14/6分组后再选最终ID92。**选择仍不可靠：看图有明显夹空嫌疑，不能接受模型“包住杯身”的理由作为抓握认证。机器人动作0，尚无真实抓取/放置结果。**64token截断和长句SAM零检测等失败记录保留。41项CPU检查与真实GPU感知/渲染分开记录；步骤复用后的6.09s不是端到端耗时。
+
+
+### 当前实际提示入口与操作说明补充
+
+普通数值动作会话加载 `prompts/system.md`；静态对象级抓取试验加载 `prompts/grasp_trial.md`，本次已在该文件补齐现有接口实际可用的操作说明，直接进入高层system，不要求高层调用未开放的读文件工具。两入口的工具集合不同，不把普通会话工具写成抓取草图可调用工具。
+
+补充了双视角/机器人状态的含义、目标与部件身份分工、依据后续任务比较把手/边沿/主体、接近与夹合净空、SAM与两次Molmo选择的区别、GraspGen→原生EEF变换、pregrasp接近轴、当前五种草图动作的实际参数/默认值/预算及提交含义。明确抓取偏好应包含选择部位对后续任务的作用，没有固定抓取部位或高度配方。Molmo位姿提示补充指垫闭合路径与可见目标材料的核对，仍允许NONE。
+
+这次仅补现有功能的说明，不增加动作、自动放置、自动恢复或服务接口，不改筛选阈值、模型配置或执行逻辑。未启动GPU/API新实验，不能据说明更新宣称抓取效果改善。旧run内的实际system_prompt快照保留原样，更新只影响以后新请求。
+
+
+### 显式执行选中的抓取
+
+用户要求实抓时可运行 `python -m sketchik.grasp_trial execute --trial <trial> --gpu-uuid <UUID> --peer-pid <各常驻模型PID> --lift-test-m 0.05`。原数值抓取计划保持不变；可选0～0.10m世界Z抬升只作为单独标注的验收后缀，默认不加。执行前重建同一任务/seed/init_state，逐项核对机器人状态、原生双图、深度及相机标定；不匹配则不派发旧抓取位姿。保存连续视频、每步关节目标/实测状态、各动作耗时和截图。命令收敛与视觉抓取结果分别记录。
+
+发现原step0对象尚未经过重力稳定：第一份92号计划已真实执行到位，但空抓；张爪等待后固定前视可见表面高度比step0下降约7cm。当前支持`sketchik.cli probe --settle-steps 30`，在首次观测前以固定初始关节目标、开爪推进30物理步；元数据保存此prelude，execute会在同一重置中逐步重放再核对观测。它只稳定初始化，不定位目标或访问物体GT，默认settle-steps仍为0，不静默改变旧实验。
+
+
+复核上一轮抓取可用 `grasp_trial plan --observation <新观测> --env-file <私有配置> --review-trial <上一轮trial>`：向同一个模型提供原始规划回合、真实工具结果、旧候选与执行截图、新观测。模型在grasp_review评估旧候选是否符合其抓取意图，并在新的grasp_preference明确两指接触与夹合要求；不由脚本指定结论或黑名单候选。旧执行状态不冒充当前观测，官方任务成功信号不传给高层。

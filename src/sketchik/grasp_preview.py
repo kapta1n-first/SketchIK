@@ -37,11 +37,56 @@ def points_from_mask(frame, mask, image):
     return camera_points @ transform[:3,:3].T + transform[:3,3], np.asarray(image)[y,x]/255.
 
 
-def mask_clouds(folder, target, candidate_ids, sam_url, output):
+def validate_mask_choice(answer, mapping):
+    parsed=json.loads(answer.strip())
+    if not isinstance(parsed,dict) or set(parsed)!={'selected_ids','reason'} or not isinstance(parsed['reason'],str):
+        raise ValueError('Expected selected_ids and reason JSON')
+    ids=parsed['selected_ids']
+    if not isinstance(ids,list) or any(type(i) is not int or i not in mapping for i in ids):
+        raise ValueError('Unprovided Mask ID')
+    cameras=[mapping[i]['camera'] for i in ids]
+    if len(cameras)!=len(set(cameras)):raise ValueError('More than one Mask selected per camera')
+    return {mapping[i]['camera']:mapping[i]['local_id'] for i in ids}
+
+
+def select_masks(folder, views, target, molmo_url, output):
+    mapping={};items=[];next_id=1
+    for camera in CAMERAS:
+        image=Image.open(folder/(camera+'.png')).convert('RGB');overlay=np.array(image);labels=[]
+        for c in views[camera]['candidates']:
+            h,w=c['mask_shape'];mask=np.unpackbits(np.frombuffer(base64.b64decode(c['mask_packbits_base64']),dtype=np.uint8))[:h*w].reshape(h,w).astype(bool)
+            if mask.shape!=overlay.shape[:2]:raise ValueError('Mask/RGB size mismatch')
+            mapping[next_id]={'camera':camera,'local_id':c['id'],'score':c['score']}
+            color=np.array([(next_id*83)%180+60,(next_id*53)%180+60,(next_id*113)%180+60])
+            overlay[mask]=(.72*overlay[mask]+.28*color).astype(np.uint8)
+            labels.append((c['box_xyxy'],next_id));next_id+=1
+        picture=Image.fromarray(overlay);draw=ImageDraw.Draw(picture)
+        from PIL import ImageFont
+        font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',25)
+        for box,identity in labels:
+            box=[max(0,min(1023,float(v))) for v in box]
+            draw.rectangle(box,outline='red',width=3);draw.text((box[0]+3,box[1]+3),str(identity),font=font,fill='red',stroke_width=2,stroke_fill='white')
+        path=output/(camera+'_mask_choices.png');picture.save(path)
+        items.append({'label':camera+' numbered SAM3 candidates','image_base64':base64.b64encode(path.read_bytes()).decode()})
+    if not mapping:
+        (output/'molmo_mask_selection.json').write_text(json.dumps({'selected_ids':[],'reason':'SAM returned no candidates; Molmo not called'}))
+        return {},set(CAMERAS)
+    prompt=(Path(__file__).resolve().parents[2]/'prompts/mask_selector.md').read_text()+'\n'+json.dumps({'target_description':target,'candidate_mapping':mapping})
+    (output/'molmo_mask_input.json').write_text(json.dumps({'prompt':prompt,'image_files':[c+'_mask_choices.png' for c in CAMERAS]},indent=2))
+    start=time.perf_counter();response=request(molmo_url+'/infer',{'prompt':prompt,'images':items})
+    response['client_wall_s']=time.perf_counter()-start
+    (output/'molmo_mask_response.json').write_text(json.dumps(response,indent=2))
+    selected=validate_mask_choice(response['answer'],mapping)
+    (output/'molmo_mask_selection.json').write_text(json.dumps({'selected_camera_ids':selected,'mapping':mapping},indent=2))
+    return selected,set(CAMERAS)-set(selected)
+
+
+def mask_clouds(folder, target, candidate_ids, sam_url, output, sam_prompt=None, molmo_url=None):
     images = {c: Image.open(folder/(c+".png")).convert("RGB") for c in CAMERAS}
     if any(image.size != (1024,1024) for image in images.values()):
         raise ValueError("Dual-view preview requires native 1024x1024 RGB-D; do not upscale saved 256 images")
-    payload = {"prompt": target, "images": [{"camera": c, "image_base64": base64.b64encode(
+    query = sam_prompt or target
+    payload = {"prompt": query, "images": [{"camera": c, "image_base64": base64.b64encode(
         (folder/(c+".png")).read_bytes()).decode()} for c in CAMERAS]}
     begin = time.perf_counter()
     result = request(sam_url+"/infer", payload)
@@ -50,6 +95,10 @@ def mask_clouds(folder, target, candidate_ids, sam_url, output):
     views = {v['camera']: v for v in result['images']}
     if len(result['images']) != 2 or set(views) != set(CAMERAS):
         raise ValueError("SAM response camera labels do not match the requested pair")
+    rejected_views=set()
+    if molmo_url:
+        if candidate_ids:raise ValueError('Do not combine forced Mask IDs with semantic Molmo selection')
+        candidate_ids,rejected_views=select_masks(folder,views,target,molmo_url,output)
     all_points,all_colors,origins,records = [],[],[],[]
     palette = [(255,80,40), (40,210,100), (100,100,255), (220,80,220)]
     for index,camera in enumerate(CAMERAS):
@@ -69,10 +118,12 @@ def mask_clouds(folder, target, candidate_ids, sam_url, output):
             draw.text(candidate['box_xyxy'][:2],f"ID {candidate['id']} score={candidate['score']:.2f}",fill='white')
         picture.save(directory/"sam_masks.png")
         selected=candidate_ids.get(camera)
+        if camera in rejected_views:
+            records.append({'camera':camera,'sam_candidate_count':len(masks),'status':'molmo_none','point_count':0});continue
         record={"camera":camera,"width":image.width,"height":image.height,"sam_candidate_count":len(masks)}
         if selected is None and not masks:
             record.update(status="no_detection",point_count=0);records.append(record);continue
-        selection = "explicit_candidate_id" if selected is not None else "highest_sam_score_per_view"
+        selection = ("molmo_mask_id" if molmo_url else "explicit_candidate_id") if selected is not None else "highest_sam_score_per_view"
         if selected is None:
             selected=max(views[camera]['candidates'],key=lambda candidate:candidate['score'])['id']
         if selected not in masks:raise ValueError(f"{camera}: selected candidate does not exist")
@@ -87,7 +138,7 @@ def mask_clouds(folder, target, candidate_ids, sam_url, output):
         record.update(status="selected_for_preview",selected_candidate_id=selected,selection=selection,
                       selected_score=selected_score,point_count=len(points));records.append(record)
     source={"input":"native dual-view LIBERO RGB-D plus batched SAM3 masks","observation_directory":str(folder.resolve()),
-        "target_description":target,"views":records,"sam_inference_wall_s":result['inference_wall_s'],
+        "target_description":target,"actual_sam_prompt":query,"views":records,"sam_inference_wall_s":result['inference_wall_s'],
         "sam_client_wall_s":client_wall,"sam_model_pid":result['model_pid'],"sam_request_index":result['request_index'],
         "geometry_source":"all valid visible depth pixels, separately calibrated then concatenated in world frame; no object GT",
         "cross_view_identity_certified":False,"duplicate_points_removed":False}
@@ -166,6 +217,8 @@ def main():
     parser.add_argument("--sample-json",type=Path)
     parser.add_argument("--observation-dir",type=Path)
     parser.add_argument("--target")
+    parser.add_argument("--sam-prompt")
+    parser.add_argument("--molmo-url")
     parser.add_argument("--candidate-id",action="append",default=[],metavar="CAMERA=ID")
     parser.add_argument("--sam-url",default="http://127.0.0.1:18761")
     parser.add_argument("--grasp-url",default="http://127.0.0.1:18760")
@@ -190,7 +243,7 @@ def main():
             camera,value=entry.split('=',1)
             if camera not in CAMERAS or camera in candidate_ids:parser.error("Expected unique CAMERA=ID entries")
             candidate_ids[camera]=int(value)
-        points,colors,source=mask_clouds(args.observation_dir,args.target,candidate_ids,args.sam_url,output)
+        points,colors,source=mask_clouds(args.observation_dir,args.target,candidate_ids,args.sam_url,output,args.sam_prompt,args.molmo_url)
     if len(points)<64:raise ValueError("Too few observed points for meaningful grasp preview")
     metadata={"source":source,"service":request(args.grasp_url+"/health"),"robot_actions":0}
     (output/"metadata.json").write_text(json.dumps(metadata,indent=2))

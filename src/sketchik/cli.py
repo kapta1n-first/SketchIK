@@ -17,6 +17,7 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--init-state", type=int, default=0)
     parser.add_argument("--plan", type=Path)
+    parser.add_argument("--settle-steps", type=int, default=0, help="Initial physics settling before capturing observations; recorded and replayable")
     parser.add_argument("--env-file", type=Path, help="Literal SKETCHIK_* settings; not shell-sourced")
     parser.add_argument("--base-url")
     parser.add_argument("--model")
@@ -26,6 +27,8 @@ def main():
     parser.add_argument("--max-tool-calls", type=int, default=100)
     parser.add_argument("--max-episode-steps", type=int, default=2000)
     args = parser.parse_args()
+    if not 0 <= args.settle_steps <= 200 or args.settle_steps >= args.max_episode_steps:
+        parser.error("settle-steps must be 0..200 and below episode budget")
     if min(args.api_timeout, args.max_turns, args.max_tool_calls, args.max_episode_steps) <= 0:
         parser.error("API timeout and execution budgets must be positive")
     client = None
@@ -57,7 +60,13 @@ def main():
         }, indent=2))
         raise
     try:
-        metadata = robot.metadata | {"gpu": gpu, "initialization_wall_s": time.perf_counter() - start}
+        prelude=None
+        if args.settle_steps:
+            q=robot.state()['q']
+            prelude={'steps':args.settle_steps,'joint_target':q,'gripper':-1.0}
+            for _ in range(args.settle_steps):robot.step(q,-1.0)
+        metadata = robot.metadata | {"gpu": gpu, "initialization_wall_s": time.perf_counter() - start,
+                                     "observation_prelude":prelude}
         (run / "metadata.json").write_text(json.dumps(metadata, indent=2))
         state = robot.state()
         (run / "initial_state.json").write_text(json.dumps(state, indent=2))

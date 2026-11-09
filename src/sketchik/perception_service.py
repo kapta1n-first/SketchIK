@@ -36,9 +36,25 @@ def reserve_device(gpu_uuid, peer_pids=()):
     return {"uuid": gpu_uuid, "free_mib_before_load": int(selected[1]), "peer_pids": sorted(valid_peers)}
 
 
+def filter_observed_outliers(points, k=20, threshold=.014):
+    """Upstream KNN mean L1 rule, with a CPU tree instead of an NxN CUDA matrix.
+
+    Preserve all input points/order except the same outlier rule; no voxel sampling.
+    The first nearest distance is self (or an equal zero duplicate).
+    """
+    import numpy as np
+    from scipy.spatial import cKDTree
+    points=np.asarray(points,dtype=np.float32)
+    if points.ndim!=2 or points.shape[1]!=3 or len(points)<=k or not np.isfinite(points).all():
+        raise ValueError('Expected finite XYZ points with more than k rows')
+    distances=cKDTree(points).query(points,k=k+1,p=1,workers=4)[0][:,1:]
+    keep=distances.astype(np.float32).mean(axis=1)<threshold
+    return points[keep],keep
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("kind", choices=["graspgen", "sam3"])
+    parser.add_argument("kind", choices=["graspgen", "sam3", "molmo"])
     parser.add_argument("--gpu-uuid", required=True)
     parser.add_argument("--peer-pid", type=int, action="append", default=[])
     parser.add_argument("--port", type=int, required=True)
@@ -73,11 +89,42 @@ def main():
             seed = int(request.get("seed", 0))
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
-            grasps, scores = GraspGenSampler.run_inference(points, sampler, num_grasps=count,
-                topk_num_grasps=count, min_grasps=1, max_tries=1, remove_outliers=True)
+            filter_start=time.perf_counter();filtered,keep=filter_observed_outliers(points)
+            if len(filtered)<64:raise ValueError('Too few points after upstream-equivalent KNN outlier rule')
+            filter_wall=time.perf_counter()-filter_start
+            grasps, scores = GraspGenSampler.run_inference(filtered, sampler, num_grasps=count,
+                topk_num_grasps=count, min_grasps=1, max_tries=1, remove_outliers=False)
             return {"grasps": grasps.detach().cpu().numpy().tolist(), "scores": scores.detach().cpu().numpy().tolist(),
                     "frame": "same metric coordinate frame as input points; GraspGen gripper base frame",
-                    "backend": "official diffusion-discriminator", "collision_checked": False, "ik_checked": False}
+                    "backend": "official diffusion-discriminator", "collision_checked": False, "ik_checked": False,
+                    "input_points":len(points),"filtered_points":len(filtered),"outlier_filter_wall_s":filter_wall,
+                    "outlier_filter":"CPU cKDTree mean 20-neighbor L1 distance <0.014m; no NxN CUDA matrix or voxel downsampling"}
+    elif args.kind == "molmo":
+        os.environ['HF_MODULES_CACHE'] = str(root/'.runtime/molmo_hf_modules')
+        from transformers import AutoModelForImageTextToText, AutoProcessor
+        processor=AutoProcessor.from_pretrained(args.checkpoint,trust_remote_code=True,local_files_only=True)
+        processor.image_processor.max_crops=2
+        model=AutoModelForImageTextToText.from_pretrained(args.checkpoint,trust_remote_code=True,
+            local_files_only=True,dtype=torch.float16).to('cuda').eval()
+        def infer(request):
+            items=request.get('images')
+            if not isinstance(items,list) or not 1<=len(items)<=16:raise ValueError('Expected 1..16 labelled images')
+            prompt=request.get('prompt')
+            if not isinstance(prompt,str) or not prompt.strip():raise ValueError('Nonempty selection prompt required')
+            content=[{'type':'text','text':prompt}]
+            for item in items:
+                image=Image.open(BytesIO(base64.b64decode(item['image_base64'],validate=True))).convert('RGB')
+                content.extend([{'type':'text','text':str(item['label'])},{'type':'image','image':image}])
+            inputs=processor.apply_chat_template([{'role':'user','content':content}],tokenize=True,
+                add_generation_prompt=True,return_tensors='pt',return_dict=True)
+            inputs={k:v.to(model.device) for k,v in inputs.items()}
+            count=inputs['input_ids'].shape[1]
+            if count+128>model.config.text_config.max_position_embeddings:raise ValueError('Selection input exceeds native context')
+            with torch.inference_mode():output=model.generate(**inputs,max_new_tokens=128,do_sample=False)
+            tokens=output[0,count:]
+            return {'answer':processor.tokenizer.decode(tokens,skip_special_tokens=True),
+                'input_tokens':int(count),'output_tokens':int(tokens.numel()),'image_count':len(items),
+                'max_crops_per_image':2,'max_new_tokens':128,'dtype':'float16','selection_is_not_physical_success':True}
     else:
         from sam3.model_builder import build_sam3_image_model
         from sam3.model.sam3_image_processor import Sam3Processor
@@ -141,6 +188,11 @@ def main():
         def do_GET(self):
             self.send(200 if self.path == "/health" else 404, metadata)
         def do_POST(self):
+            if self.path == '/release_cache':
+                with lock:
+                    torch.cuda.synchronize();torch.cuda.empty_cache()
+                    self.send(200,{'resident':True,'model_pid':os.getpid(),'allocated_mib':torch.cuda.memory_allocated()/2**20})
+                return
             if self.path != "/infer":
                 self.send(404, {"error": "Unknown route"})
                 return

@@ -44,6 +44,7 @@ def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_t
     if min(max_turns, max_tool_calls) < 1:
         raise ValueError('Planning budgets must be positive')
     tools = hub.schemas + [submit_tool]
+    submission_name = submit_tool['function']['name']
     validators = {t['function']['name']: Draft202012Validator(t['function']['parameters']) for t in tools}
     seen = set()
     total_s = 0.
@@ -72,12 +73,12 @@ def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_t
                 raise ProviderError('Unknown planning tool; motion is not exposed in this phase')
             args = json.loads(function['arguments'], parse_constant=lambda s: (_ for _ in ()).throw(ValueError(s)))
             validators[name].validate(args)
-            if name == 'submit_grasp_sketch' and args['source_step'] != hub.robot.steps:
+            if name == submission_name and args['source_step'] != hub.robot.steps:
                 raise ValueError('Stale sketch source_step')
             batch.add(identity)
             parsed.append((identity, name, args))
-        submissions = [v for v in parsed if v[1] == 'submit_grasp_sketch']
-        if len(submissions) > 1 or (submissions and parsed[-1][1] != 'submit_grasp_sketch'):
+        submissions = [v for v in parsed if v[1] == submission_name]
+        if len(submissions) > 1 or (submissions and parsed[-1][1] != submission_name):
             raise ProviderError('Submit at most one final sketch, after any read-only calls in the batch')
         messages.append(message)
         hub.emit({'event':'grasp_planning_response','round':turn,'wall_s':elapsed,
@@ -87,7 +88,7 @@ def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_t
         for identity, name, args in parsed:
             seen.add(identity)
             call_count += 1
-            if name == 'submit_grasp_sketch':
+            if name == submission_name:
                 messages.append({'role':'tool','tool_call_id':identity,
                                  'content':json.dumps({'saved':True,'robot_actions':0})})
                 if pictures:
@@ -121,17 +122,36 @@ def restore_planning_images(messages, roots):
     return messages
 
 
-def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max_tool_calls=100):
+def planning_instructions(text, allow_perception=True):
+    if allow_perception:
+        return text
+    head, separator, _ = text.partition('\n本轮开放submit_grasp_sketch')
+    _, heading, tail = text.partition('\n## 读图、对象身份与状态')
+    if not separator or not heading:
+        raise ValueError('Grasp guide structure changed; cannot prepare symbolic-only instructions')
+    return head + '''
+
+本次你是双Agent系统中的A，只看程序自动提供的图像、任务和状态，生成符号草图；不调用感知工具，不求像素或三维坐标。程序自动保存并打包历史图像、对应深度和相机信息交给B。B在抓取链执行期间分析可能用于后续放置的参考区域/点；具体感知、几何查询和参数准备由B及执行器负责。
+
+本轮只开放submit_grasp_sketch。当前入口仍只接通抓取草图，按完整任务选择对象、分割范围和抓取意图，不编造未实现的放置动作。SAM3/GraspGen由执行器调用，Mask和抓取位姿仍由常驻Molmo选择ID或NONE；你不代替Molmo选候选。不需要先自行测量尺寸或定位后续放置点才能交草图。当前图片来自保存观测，没有主动移动相机。
+''' + heading + tail
+
+
+def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max_tool_calls=100,
+                  additional_instructions='', allow_perception=True):
     root=Path(__file__).resolve().parents[2];run=root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_trial');run.mkdir()
     settings=load_settings(env_file)
     client=ChatClient(settings.get('SKETCHIK_BASE_URL'),settings.get('SKETCHIK_MODEL'),settings.get('SKETCHIK_API_KEY'),settings.get('SKETCHIK_REASONING'),timeout=120)
     meta=json.loads((observation/'metadata.json').read_text());state=public(json.loads((observation/'initial_state.json').read_text()))
-    system=(root/'prompts/grasp_trial.md').read_text();(run/'system_prompt.md').write_text(system)
+    system=planning_instructions((root/'prompts/grasp_trial.md').read_text(), allow_perception)
+    if additional_instructions:system += '\n\n' + additional_instructions
+    (run/'system_prompt.md').write_text(system)
     tool={'type':'function','function':{'name':'submit_grasp_sketch','description':'Save a symbolic current-grasp sketch; no motion or candidate selection yet.','parameters':SKETCH_SCHEMA}}
     def emit(record):
         with (run/'planning_events.jsonl').open('a') as stream:
             stream.write(json.dumps(record,allow_nan=False)+'\n')
-    hub=ToolHub(SavedObservationRobot(observation),None,run,emit,allowed_tools=PERCEPTION_TOOLS)
+    hub=ToolHub(SavedObservationRobot(observation),None,run,emit,
+                allowed_tools=PERCEPTION_TOOLS if allow_perception else frozenset())
     initial=hub.observe()[0]
     content=[{'type':'text','text':json.dumps({'task':meta['task_language'],'source_step':state['step'],
         'observation_id':initial['observation_id'],'robot_state':initial['state'],
@@ -176,7 +196,8 @@ def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max
         (run/'review_source.json').write_text(json.dumps({'previous_trial':str(previous),'previous_execution':str(execution),
             'same_model':client.model==previous_cfg['provider']['model'],'user_requested':True},indent=2))
     (run/'planning_input.json').write_text(json.dumps(transcript_copy(messages),indent=2))
-    config={'observation':str(observation.resolve()),'provider':client.metadata,'robot_actions':0}
+    config={'observation':str(observation.resolve()),'provider':client.metadata,'robot_actions':0,
+            'planning_perception_tools': sorted(PERCEPTION_TOOLS) if allow_perception else []}
     (run/'config.json').write_text(json.dumps(config,indent=2));(run/'planning_tool.json').write_text(json.dumps(tool,indent=2))
     (run/'planning_tools.json').write_text(json.dumps(hub.schemas+[tool],indent=2))
     start=time.perf_counter()
@@ -341,7 +362,7 @@ def run_selection(trial, gpu_uuid, peer_pids, perception_dir=None):
         raise
 
 
-def execute_selected(trial, gpu_uuid, peer_pids, lift_test_m=0.):
+def execute_selected(trial, gpu_uuid, peer_pids, lift_test_m=0., *, on_execution_ready=None):
     """Execute an unchanged selected grasp in a matching reset, optionally test lift.
 
     Uses observed RGB-D and robot state for reset matching, never object poses.
@@ -403,6 +424,8 @@ def execute_selected(trial, gpu_uuid, peer_pids, lift_test_m=0.):
         if lift_test_m:execution['steps'].append({'primitive':'move_relative','params':{'delta_m':[0.,0.,lift_test_m]}})
         (run/'execution_plan.json').write_text(json.dumps(execution,indent=2))
         print(json.dumps({'run':str(run),'candidate_id':selected['candidate_id'],'initial_observation_matched':True,'extra_lift_m':lift_test_m}),flush=True)
+        if on_execution_ready is not None:
+            on_execution_ready(run)
         result=run_validation(robot,run,'execute',run/'execution_plan.json')
         (run/'execution_summary.json').write_text(json.dumps({'candidate_id':selected['candidate_id'],'actions':result['actions'],
             'all_commands_completed':result['control_validation_passed'],'error':result['error'],'wall_seconds':result['wall_seconds'],

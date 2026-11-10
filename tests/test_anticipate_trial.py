@@ -160,6 +160,36 @@ def test_b_reference_xyz_comes_from_real_saved_depth_and_is_not_a_release_pose(t
         prepare_geometry(hub, {'placement_candidates':[point, point]})
 
 
+@pytest.mark.parametrize('timeout', [120, 300])
+@pytest.mark.parametrize('direct', [False, True])
+def test_b_timeout_is_explicit_and_complete_handoff_stays_read_only(tmp_path, monkeypatch, timeout, direct):
+    from sketchik import anticipate_trial
+    trial, original = handoff(tmp_path)
+    (trial/'sketch.json').write_text(json.dumps(sketch()))
+    run = tmp_path/'b_timeout'
+    captured = {}
+    analysis = {'source_step': 0, 'grasp_object': 'target', 'destination': 'container',
+        'observed_evidence': [], 'placement_outline': [], 'missing_information': ['geometry'],
+        'post_grasp_checks': [], 'ready_for_grounding': False, 'placement_candidates': []}
+    class Client:
+        def __init__(self, *args, **kwargs):
+            captured['timeout'] = kwargs['timeout']
+            captured['use_env_proxy'] = kwargs['use_env_proxy']
+            self.metadata = {'timeout_s': kwargs['timeout'], 'automatic_retries': 0}
+        def complete(self, messages, tools):
+            captured['messages'] = messages.copy()
+            return {'message': {'role': 'assistant', 'tool_calls': [
+                call('submit_placement_analysis', analysis, 'b_final')]}}
+    monkeypatch.setattr(anticipate_trial, 'ChatClient', Client)
+    monkeypatch.setattr(anticipate_trial, 'load_settings', lambda _: {})
+    anticipate_trial.analyse(trial, run, None, api_timeout=timeout, direct=direct)
+    assert captured['timeout'] == timeout
+    assert captured['use_env_proxy'] is not direct
+    assert captured['messages'][1:len(original)] == original[1:]
+    result = json.loads((run/'result.json').read_text())
+    assert result['robot_actions'] == 0 and not result['executable_placement']
+
+
 class TickRobot(FakeRobot):
     on_step = None
 

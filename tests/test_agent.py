@@ -2,6 +2,7 @@ from copy import deepcopy
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
+import urllib.error
 
 import numpy as np
 import pytest
@@ -183,6 +184,36 @@ def test_http_chat_payload_and_truncated_response_no_tool_execution():
         server.shutdown()
         server.server_close()
         thread.join()
+
+
+@pytest.mark.parametrize('reason', [TimeoutError('private unit-secret'),
+    ConnectionResetError(104, 'private unit-secret'), 'private unit-secret'])
+def test_transport_reason_class_retained_without_secret_or_retry(reason):
+    class BrokenOpener:
+        calls = 0
+        def open(self, request, timeout):
+            self.calls += 1
+            assert timeout == 300
+            raise urllib.error.URLError(reason)
+    client = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret', timeout=300)
+    client.opener = BrokenOpener()
+    with pytest.raises(ProviderError) as result:
+        client.complete([], [])
+    assert f'reason_type={type(reason).__name__}' in str(result.value)
+    assert 'unit-secret' not in str(result.value)
+    assert client.opener.calls == 1
+
+
+def test_proxy_bypass_is_explicit_and_defaults_remain(monkeypatch):
+    monkeypatch.setattr(urllib.request, 'getproxies', lambda: {'https': 'http://127.0.0.1:7900'})
+    normal = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret')
+    direct = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret', use_env_proxy=False)
+    local = ChatClient('http://127.0.0.1:18760/v1', 'unit-model', 'unit-secret')
+    assert normal.metadata['proxy_mode'] == 'environment'
+    assert any(isinstance(h, urllib.request.ProxyHandler) and h.proxies for h in normal.opener.handlers)
+    assert direct.metadata['proxy_mode'] == local.metadata['proxy_mode'] == 'direct'
+    assert not any(isinstance(h, urllib.request.ProxyHandler) for h in direct.opener.handlers)
+    assert not any(isinstance(h, urllib.request.ProxyHandler) for h in local.opener.handlers)
 
 
 def test_run_files_create_read_list_and_explicit_overwrite(hub):

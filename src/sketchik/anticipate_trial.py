@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import shutil
@@ -160,7 +161,9 @@ def prepare_geometry(hub, analysis):
             'note': 'Reference points may later fill A sketch parameters; a point is not a support/free-space or release certificate.'}
 
 
-def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60):
+def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60, *, api_timeout=120, direct=False):
+    if not math.isfinite(api_timeout) or api_timeout <= 0:
+        raise ValueError('API timeout must be finite and positive')
     root = Path(__file__).resolve().parents[2]
     run.mkdir(exist_ok=False)
     def emit(event):
@@ -180,7 +183,8 @@ def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60):
             'request': 'Prepare possible placement/support/entry reference pixels from the historical images while the grasp chain proceeds. Perception tools are yours to use. Save references for later binding of A placement sketch, plus missing information; do not replace A task planning or assume grasp success.'})})
         settings = load_settings(env_file)
         client = ChatClient(settings.get('SKETCHIK_BASE_URL'), settings.get('SKETCHIK_MODEL'),
-                            settings.get('SKETCHIK_API_KEY'), settings.get('SKETCHIK_REASONING'), timeout=120)
+                            settings.get('SKETCHIK_API_KEY'), settings.get('SKETCHIK_REASONING'), timeout=api_timeout,
+                            use_env_proxy=not direct)
         tool = {'type': 'function', 'function': {'name': 'submit_placement_analysis',
                 'description': 'Save provisional placement analysis from pregrasp history; no action or success certification.',
                 'parameters': ANALYSIS_SCHEMA}}
@@ -310,13 +314,17 @@ def main():
     b = sub.add_parser('analyse')
     b.add_argument('--trial', type=Path, required=True)
     b.add_argument('--output', type=Path, required=True)
+    b.add_argument('--api-timeout', type=float, default=120,
+                   help='B request socket timeout in seconds; no automatic retries')
+    b.add_argument('--direct', action='store_true', help='Explicitly bypass environment HTTP proxies for B only')
     for item in (p, b):
         item.add_argument('--env-file', type=Path, required=True)
         item.add_argument('--max-turns', type=int, default=12)
         item.add_argument('--max-tool-calls', type=int, default=60)
     args = parser.parse_args()
     if args.command == 'analyse':
-        analyse(args.trial.resolve(), args.output.resolve(), args.env_file, args.max_turns, args.max_tool_calls)
+        analyse(args.trial.resolve(), args.output.resolve(), args.env_file, args.max_turns, args.max_tool_calls,
+                api_timeout=args.api_timeout, direct=args.direct)
     else:
         print(json.dumps({'run': str(run_trial(args))}), flush=True)
 

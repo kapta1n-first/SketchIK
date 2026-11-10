@@ -42,7 +42,7 @@ def load_settings(path=None):
 
 
 class ChatClient:
-    def __init__(self, base_url, model, api_key, reasoning=None, timeout=90):
+    def __init__(self, base_url, model, api_key, reasoning=None, timeout=90, *, use_env_proxy=True):
         parsed = urlparse(base_url or "")
         if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password or parsed.query:
             raise ValueError("Expected API base URL without embedded credentials or query")
@@ -50,12 +50,14 @@ class ChatClient:
             raise ValueError("Model and API key are required; nothing is sent without configuration")
         self.url = base_url.rstrip("/") + "/chat/completions"
         # Local gateways/tests must not be sent through a workstation HTTP proxy.
+        direct = not use_env_proxy or parsed.hostname in ("localhost", "127.0.0.1", "::1")
         self.opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
-                       if parsed.hostname in ("localhost", "127.0.0.1", "::1")
+                       if direct
                        else urllib.request.build_opener())
         self.model, self.api_key, self.reasoning, self.timeout = model, api_key, reasoning, timeout
         self.metadata = {"kind": "chat_completions", "base_url": base_url, "model": model,
-                         "reasoning_effort": reasoning, "automatic_retries": 0, "timeout_s": timeout}
+                         "reasoning_effort": reasoning, "automatic_retries": 0, "timeout_s": timeout,
+                         "proxy_mode": "direct" if direct else "environment"}
 
     def complete(self, messages, tools):
         payload = {"model": self.model, "messages": messages, "tools": tools,
@@ -72,7 +74,13 @@ class ChatClient:
         except urllib.error.HTTPError as exc:
             raise ProviderError(f"Provider HTTP {exc.code}; no automatic retry") from None
         except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
-            raise ProviderError(f"Provider transport/JSON failure ({type(exc).__name__}); no automatic retry") from None
+            reason = getattr(exc, "reason", exc)
+            # Only record exception classes/numeric errno, never raw network messages.
+            # URLError.reason can contain URLs or provider-echoed private data.
+            detail = f"{type(exc).__name__}; reason_type={type(reason).__name__}"
+            if isinstance(reason, OSError) and isinstance(reason.errno, int):
+                detail += f"; errno={reason.errno}"
+            raise ProviderError(f"Provider transport/JSON failure ({detail}); no automatic retry") from None
         choices = reply.get("choices")
         if not isinstance(choices, list) or not choices:
             raise ProviderError("Provider returned no choices")

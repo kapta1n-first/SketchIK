@@ -131,9 +131,11 @@ class TimedClient:
         try:
             result = self.client.complete(messages, tools)
         except Exception as exc:
-            self.emit({'event': 'b_api_finished', 'round': self.round, 'error_type': type(exc).__name__})
+            self.emit({'event': 'b_api_finished', 'round': self.round, 'error_type': type(exc).__name__,
+                       'request': getattr(self.client, 'last_request_metadata', {})})
             raise
-        self.emit({'event': 'b_api_finished', 'round': self.round, 'usage': result.get('usage')})
+        self.emit({'event': 'b_api_finished', 'round': self.round, 'usage': result.get('usage'),
+                   'request': getattr(self.client, 'last_request_metadata', {})})
         return result
 
 
@@ -161,7 +163,8 @@ def prepare_geometry(hub, analysis):
             'note': 'Reference points may later fill A sketch parameters; a point is not a support/free-space or release certificate.'}
 
 
-def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60, *, api_timeout=120, direct=False):
+def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60, *, api_timeout=120, direct=False,
+            jpeg_quality=None):
     if not math.isfinite(api_timeout) or api_timeout <= 0:
         raise ValueError('API timeout must be finite and positive')
     root = Path(__file__).resolve().parents[2]
@@ -184,7 +187,8 @@ def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60, *, api_timeou
         settings = load_settings(env_file)
         client = ChatClient(settings.get('SKETCHIK_BASE_URL'), settings.get('SKETCHIK_MODEL'),
                             settings.get('SKETCHIK_API_KEY'), settings.get('SKETCHIK_REASONING'), timeout=api_timeout,
-                            use_env_proxy=not direct)
+                            use_env_proxy=not direct, image_jpeg_quality=jpeg_quality,
+                            transport_dir=run/'api_transport' if jpeg_quality is not None else None)
         tool = {'type': 'function', 'function': {'name': 'submit_placement_analysis',
                 'description': 'Save provisional placement analysis from pregrasp history; no action or success certification.',
                 'parameters': ANALYSIS_SCHEMA}}
@@ -317,6 +321,8 @@ def main():
     b.add_argument('--api-timeout', type=float, default=120,
                    help='B request socket timeout in seconds; no automatic retries')
     b.add_argument('--direct', action='store_true', help='Explicitly bypass environment HTTP proxies for B only')
+    b.add_argument('--jpeg-quality', type=int, default=None,
+                   help='Explicit API-only JPEG quality, keeping all source images and their resolution')
     for item in (p, b):
         item.add_argument('--env-file', type=Path, required=True)
         item.add_argument('--max-turns', type=int, default=12)
@@ -324,7 +330,7 @@ def main():
     args = parser.parse_args()
     if args.command == 'analyse':
         analyse(args.trial.resolve(), args.output.resolve(), args.env_file, args.max_turns, args.max_tool_calls,
-                api_timeout=args.api_timeout, direct=args.direct)
+                api_timeout=args.api_timeout, direct=args.direct, jpeg_quality=args.jpeg_quality)
     else:
         print(json.dumps({'run': str(run_trial(args))}), flush=True)
 

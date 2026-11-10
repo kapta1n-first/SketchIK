@@ -162,7 +162,8 @@ def test_b_reference_xyz_comes_from_real_saved_depth_and_is_not_a_release_pose(t
 
 @pytest.mark.parametrize('timeout', [120, 300])
 @pytest.mark.parametrize('direct', [False, True])
-def test_b_timeout_is_explicit_and_complete_handoff_stays_read_only(tmp_path, monkeypatch, timeout, direct):
+@pytest.mark.parametrize('quality', [None, 95])
+def test_b_timeout_is_explicit_and_complete_handoff_stays_read_only(tmp_path, monkeypatch, timeout, direct, quality):
     from sketchik import anticipate_trial
     trial, original = handoff(tmp_path)
     (trial/'sketch.json').write_text(json.dumps(sketch()))
@@ -175,6 +176,7 @@ def test_b_timeout_is_explicit_and_complete_handoff_stays_read_only(tmp_path, mo
         def __init__(self, *args, **kwargs):
             captured['timeout'] = kwargs['timeout']
             captured['use_env_proxy'] = kwargs['use_env_proxy']
+            captured['image_jpeg_quality'] = kwargs['image_jpeg_quality']
             self.metadata = {'timeout_s': kwargs['timeout'], 'automatic_retries': 0}
         def complete(self, messages, tools):
             captured['messages'] = messages.copy()
@@ -182,9 +184,10 @@ def test_b_timeout_is_explicit_and_complete_handoff_stays_read_only(tmp_path, mo
                 call('submit_placement_analysis', analysis, 'b_final')]}}
     monkeypatch.setattr(anticipate_trial, 'ChatClient', Client)
     monkeypatch.setattr(anticipate_trial, 'load_settings', lambda _: {})
-    anticipate_trial.analyse(trial, run, None, api_timeout=timeout, direct=direct)
+    anticipate_trial.analyse(trial, run, None, api_timeout=timeout, direct=direct, jpeg_quality=quality)
     assert captured['timeout'] == timeout
     assert captured['use_env_proxy'] is not direct
+    assert captured['image_jpeg_quality'] == quality
     assert captured['messages'][1:len(original)] == original[1:]
     result = json.loads((run/'result.json').read_text())
     assert result['robot_actions'] == 0 and not result['executable_placement']

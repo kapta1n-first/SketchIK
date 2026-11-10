@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import base64
 import hashlib
+from io import BytesIO
 import json
 import os
 from pathlib import Path
@@ -10,6 +12,8 @@ import time
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
+
+from PIL import Image
 
 from .tools import ToolHub
 
@@ -42,12 +46,15 @@ def load_settings(path=None):
 
 
 class ChatClient:
-    def __init__(self, base_url, model, api_key, reasoning=None, timeout=90, *, use_env_proxy=True):
+    def __init__(self, base_url, model, api_key, reasoning=None, timeout=90, *, use_env_proxy=True,
+                 image_jpeg_quality=None, transport_dir=None):
         parsed = urlparse(base_url or "")
         if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password or parsed.query:
             raise ValueError("Expected API base URL without embedded credentials or query")
         if not model or not api_key:
             raise ValueError("Model and API key are required; nothing is sent without configuration")
+        if image_jpeg_quality is not None and (type(image_jpeg_quality) is not int or not 1 <= image_jpeg_quality <= 100):
+            raise ValueError("JPEG transport quality must be an integer in [1,100], or None for original images")
         self.url = base_url.rstrip("/") + "/chat/completions"
         # Local gateways/tests must not be sent through a workstation HTTP proxy.
         direct = not use_env_proxy or parsed.hostname in ("localhost", "127.0.0.1", "::1")
@@ -55,16 +62,68 @@ class ChatClient:
                        if direct
                        else urllib.request.build_opener())
         self.model, self.api_key, self.reasoning, self.timeout = model, api_key, reasoning, timeout
+        self.image_jpeg_quality = image_jpeg_quality
+        self.transport_dir = Path(transport_dir) if transport_dir is not None else None
+        self._jpeg_cache = {}
+        self.last_request_metadata = {}
         self.metadata = {"kind": "chat_completions", "base_url": base_url, "model": model,
                          "reasoning_effort": reasoning, "automatic_retries": 0, "timeout_s": timeout,
-                         "proxy_mode": "direct" if direct else "environment"}
+                         "proxy_mode": "direct" if direct else "environment",
+                         "image_transport": {"format": "jpeg" if image_jpeg_quality is not None else "original",
+                             "quality": image_jpeg_quality, "resize": False, "source_images_unchanged": True}}
+
+    def wire_messages(self, messages):
+        """Explicit transport-only encoding; original history/RGB-D remain untouched."""
+        if self.image_jpeg_quality is None:
+            return messages
+        encoded = deepcopy(messages)
+        for message in encoded:
+            if not isinstance(message.get("content"), list):
+                continue
+            for part in message["content"]:
+                if part.get("type") != "image_url":
+                    continue
+                url = part["image_url"]["url"]
+                if not url.startswith("data:image/png;base64,"):
+                    continue
+                identity = hashlib.sha256(url.encode()).hexdigest()
+                if identity not in self._jpeg_cache:
+                    raw = base64.b64decode(url.split(",", 1)[1], validate=True)
+                    with Image.open(BytesIO(raw)) as source:
+                        rgb = source.convert("RGB")
+                        buffer = BytesIO()
+                        rgb.save(buffer, format="JPEG", quality=self.image_jpeg_quality,
+                                 subsampling=0, optimize=True)
+                    data = buffer.getvalue()
+                    wire_url = "data:image/jpeg;base64," + base64.b64encode(data).decode()
+                    self._jpeg_cache[identity] = wire_url
+                    if self.transport_dir is not None:
+                        images = self.transport_dir / "images"
+                        images.mkdir(parents=True, exist_ok=True)
+                        file = images / (hashlib.sha256(wire_url.encode()).hexdigest() + ".jpg")
+                        if not file.exists():
+                            file.write_bytes(data)
+                part["image_url"]["url"] = self._jpeg_cache[identity]
+        return encoded
 
     def complete(self, messages, tools):
-        payload = {"model": self.model, "messages": messages, "tools": tools,
+        started = time.perf_counter()
+        wire = self.wire_messages(messages)
+        payload = {"model": self.model, "messages": wire, "tools": tools,
                    "tool_choice": "auto", "parallel_tool_calls": False}
         if self.reasoning:
             payload["reasoning_effort"] = self.reasoning
         body = json.dumps(payload, allow_nan=False).encode()
+        self.last_request_metadata = {"body_bytes": len(body), "body_sha256": hashlib.sha256(body).hexdigest(),
+            "image_count": sum(part.get("type") == "image_url" for message in wire
+                if isinstance(message.get("content"), list) for part in message["content"]),
+            "image_encoding_and_serialization_s": time.perf_counter()-started,
+            "image_transport": self.metadata["image_transport"]}
+        if self.transport_dir is not None:
+            self.transport_dir.mkdir(parents=True, exist_ok=True)
+            with (self.transport_dir / "requests.jsonl").open("a") as stream:
+                stream.write(json.dumps({**self.last_request_metadata,
+                    "messages": transcript_copy(wire)}, allow_nan=False) + "\n")
         request = urllib.request.Request(self.url, data=body, method="POST", headers={
             "Content-Type": "application/json", "Authorization": "Bearer " + self.api_key})
         # Do not log raw provider error bodies (they can echo auth or full inputs).

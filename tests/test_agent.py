@@ -1,4 +1,6 @@
 from copy import deepcopy
+import base64
+from io import BytesIO
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import threading
@@ -6,6 +8,7 @@ import urllib.error
 
 import numpy as np
 import pytest
+from PIL import Image
 
 from sketchik.agent import ChatClient, ProviderError, ScriptedClient, load_settings, run_session
 from sketchik.tools import ToolHub
@@ -214,6 +217,48 @@ def test_proxy_bypass_is_explicit_and_defaults_remain(monkeypatch):
     assert direct.metadata['proxy_mode'] == local.metadata['proxy_mode'] == 'direct'
     assert not any(isinstance(h, urllib.request.ProxyHandler) for h in direct.opener.handlers)
     assert not any(isinstance(h, urllib.request.ProxyHandler) for h in local.opener.handlers)
+
+
+def test_jpeg_wire_encoding_preserves_full_source_history_and_saves_exact_sent_images(tmp_path):
+    source = BytesIO()
+    Image.fromarray(np.arange(32*32*3, dtype=np.uint8).reshape(32,32,3)).save(source, format='PNG')
+    url = 'data:image/png;base64,' + base64.b64encode(source.getvalue()).decode()
+    messages = [{'role': 'system', 'content': 'unchanged instructions'}, {'role': 'user', 'content': [
+        {'type': 'text', 'text': 'same pixel coordinates and camera'},
+        {'type': 'image_url', 'image_url': {'url': url, 'detail': 'high'}},
+        {'type': 'image_url', 'image_url': {'url': url}}]}]
+    original = deepcopy(messages)
+    captured = []
+    class Opener:
+        def open(self, request, timeout):
+            captured.append(json.loads(request.data))
+            return BytesIO(json.dumps({'choices': [{'finish_reason': 'stop',
+                'message': {'role': 'assistant', 'content': 'local fixture'}}]}).encode())
+    client = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret',
+                        image_jpeg_quality=95, transport_dir=tmp_path/'wire')
+    client.opener = Opener()
+    for _ in range(2):client.complete(messages, [])
+    assert messages == original and client.last_request_metadata['image_count'] == 2
+    assert captured[0] == captured[1] and len(client._jpeg_cache) == 1
+    wire = captured[0]['messages']
+    assert wire[0] == original[0] and wire[1]['content'][0] == original[1]['content'][0]
+    for part in wire[1]['content'][1:]:
+        sent = part['image_url']['url']
+        assert sent.startswith('data:image/jpeg;base64,')
+        with Image.open(BytesIO(base64.b64decode(sent.split(',',1)[1]))) as picture:
+            assert picture.size == (32,32) and picture.format == 'JPEG'
+    assert wire[1]['content'][1]['image_url']['detail'] == 'high'
+    assert len(list((tmp_path/'wire/images').glob('*.jpg'))) == 1
+    records = [json.loads(s) for s in (tmp_path/'wire/requests.jsonl').read_text().splitlines()]
+    assert len(records) == 2 and records[0]['image_count'] == 2
+    assert 'unit-secret' not in json.dumps(records)
+    assert 'data:image' not in json.dumps(records)
+
+
+@pytest.mark.parametrize('quality', [0, 101, True, 95.5])
+def test_invalid_jpeg_transport_quality_is_rejected_before_network(quality):
+    with pytest.raises(ValueError, match='JPEG transport quality'):
+        ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret', image_jpeg_quality=quality)
 
 
 def test_run_files_create_read_list_and_explicit_overwrite(hub):

@@ -79,3 +79,39 @@ def test_metric_depth_world_frame():
     frame["depth_m"][1, 2] = np.nan
     with pytest.raises(ValueError):
         back_project(frame, [2, 1])
+
+
+def test_adapter_refreshes_post_integration_pose_before_callbacks(ik):
+    import mujoco
+    from types import SimpleNamespace
+    from sketchik.libero import LiberoRobot
+    model=ik.model;data=mujoco.MjData(model)
+    seed=np.array([0.,-.5,0.,-2.,0.,1.5,.7]);goal=seed+np.array([.02,0,0,0,0,0,0])
+    data.qpos[ik.q_index]=seed;mujoco.mj_forward(model,data)
+    old_position=data.site_xpos[ik.site_id].copy()
+    forward_calls=[]
+    def forward():
+        forward_calls.append(True);mujoco.mj_forward(model,data)
+    controller=SimpleNamespace(goal_qpos=seed.copy())
+    def integrate_without_final_forward(action):
+        data.qpos[ik.q_index]=action[:7]
+        controller.goal_qpos=action[:7].copy()
+        np.testing.assert_array_equal(data.site_xpos[ik.site_id],old_position)
+        return None,0.,False,{}
+    fingers=[model.joint(i).name for i in range(model.njnt) if 'finger_joint' in model.joint(i).name]
+    robot=LiberoRobot.__new__(LiberoRobot)
+    robot.env=SimpleNamespace(sim=SimpleNamespace(data=data,forward=forward,
+        model=SimpleNamespace(jnt_range=model.jnt_range,
+            get_joint_qpos_addr=lambda n:int(model.joint(n).qposadr[0]))),
+        step=integrate_without_final_forward,_check_success=lambda:False)
+    robot.robot=SimpleNamespace(arm_joint_indexes=[model.joint(model.joint(i).name).id for i in range(7)],
+        part_controllers={'right':controller},gripper={'right':SimpleNamespace(joints=fingers)})
+    robot.q_index=ik.q_index;robot.site_id=ik.site_id
+    robot.done=False;robot.steps=0;robot.max_steps=100;robot.gripper_command=-1.
+    callbacks=[];robot.on_step=callbacks.append
+    result=robot.step(goal)
+    expected_p,expected_r=ik.fk(goal)
+    assert len(forward_calls)==1 and len(callbacks)==1 and robot.steps==1
+    np.testing.assert_array_equal(data.qpos[ik.q_index],goal)
+    np.testing.assert_allclose(result['position'],expected_p,atol=1e-12)
+    np.testing.assert_allclose(Rotation.from_quat(callbacks[0]['quaternion_xyzw']).as_matrix(),expected_r,atol=1e-12)

@@ -119,6 +119,9 @@ class LiberoRobot:
         self.steps += 1
         self.done = bool(done)
         self.gripper_command = command
+        # Integration advances qpos beyond the last cached site/camera transforms.
+        # Refresh without advancing time before recording state or RGB-D.
+        self.env.sim.forward()
         # Verify the real controller received absolute angles without scaling/clipping.
         received = self.robot.part_controllers["right"].goal_qpos
         if not np.allclose(received, q, atol=1e-12, rtol=0):

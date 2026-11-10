@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 from datetime import datetime
 import json
 import os
@@ -14,7 +15,8 @@ import time
 from jsonschema import Draft202012Validator
 
 from .agent import ChatClient, load_settings, transcript_copy, ProviderError
-from .tools import obj, V3, STEPS, public, tool_schemas
+from .tools import obj, V3, STEPS, public, tool_schemas, ToolHub, PERCEPTION_TOOLS
+from .perception import SavedObservationRobot
 from .grasp_preview import request
 
 
@@ -37,14 +39,103 @@ def image_part(path):
     return {'type':'image_url','image_url':{'url':'data:image/png;base64,'+base64.b64encode(path.read_bytes()).decode()}}
 
 
-def generate_plan(observation, env_file, review_trial=None):
+def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_tool_calls=100):
+    """Allow read-only perception before submission; never dispatch robot motion."""
+    if min(max_turns, max_tool_calls) < 1:
+        raise ValueError('Planning budgets must be positive')
+    tools = hub.schemas + [submit_tool]
+    validators = {t['function']['name']: Draft202012Validator(t['function']['parameters']) for t in tools}
+    seen = set()
+    total_s = 0.
+    call_count = 0
+    for turn in range(1, max_turns + 1):
+        start = time.perf_counter()
+        response = client.complete(messages, tools)
+        elapsed = time.perf_counter() - start
+        total_s += elapsed
+        message = response['message']
+        calls = message.get('tool_calls') or []
+        if not calls:
+            raise ProviderError('No tool call or sketch submitted; no automatic API retry')
+        if call_count + len(calls) > max_tool_calls:
+            raise ProviderError('Grasp planning tool budget exhausted')
+        parsed = []
+        batch = set()
+        # Validate the entire batch before even invoking a read-only service.
+        for call in calls:
+            identity = call.get('id')
+            function = call.get('function', {})
+            name = function.get('name')
+            if call.get('type') != 'function' or not isinstance(identity, str) or not identity or identity in seen or identity in batch:
+                raise ProviderError('Malformed or duplicate tool call ID')
+            if name not in validators:
+                raise ProviderError('Unknown planning tool; motion is not exposed in this phase')
+            args = json.loads(function['arguments'], parse_constant=lambda s: (_ for _ in ()).throw(ValueError(s)))
+            validators[name].validate(args)
+            if name == 'submit_grasp_sketch' and args['source_step'] != hub.robot.steps:
+                raise ValueError('Stale sketch source_step')
+            batch.add(identity)
+            parsed.append((identity, name, args))
+        submissions = [v for v in parsed if v[1] == 'submit_grasp_sketch']
+        if len(submissions) > 1 or (submissions and parsed[-1][1] != 'submit_grasp_sketch'):
+            raise ProviderError('Submit at most one final sketch, after any read-only calls in the batch')
+        messages.append(message)
+        hub.emit({'event':'grasp_planning_response','round':turn,'wall_s':elapsed,
+                  'usage':response.get('usage'),'finish_reason':response.get('finish_reason'),
+                  'tool_names':[v[1] for v in parsed]})
+        pictures = []
+        for identity, name, args in parsed:
+            seen.add(identity)
+            call_count += 1
+            if name == 'submit_grasp_sketch':
+                messages.append({'role':'tool','tool_call_id':identity,
+                                 'content':json.dumps({'saved':True,'robot_actions':0})})
+                if pictures:
+                    messages.append({'role':'user','content':pictures})
+                return args, response, {'api_wall_s':total_s,'rounds':turn,'tool_calls':call_count}
+            result, images = hub.call(name, args)
+            messages.append({'role':'tool','tool_call_id':identity,'content':json.dumps(result,allow_nan=False)})
+            pictures.extend(images)
+        if pictures:
+            messages.append({'role':'user','content':pictures})
+    raise ProviderError('Grasp planning reply budget exhausted without a sketch')
+
+
+def restore_planning_images(messages, roots):
+    """Reload saved public RGBs when resuming a previous multi-tool review history."""
+    pictures = {}
+    for root in roots:
+        for path in root.rglob('*.png'):
+            if path.is_symlink():
+                continue
+            url = image_part(path)['image_url']['url']
+            pictures['saved-observation-image-sha256:' + hashlib.sha256(url.encode()).hexdigest()] = url
+    for message in messages:
+        if isinstance(message.get('content'), list):
+            for part in message['content']:
+                if part.get('type') == 'image_url':
+                    reference = part['image_url']['url']
+                    if reference not in pictures:
+                        raise ValueError('Saved planning image is missing; cannot silently omit history')
+                    part['image_url']['url'] = pictures[reference]
+    return messages
+
+
+def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max_tool_calls=100):
     root=Path(__file__).resolve().parents[2];run=root/'runs'/(datetime.now().strftime('%Y%m%dT%H%M%S')+'_grasp_trial');run.mkdir()
     settings=load_settings(env_file)
     client=ChatClient(settings.get('SKETCHIK_BASE_URL'),settings.get('SKETCHIK_MODEL'),settings.get('SKETCHIK_API_KEY'),settings.get('SKETCHIK_REASONING'),timeout=120)
     meta=json.loads((observation/'metadata.json').read_text());state=public(json.loads((observation/'initial_state.json').read_text()))
     system=(root/'prompts/grasp_trial.md').read_text();(run/'system_prompt.md').write_text(system)
     tool={'type':'function','function':{'name':'submit_grasp_sketch','description':'Save a symbolic current-grasp sketch; no motion or candidate selection yet.','parameters':SKETCH_SCHEMA}}
-    content=[{'type':'text','text':json.dumps({'task':meta['task_language'],'source_step':state['step'],'robot_state':state,'phase':'Plan current grasp only, grounded poses are filled later.'})}]
+    def emit(record):
+        with (run/'planning_events.jsonl').open('a') as stream:
+            stream.write(json.dumps(record,allow_nan=False)+'\n')
+    hub=ToolHub(SavedObservationRobot(observation),None,run,emit,allowed_tools=PERCEPTION_TOOLS)
+    initial=hub.observe()[0]
+    content=[{'type':'text','text':json.dumps({'task':meta['task_language'],'source_step':state['step'],
+        'observation_id':initial['observation_id'],'robot_state':initial['state'],
+        'static_observation':True,'phase':'Read-only current grasp planning; grounded poses are filled later.'})}]
     for camera in ['agentview','robot0_eye_in_hand']:
         content.extend([{'type':'text','text':f'Current calibrated camera: {camera}, 1024x1024'},image_part(observation/(camera+'.png'))])
     messages=[{'role':'system','content':system},{'role':'user','content':content}]
@@ -56,8 +147,8 @@ def generate_plan(observation, env_file, review_trial=None):
         for camera in ['agentview','robot0_eye_in_hand']:
             old_content.extend([{'type':'text','text':f'Previous initial camera: {camera}'},image_part(old_observation/(camera+'.png'))])
         old_reply=json.loads((previous/'high_level_response.json').read_text())['message']
-        calls=old_reply.get('tool_calls') or []
-        if len(calls)!=1:raise ValueError('Review requires a single saved actual sketch submission')
+        calls=[c for c in old_reply.get('tool_calls',[]) if c.get('function',{}).get('name')=='submit_grasp_sketch']
+        if len(calls)!=1:raise ValueError('Review requires a saved actual sketch submission')
         selected=json.loads((previous/'selection_result.json').read_text())
         timing=json.loads((previous/'full_run_timing.json').read_text());execution=Path(timing['execution_run'])
         executed=json.loads((execution/'execution_summary.json').read_text())
@@ -73,18 +164,26 @@ def generate_plan(observation, env_file, review_trial=None):
             {'role':'tool','tool_call_id':calls[0]['id'],'content':json.dumps(public(receipt))},
             {'role':'user','content':review_content},
             {'role':'user','content':[{'type':'text','text':'NEW RESET CURRENT OBSERVATION FOR THE NEXT GRASP:'},*content]}]
+        if (previous/'planning_transcript.json').exists():
+            history=restore_planning_images(json.loads((previous/'planning_transcript.json').read_text()),
+                [old_observation,previous/'observations',previous/'planning_images'])
+            receipts=[m for m in history if m.get('role')=='tool' and m.get('tool_call_id')==calls[0]['id']]
+            if len(receipts)!=1:
+                raise ValueError('Previous transcript is missing its actual sketch submission receipt')
+            history[0]={'role':'system','content':system}
+            receipts[0]['content']=json.dumps(public(receipt))
+            messages=history+messages[-2:]
         (run/'review_source.json').write_text(json.dumps({'previous_trial':str(previous),'previous_execution':str(execution),
             'same_model':client.model==previous_cfg['provider']['model'],'user_requested':True},indent=2))
     (run/'planning_input.json').write_text(json.dumps(transcript_copy(messages),indent=2))
     config={'observation':str(observation.resolve()),'provider':client.metadata,'robot_actions':0}
     (run/'config.json').write_text(json.dumps(config,indent=2));(run/'planning_tool.json').write_text(json.dumps(tool,indent=2))
+    (run/'planning_tools.json').write_text(json.dumps(hub.schemas+[tool],indent=2))
     start=time.perf_counter()
     try:
-        response=client.complete(messages,[tool]);elapsed=time.perf_counter()-start
-        (run/'high_level_response.json').write_text(json.dumps({'wall_s':elapsed,**response},indent=2))
-        calls=response['message'].get('tool_calls') or []
-        if len(calls)!=1 or calls[0].get('function',{}).get('name')!='submit_grasp_sketch':raise ProviderError('Expected one current-grasp sketch submission; no automatic retry')
-        sketch=json.loads(calls[0]['function']['arguments'])
+        sketch,response,timing=planning_dialogue(client,hub,messages,tool,max_turns=max_turns,max_tool_calls=max_tool_calls)
+        elapsed=timing['api_wall_s']
+        (run/'high_level_response.json').write_text(json.dumps({'wall_s':elapsed,'planning':timing,**response},indent=2))
         Draft202012Validator(SKETCH_SCHEMA).validate(sketch)
         if sketch['source_step']!=state['step']:raise ValueError('Stale sketch source_step')
         if review_trial is not None and 'grasp_review' not in sketch:raise ValueError('Requested grasp review missing from submission')
@@ -93,6 +192,18 @@ def generate_plan(observation, env_file, review_trial=None):
     except Exception as e:
         (run/'planning_error.json').write_text(json.dumps({'type':type(e).__name__,'error':str(e),'wall_s':time.perf_counter()-start,'automatic_retry':False},indent=2))
         print(json.dumps({'trial':str(run),'planning_error':type(e).__name__}),flush=True);raise
+    finally:
+        # Keep the exact crop/overlay/history pixels needed to restore this dialogue.
+        folder=run/'planning_images';folder.mkdir(exist_ok=True)
+        for message in messages:
+            if isinstance(message.get('content'),list):
+                for part in message['content']:
+                    if part.get('type')=='image_url':
+                        url=part['image_url']['url']
+                        if url.startswith('data:image/png;base64,'):
+                            identity=hashlib.sha256(url.encode()).hexdigest()
+                            (folder/(identity+'.png')).write_bytes(base64.b64decode(url.split(',',1)[1],validate=True))
+        (run/'planning_transcript.json').write_text(json.dumps(transcript_copy(messages),indent=2))
     return run
 
 
@@ -312,11 +423,12 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     sub=parser.add_subparsers(dest='phase',required=True)
     p=sub.add_parser('plan');p.add_argument('--observation',type=Path,required=True);p.add_argument('--env-file',type=Path,required=True);p.add_argument('--review-trial',type=Path)
+    p.add_argument('--max-turns',type=int,default=40);p.add_argument('--max-tool-calls',type=int,default=100)
     p=sub.add_parser('select');p.add_argument('--trial',type=Path,required=True);p.add_argument('--gpu-uuid',required=True);p.add_argument('--peer-pid',type=int,action='append',default=[]);p.add_argument('--perception-dir',type=Path)
     p=sub.add_parser('execute');p.add_argument('--trial',type=Path,required=True);p.add_argument('--gpu-uuid',required=True)
     p.add_argument('--peer-pid',type=int,action='append',default=[]);p.add_argument('--lift-test-m',type=float,default=0.)
     args=parser.parse_args()
-    if args.phase=='plan':generate_plan(args.observation,args.env_file,args.review_trial)
+    if args.phase=='plan':generate_plan(args.observation,args.env_file,args.review_trial,max_turns=args.max_turns,max_tool_calls=args.max_tool_calls)
     elif args.phase=='select':run_selection(args.trial,args.gpu_uuid,args.peer_pid,args.perception_dir)
     else:execute_selected(args.trial,args.gpu_uuid,args.peer_pid,args.lift_test_m)
 

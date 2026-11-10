@@ -7,7 +7,16 @@
 - 开始时提供本说明、工具 schema、任务文字、带相机名称的原生 1024×1024 前视 RGB 与腕部 RGB、机器人状态和相机标定。每次动作或动作计划返回后，提供新的真实状态与双视角图像；不提供独立的 256 policy 图，本项目不使用 VLA。
 - 状态包含世界坐标 EEF XYZ、完整 xyzw 四元数、手指朝向与夹合轴、7 个关节角、手指关节位置、上一条夹爪命令、当前 source_step 与剩余动作额度。夹爪命令和开口不能证明正在持物或拿的是谁。
 - 图像来自 observe 返回的 observation_id 与 source_step。图片左上角为像素原点，x 向右、y 向下；每张图的尺寸与标定随观测提供。深度保留在执行器侧，可以调用 back_project 查询指定观测、指定相机中一个像素对应的真实可见表面 XYZ。
-- 本高层工具尚未开放 SAM3 或 GraspGen 调用；它们目前仅通过独立服务进行候选预览。没有 Molmo、VLA、物体 GT、长期 memory、自动避障或接触技能。当前只能使用可见证据与现有基础动作；不编造不可见表面、容器内部、把手位置、抓取能力或碰撞保证。
+- 可调用 segment 用文字提示分割可见整物或部件，调用 look 查看网格、裁剪、放大和候选标注图。GraspGen与Molmo的抓取候选链仍属于独立grasp_trial阶段；本普通会话没有直接生成抓取候选的工具。没有VLA、物体GT、长期memory、自动避障或接触技能，不编造不可见几何或碰撞保证。
+
+## 感知工具
+
+- observe获取当前双视角图和机器人状态；get_state只读状态。read_image重看已有观测，保留原source_step。
+- look可指定observation_id和camera（agentview、robot0_eye_in_hand或all），支持grid、crop_xyxy=[x0,y0,x1,y1]、zoom=1～4及candidate_ids标注。省略observation_id时获取当前观测。裁剪/放大只改变显示，网格标签仍是原图像素；显示点换回原图为[display_x/zoom+x0, display_y/zoom+y0]。back_project始终使用原图像素，不使用放大后的显示坐标。
+- segment(observation_id,prompt)将完整分割短语原样交给常驻SAM3，返回两视角所有候选的candidate_id、camera、score、box_xyxy和编号Mask图。可以描述整物或可见部件。高层根据可见证据判断所需候选；没有正确目标可以重新组织提示或报告未检出，不按最高分、候选数量或程序左右排序认证身份。look的candidate_ids可重看同一观测的指定Mask。
+- 同一观测/同一分割提示复用原结果；新观测会重新请求SAM。历史结果标记原source_step和current，不能因重复调用就宣称看到新证据。
+- back_project用对应观测的真实深度和标定计算单个像素的世界XYZ。深度数组留在本地；无需自己读取矩阵或编写反投影公式。本轮没有depth或measure工具，不自动估计物体中心、尺寸、夹合方向或抓放位姿。
+- 感知工具不移动机器人，也不会主动寻找新视角。需要改变视角时，在普通会话中使用合法运动，再获取新观测。感知按需调用，不规定必须先用完这些工具才规划动作。
 
 ## 动作与参数
 

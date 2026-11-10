@@ -4,6 +4,7 @@ from __future__ import annotations
 import base64
 from io import BytesIO
 import json
+import os
 from pathlib import Path
 import time
 
@@ -55,6 +56,16 @@ def tool_schemas():
     definitions = {
         "observe": ("Get current labelled agentview and wrist RGB, robot state, tool axes, remaining action budget and calibration; depth stays local for back_project.", obj({})),
         "get_state": ("Read current robot state without rendering images or advancing physics.", obj({})),
+        "look": ("View current or saved RGB with optional pixel grid, crop, zoom and candidate masks. Grid labels retain original pixels; use those original pixels with back_project. Does not move the camera.", obj({
+            "observation_id": {"type": "string"},
+            "camera": {"enum": ["all", "agentview", "robot0_eye_in_hand"]},
+            "grid": {"type": "boolean"},
+            "crop_xyxy": {"type": "array", "items": {"type": "integer"}, "minItems": 4, "maxItems": 4},
+            "zoom": {"type": "number", "minimum": 1, "maximum": 4},
+            "candidate_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": True}})),
+        "segment": ("Text-prompt SAM3 segmentation of both saved calibrated views, including whole objects or visible parts. Returns ALL candidate IDs/scores/boxes and numbered mask images; no highest-score selection. Same observation/prompt is cached. No robot movement.", obj({
+            "observation_id": {"type": "string"}, "prompt": {"type": "string", "minLength": 1, "maxLength": 2048}},
+            ["observation_id", "prompt"])),
         "read_text_file": ("Read project instructions/examples, your current-run workspace files, or saved public observation JSON. Paths are relative to list_dir roots; no raw simulator/credential files.", obj({
             "path": {"type": "string", "minLength": 1},
             "max_chars": {"type": "integer", "minimum": 1, "maximum": 40000}}, ["path"])),
@@ -84,6 +95,9 @@ def tool_schemas():
             for n,(d,s) in definitions.items()]
 
 
+PERCEPTION_TOOLS = frozenset(("observe", "get_state", "read_image", "back_project", "look", "segment"))
+
+
 def public(value):
     """Official success is evaluation-only, not an oracle in the planner context."""
     if isinstance(value, dict):
@@ -98,16 +112,19 @@ def public(value):
 
 
 class ToolHub:
-    def __init__(self, robot, executor, run: Path, emit, project_root=None):
+    def __init__(self, robot, executor, run: Path, emit, project_root=None,
+                 sam_url=None, sam_request=None, allowed_tools=None):
         self.robot, self.executor, self.run, self.emit = robot, executor, run, emit
         self.project_root = Path(project_root or Path(__file__).resolve().parents[2]).resolve()
         self.workspace = self.run / "workspace"
         self.workspace.mkdir(exist_ok=True)
-        self.schemas = tool_schemas()
+        self.schemas = [s for s in tool_schemas() if allowed_tools is None or s["function"]["name"] in allowed_tools]
         self.validators = {t["function"]["name"]: Draft202012Validator(t["function"]["parameters"]) for t in self.schemas}
         self.observations = {}
         self.finished = None
         self.fatal = False
+        from .perception import PerceptionTools
+        self.vision = PerceptionTools(self, sam_url or os.environ.get("SKETCHIK_SAM3_URL", "http://127.0.0.1:18761"), sam_request)
 
     def file_path(self, name, write=False):
         """Only public docs/examples, observation artifacts, and this run's scratch files.
@@ -163,7 +180,8 @@ class ToolHub:
         state = public(self.robot.state())
         r = Rotation.from_quat(state["quaternion_xyzw"]).as_matrix()
         state["tool_axes_world"] = {"finger_direction": r[:,2].tolist(), "closing_axis": r[:,0].tolist()}
-        state["remaining_actions"] = self.robot.max_steps - self.robot.steps
+        state["remaining_actions"] = (None if getattr(self.robot, "static_observation", False)
+                                      else self.robot.max_steps - self.robot.steps)
         return state
 
     def observe(self):
@@ -174,7 +192,8 @@ class ToolHub:
         folder.mkdir(parents=True)
         self.observations[token] = frames
         description = {"observation_id": token, "source_step": state["step"], "state": state,
-                       "task_language": self.robot.metadata["task_language"], "cameras": []}
+                       "task_language": self.robot.metadata["task_language"], "cameras": [],
+                       "static_observation": bool(getattr(self.robot, "static_observation", False))}
         parts = []
         for camera, frame in frames.items():
             Image.fromarray(frame["rgb"]).save(folder / (camera+".png"))
@@ -213,6 +232,8 @@ class ToolHub:
                 value, images = self.observe()
             elif name == "get_state":
                 value = self.state()
+            elif name in ("look", "segment"):
+                value, images = getattr(self.vision, name)(**arguments)
             elif name == "read_text_file":
                 path = self.file_path(arguments["path"])
                 if path.suffix.lower() not in (".md", ".txt", ".json", ".jsonl", ".yaml", ".yml", ".csv"):

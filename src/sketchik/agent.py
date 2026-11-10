@@ -171,7 +171,7 @@ def run_session(hub: ToolHub, client, system, max_turns=40, max_tool_calls=100):
                 result, images = hub.call(name, arguments)
                 messages.append({"role": "tool", "tool_call_id": call_id, "content": json.dumps(result, allow_nan=False)})
                 if images:
-                    fresh_images = images
+                    fresh_images.extend(images)
             # A user multimodal message follows tool replies; no image arrays in string-only tool content.
             if fresh_images:
                 messages.append({"role": "user", "content": fresh_images})

@@ -135,7 +135,11 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 
 AGENTS.md 面向修改代码的 Codex，不当作机器人高层提示词。在线模型的名称、URL、reasoning 设置均来自启动参数/配置；没有偷偷选定默认模型，暂未复制旧项目的 API 密钥或经验。
 
-高层共有 **16 个工具**：7 个基础动作，`observe`、`get_state`、`back_project`、`execute_plan`、`finish`，以及 `read_text_file`、`write_text_file`、`list_dir`、`read_image`。动作底层仍是之前的七个入口；没有新增一种运动控制器。
+普通高层会话共有 **18 个工具**：7 个基础动作，`observe`、`get_state`、`back_project`、`look`、`segment`、`execute_plan`、`finish`，以及 `read_text_file`、`write_text_file`、`list_dir`、`read_image`。动作底层仍是之前的七个入口；没有新增运动控制器。
+
+`look` 支持当前/历史双视角、原图像素网格、`crop_xyxy`裁剪、1～4倍显示放大和SAM候选标注。显示像素换回原图为`[x/zoom+x0, y/zoom+y0]`；`back_project`始终用原图像素和对应的`observation_id`。`segment(observation_id,prompt)`调用常驻SAM3返回全部候选ID、评分、框和编号Mask图，可分整物或可见部件，不取最高分、不做左右排序。相同观测和提示缓存复用，新观测重新查询。服务地址默认`http://127.0.0.1:18761`，可通过进程环境变量`SKETCHIK_SAM3_URL`指定；工具只连接已启动的服务，不自动启动或重载GPU模型。
+
+本轮不开放`depth`或`measure`，不新增中心/尺寸/建议夹合方向计算。深度和标定由程序内部用于像素反投影，模型无需自己写几何公式。候选的分割分数、唯一候选和合法XYZ都不认证对象身份、抓取或碰撞安全。
 
 文件工具可读 README.md、changes.md、prompts/、examples/ 和本轮公开 observations/，临时计划只能写入本轮 workspace/，已有文件覆盖需显式 overwrite=true。不会开放 API 密钥、评测结果 GT 或其他项目。read_image 使用 observation_id＋camera 读取本轮已有历史 RGB，真实图像重新进入模型上下文，保留原始拍摄步数；不重新拍照、不推进物理。这些是普通运行工具，不是长期经验/memory 系统。
 
@@ -339,7 +343,7 @@ PYTHONPATH=src .venv-grasp/bin/python -m sketchik.grasp_trial select \
   --peer-pid <SAM_PID> --peer-pid <GraspGen_PID> --peer-pid <Molmo_PID>
 ```
 
-- `prompts/grasp_trial.md` 是高层真实输入说明。高层确定当前应抓的对象、想抓的部位/方式，并提交 `submit_grasp_sketch`：例如 `move_to(selected_grasp.pregrasp)`、开爪、`move_to(selected_grasp.grasp)`、闭爪。pregrasp沿候选自身接近轴后退，不是固定世界上方。顺序由高层决定，工具不会强制上述顺序。原始API回复、完整实际提示、usage和墙钟时间均留在run内。
+- `prompts/grasp_trial.md` 是高层真实输入说明。现在同样开放`observe/get_state/read_image/look/segment/back_project`六个只读感知工具，可多轮检查后提交`submit_grasp_sketch`；不强制调用感知。输入是保存的静态观测，`observe`不会产生新视角或移动机器人。默认上限40轮/100次工具，`plan --max-turns/--max-tool-calls`可调整。高层确定当前应抓对象、部位/方式，提交原有动作草图；位姿仍由后续GraspGen链绑定，当前查询的Mask不会隐式替换后续目标。原始API回复、完整说明、逐次工具回执/耗时、实际图片和会话历史保存在run中。
 - 身份描述用简洁的类别、外观及必要方位/参照；不混入抓法推理。SAM3接收高层显式`sam_prompt`（缺省使用target_description），保留类别和必要外观/部件/方位线索；Mask选择Molmo同时接收完整`target_description`和实际`sam_prompt`，分别用于辨认所属物体及所需分割范围。高层可自行选择整物或可见部件；部件Mask仅代表局部可见几何，GraspGen实际接收该Mask点云，其余场景保留用于现有邻近筛选。这与旧项目将整段描述再拼接给SAM的规则不同，实际输入分别保存。SAM3保留两图全部有效Mask；`prompts/mask_selector.md`让Molmo选对应同一目标的候选，每相机最多一个，可拒绝唯一候选或两个都拒绝。程序不做左右排序，不强迫最高分。选择是模型判断，不能认证跨视角身份。
 - 选中Mask的所有有效RGB-D点进入GraspGen；可见点不补隐藏几何。原始128候选保持完整，按已有场景/IK筛选保存每项拒绝原因。每个保留候选都产生一张独立的双视角实体夹爪照片叠加图，原始编号不重排。`--stills-only`跳过动画，没有为模型选择生成无用视频。
 - `prompts/grasp_selector.md` 是独立的**抓取位姿选择说明**，不是Mask说明。常驻Molmo看原始双图、全部保留候选图和高层grasp_preference，返回原编号或null/NONE，必须给可见理由。超过14候选时全部分组展示，再比较各组选择；不暗中只给最高分。不是训练过的抓握评估器，可能选错或拒绝所有候选，真实能力需由实验验证。

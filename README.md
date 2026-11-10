@@ -333,15 +333,27 @@ USE_FLAX=0 USE_TF=0 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src \
 
 ## 双 Agent 放置预分析小试验
 
-`python -m sketchik.anticipate_trial run --observation <保存的初始观测> --env-file .runtime/agent.env --gpu-uuid <UUID> --peer-pid <SAM_PID> --peer-pid <Molmo_PID> --peer-pid <GraspGen_PID>`让A只看自动提供的图片、任务与状态，提交符号抓取草图；A不调用感知工具，历史由程序自动打包交给B。A交稿后B与抓取链并行：原SAM3/Molmo/GraspGen继续生成/选择抓取位姿，B负责查询历史图并准备后续放置参考。实抓仍需严格重置匹配。可选`--lift-test-m 0.05`仍是单独记录的抬升验收，不改模型原计划。
+`python -m sketchik.anticipate_trial run --observation <保存的初始观测> --env-file .runtime/agent.env --gpu-uuid <UUID> --peer-pid <SAM_PID> --peer-pid <Molmo_PID> --peer-pid <GraspGen_PID> --history-interval-s 1`先运行A的真实初始观察，再提交符号抓取草图。角色分工如下：
 
-B使用`prompts/placement_anticipation.md`和六个只读感知工具；历史图片及相机/步数完整保留，所有状态和几何查询仅来自抓取前快照，不能冒充实时观察。B输出可能的放置/支撑/入口/接近参考像素及用途，程序用同一保存RGB-D反投影为世界XYZ，保存在`prepared_geometry.json`，不能由B猜数。没有可辨认点可返回空；无效深度/越界点单列拒绝。语义用途仍是模型判断，点不等于可释放位姿。参考供以后执行到放置时补全A草图；当前A入口仍只有抓取草图，实际放置步骤、结合抓后状态换算EEF及执行绑定尚未接通。B不读抓取结果、不改变Molmo抓取选择、不发送动作；没有新增主动观察移动。
+| 角色 | 当前实际职责 | 实际说明 |
+| --- | --- | --- |
+| A | 看任务和双视角图、决定抓取意图；可以适量分割/反投影辅助空爪观察移动，主要取得新视角和保存历史；不在同一画面反复求精细几何。看得足够时可直接交草图，没有固定次数或路线 | `prompts/initial_observation.md`，拼接`grasp_trial.md`公共抓取说明 |
+| 执行器与常驻模型 | SAM3生成Mask候选，Molmo选Mask；GraspGen生成抓取位姿，经原有筛选/渲染后Molmo选位姿或NONE，IK执行 | `prompts/mask_selector.md`、`prompts/grasp_selector.md`及实际工具schema |
+| B | A交稿后，与抓取链并行；只读A交接的历史，详细查询后续放置的支撑/入口/接近参考；不接管动作、不替Molmo选抓法，也看不到实时抓取结果 | `prompts/placement_anticipation.md` |
+
+A开放六个感知工具`observe/get_state/read_image/look/segment/back_project`和`move_to/move_pose/move_relative/move_waypoints/wait`。观察移动保持空爪/张开，不开放抓取开合工具；没有自动避障或固定观察动作。最终`submit_grasp_sketch`仍提交位姿引用，由后续候选链绑定，和观察时直接调用的数值运动参数不同。B只有六个只读感知工具；读取的是历史，不会因调用`observe`得到实时图。
+
+历史默认**每20个物理步，即1秒仿真时间**保存一组原生1024双视角RGB-D，另存初始图和每次动作结束/失败的关键帧。`--history-interval-s`可调整，按20Hz量化到物理步。每组保存自己的`observation_id/source_step/标定`，全部周期帧打包给B，不静默丢弃；深度留在本地供感知工具查询。API等待不推进物理，不重复存同一静止画面，也不因此触发模型调用。实际间隔、周期帧ID和控制步数保存在A的`history_manifest.json`，图像及标定在`observations/`，实际A输入/工具/说明单独保存可核对。
+
+当前候选诊断在A观察后关闭环境；候选选定后，新环境重放记录的机器人命令，再严格核对当前RGB-D、标定和状态后实抓。重放不是第二次让A决策，也不恢复物体GT；它是当前诊断入口的额外开销，不能混作正式在线延迟。可选`--lift-test-m 0.05`仍是单独记录的抬升验收，不改模型原计划。
+
+B输出可能的放置/支撑/入口/接近参考像素及用途，程序用同一保存RGB-D反投影为世界XYZ，保存在`prepared_geometry.json`，不能由B猜数。没有可辨认点可返回空；无效深度/越界点单列拒绝。语义用途仍是模型判断，点不等于可释放位姿。参考供以后执行到放置时补全A草图；当前A入口仍只有抓取草图，实际放置步骤、结合抓后状态换算EEF及执行绑定尚未接通。**本节的A主动观察是最新分工；下列较早记录分别按当时权限保存，不能当成已实测当前分工。**
 
 本小试验默认每个Agent最多12轮/60次工具，可用`--max-turns/--max-tool-calls`调整，不影响普通会话上限。API失败不自动重问，不因B失败重放抓取。结果目录`*_two_agent_trial`关联A原试验、B完整历史与真实抓取视频；分别记录B请求开始/结束和物理动作时间，报告实际时间交叠。交叠时长不是已证明的提速，也不表示放置已解决。没有候选时不强选、不启动实抓。
 
-首轮旧分工的真实task9记录：`runs/20261110T144024_two_agent_trial/review.json`。当时错误地让A调用感知，A用32次反投影后提交把手抓取；128候选保留9个，Molmo选择119号，实图确认空抓。B用1次API/122.14秒完成文字预分析，与物理步进窗口交叠21.26秒。该轮没有真实放置，且早于当前“A只画草图、B准备参考点”的澄清，不能当作修正分工的验收。
+首轮旧分工的真实task9记录：`runs/20261110T144024_two_agent_trial/review.json`。A用32次反投影后提交把手抓取；128候选保留9个，Molmo选择119号，实图确认空抓。B用1次API/122.14秒完成文字预分析，与物理步进窗口交叠21.26秒。该轮没有真实放置，也没有当前的主动观察采样。
 
-修正分工的真实记录：`runs/20261110T151011_two_agent_trial/review.json`。A只调用提交，一轮34.51秒，零感知查询。B保存14个表面坐标查询，但第8次API连接失败，未提交最终参考集合，不将零散查询当成放置点缓存已验收。Molmo选41号后，当前到预抓点路径IK失败，抓取动作0；未执行放置。B与候选准备流程交叠126.40秒，实际物理交叠0。56项CPU测试通过与这些真实失败分别记录，不自动重试付费请求或放宽控制阈值。
+中间仅符号A版本的真实记录：`runs/20261110T151011_two_agent_trial/review.json`。A只调用提交，一轮34.51秒，零感知查询。B保存14个表面坐标查询，但第8次API连接失败，未提交最终参考集合，不将零散查询当成放置点缓存已验收。Molmo选41号后，当前到预抓点路径IK失败，抓取动作0；未执行放置。B与候选准备流程交叠126.40秒，实际物理交叠0。该版没有给A运动权限，现已由上面的主动观察入口替代；其56项CPU结果不替代当前真实验收。不自动重试付费请求或放宽控制阈值。
 
 ## 当前抓取草图 → 常驻 Molmo 位姿选择试验
 

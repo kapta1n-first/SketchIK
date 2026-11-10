@@ -46,6 +46,47 @@ class SavedObservationRobot:
                     "convention": "top-left pixels; camera x right, y down, z forward; metric depth"}
 
 
+class ObservationHistory:
+    """Record controls and periodic RGB-D during motion, without calling an LLM."""
+    def __init__(self, robot, run, emit, interval_s=1., video=None):
+        if not np.isfinite(interval_s) or interval_s < .05:
+            raise ValueError('History interval must be at least one 20Hz simulation step')
+        self.robot, self.run, self.emit, self.video = robot, run, emit, video
+        self.interval_steps = max(1, round(interval_s * 20))
+        self.interval_s = self.interval_steps / 20
+        self.hub = None
+        self.next_step = None
+        self.periodic_ids = []
+        self.control_count = 0
+        self.stream = (run / 'observation_controls.jsonl').open('x', buffering=1)
+
+    def attach(self, hub):
+        self.hub = hub
+        self.next_step = self.robot.steps + self.interval_steps
+
+    def on_step(self, state):
+        self.control_count += 1
+        record = {'source_step': state['step'], 'joint_target': state['joint_target'],
+                  'gripper_command': state['gripper_command']}
+        self.stream.write(json.dumps(record, allow_nan=False) + '\n')
+        if self.video is not None:
+            self.video.append_data(self.robot.camera('agentview')['rgb'])
+        if self.hub is not None and state['step'] >= self.next_step:
+            observation, _ = self.hub.observe()
+            self.periodic_ids.append(observation['observation_id'])
+            self.emit({'event': 'periodic_history_saved', 'observation_id': observation['observation_id'],
+                       'source_step': state['step'], 'interval_simulation_s': self.interval_s})
+            self.next_step = state['step'] + self.interval_steps
+
+    def close(self):
+        self.stream.close()
+        manifest = {'interval_simulation_s': self.interval_s, 'periodic_observation_ids': self.periodic_ids,
+                    'recorded_control_steps': self.control_count,
+                    'keyframes': 'Initial image and each completed/failed action are also saved by ToolHub.',
+                    'sampling_clock': '20Hz physics steps; no captures during API waiting without physics'}
+        (self.run / 'history_manifest.json').write_text(json.dumps(manifest, indent=2))
+
+
 class PerceptionTools:
     def __init__(self, hub, sam_url, sam_request=None):
         self.hub, self.sam_url = hub, sam_url.rstrip("/")

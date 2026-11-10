@@ -15,7 +15,7 @@ import numpy as np
 from PIL import Image
 
 from .agent import ChatClient, load_settings, transcript_copy
-from .grasp_trial import generate_plan, run_selection, execute_selected, planning_dialogue, restore_planning_images
+from .grasp_trial import run_selection, execute_selected, planning_dialogue, restore_planning_images, image_part, save_planning_history
 from .perception import SavedObservationRobot
 from .libero import back_project
 from .tools import ToolHub, PERCEPTION_TOOLS, obj
@@ -80,8 +80,8 @@ def restore_handoff(trial, run, emit, *, sam_request=None):
     for folder in sorted((run / 'observations').iterdir()):
         meta = json.loads((folder / 'observation.json').read_text())
         step = meta['source_step']
-        if step != hub.robot.steps:
-            raise ValueError('This diagnostic expects the static pregrasp history, not a different live state')
+        if not 0 <= step <= hub.robot.steps:
+            raise ValueError('Historical observation is from after the final handoff state')
         frames = {}
         for camera in hub.robot.cameras:
             with np.load(folder / (camera + '.npz')) as data:
@@ -104,6 +104,18 @@ def restore_handoff(trial, run, emit, *, sam_request=None):
             k: record[k] for k in ('candidate_ids', 'sam_client_wall_s', 'sam_inference_wall_s', 'sam_model_pid')}
     messages = restore_planning_images(json.loads((trial / 'planning_transcript.json').read_text()),
                                       [source, trial / 'observations', trial / 'planning_images'])
+    manifest_file=trial/'history_manifest.json'
+    if manifest_file.exists():
+        manifest=json.loads(manifest_file.read_text())
+        parts=[{'type':'text','text':'Additional historical frames automatically saved during earlier A observation motions. Each source_step is the actual capture time, not the current live state. All periodic frames are included.'}]
+        for identity in manifest['periodic_observation_ids']:
+            frames=hub.vision.frames(identity)
+            for camera in hub.robot.cameras:
+                frame=frames[camera]
+                parts.extend([{'type':'text','text':json.dumps({'observation_id':identity,'source_step':frame['step'],
+                    'camera':camera,'historical_only':True,'capture_reason':'automatic_periodic_history'})},
+                    image_part(run/'observations'/identity/(camera+'.png'))])
+        if manifest['periodic_observation_ids']:messages.append({'role':'user','content':parts})
     return hub, messages
 
 
@@ -192,20 +204,8 @@ def analyse(trial, run, env_file, max_turns=12, max_tool_calls=60):
         emit({'event': 'b_failed', 'error_type': type(exc).__name__})
         raise
     finally:
-        # Save all actual new crop/overlay images as well as the inherited history.
-        import base64
-        import hashlib
-        folder = run / 'planning_images'; folder.mkdir(exist_ok=True)
-        for message in messages:
-            if not isinstance(message.get('content'), list):
-                continue
-            for part in message['content']:
-                if part.get('type') == 'image_url':
-                    url = part['image_url']['url']
-                    if url.startswith('data:image/png;base64,'):
-                        (folder / (hashlib.sha256(url.encode()).hexdigest() + '.png')).write_bytes(
-                            base64.b64decode(url.split(',', 1)[1], validate=True))
-        (run / 'transcript.json').write_text(json.dumps(transcript_copy(messages), indent=2))
+        save_planning_history(run,messages)
+        (run/'transcript.json').write_text(json.dumps(transcript_copy(messages),indent=2))
 
 
 def overlap_report(execution, b_run):
@@ -239,9 +239,18 @@ def run_trial(args):
     trial, execution, child, output = None, None, None, None
     try:
         emit({'event': 'a_started'})
-        trial = generate_plan(args.observation.resolve(), args.env_file, allow_perception=False,
-            max_turns=args.max_turns, max_tool_calls=args.max_tool_calls,
-            additional_instructions='本次A的历史图片由程序自动打包，B负责后续放置参考几何，Molmo负责抓取候选选择。你只提交当前符号抓取草图，不做感知工具查询。')
+        trial=run/'agent_a'
+        command=[sys.executable,'-m','sketchik.grasp_trial','observe-plan',
+            '--source-observation',str(args.observation.resolve()),'--output-run',str(trial),
+            '--env-file',str(args.env_file.resolve()),'--gpu-uuid',args.gpu_uuid,
+            '--history-interval-s',str(args.history_interval_s),'--max-turns',str(args.max_turns),
+            '--max-tool-calls',str(args.max_tool_calls)]
+        for pid in args.peer_pid:command+=['--peer-pid',str(pid)]
+        with (run/'agent_a_console.log').open('x') as stream:
+            result=subprocess.run(command,cwd=root,env={**os.environ,'PYTHONPATH':str(root/'src')},
+                                  stdout=stream,stderr=subprocess.STDOUT)
+        if result.returncode or not (trial/'sketch.json').exists():
+            raise RuntimeError('A observation/planning failed; see agent_a_console.log and saved history')
         (run / 'agent_a.json').write_text(json.dumps({'trial': str(trial)}, indent=2))
         emit({'event': 'a_sketch_saved', 'trial': str(trial)})
         output = (run / 'agent_b_console.log').open('w')
@@ -297,6 +306,7 @@ def main():
     p.add_argument('--gpu-uuid', required=True)
     p.add_argument('--peer-pid', type=int, action='append', default=[])
     p.add_argument('--lift-test-m', type=float, default=0.)
+    p.add_argument('--history-interval-s', type=float, default=1.)
     b = sub.add_parser('analyse')
     b.add_argument('--trial', type=Path, required=True)
     b.add_argument('--output', type=Path, required=True)

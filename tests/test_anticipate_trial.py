@@ -8,7 +8,8 @@ from jsonschema import Draft202012Validator
 
 from sketchik.agent import ProviderError, transcript_copy
 from sketchik.anticipate_trial import ANALYSIS_SCHEMA, restore_handoff, overlap_report, prepare_geometry
-from sketchik.grasp_trial import SKETCH_SCHEMA, planning_dialogue, planning_instructions
+from sketchik.grasp_trial import SKETCH_SCHEMA, planning_dialogue, planning_instructions, replay_observation_prelude
+from sketchik.perception import ObservationHistory
 from sketchik.tools import ToolHub, PERCEPTION_TOOLS
 from test_agent import FakeRobot, call
 from test_grasp_trial import sketch
@@ -157,3 +158,133 @@ def test_b_reference_xyz_comes_from_real_saved_depth_and_is_not_a_release_pose(t
     assert prepare_geometry(hub, {'placement_candidates':[]})['references'] == []
     with pytest.raises(ValueError, match='Duplicate'):
         prepare_geometry(hub, {'placement_candidates':[point, point]})
+
+
+class TickRobot(FakeRobot):
+    on_step = None
+
+    def step(self, joints, gripper=-1.):
+        self.steps += 1
+        state = {**self.state(), 'joint_target': list(joints), 'gripper_command': gripper}
+        if self.on_step:self.on_step(state)
+
+    def camera(self, name):
+        frame = super().camera(name)
+        frame['world_from_camera'][0,3] = self.steps / 100
+        return frame
+
+
+def test_periodic_history_uses_physics_time_and_keeps_keyframes(tmp_path):
+    robot=TickRobot();events=[]
+    hub=ToolHub(robot,None,tmp_path,events.append,allowed_tools=PERCEPTION_TOOLS)
+    initial,pictures=hub.observe()
+    recorder=ObservationHistory(robot,tmp_path,events.append,interval_s=1.)
+    recorder.attach(hub);robot.on_step=recorder.on_step
+    for _ in range(45):robot.step([0.]*7)
+    final,final_pictures=hub.observe()
+    recorder.close();robot.on_step=None
+    manifest=json.loads((tmp_path/'history_manifest.json').read_text())
+    assert manifest['periodic_observation_ids']==['obs_00001','obs_00002']
+    assert [hub.observations[i]['agentview']['step'] for i in manifest['periodic_observation_ids']]==[20,40]
+    assert initial['source_step']==0 and final['source_step']==45
+    assert manifest['recorded_control_steps']==45 and manifest['interval_simulation_s']==1.
+    assert len(list((tmp_path/'observations').iterdir()))==4
+    for _ in range(5):robot.state()  # No physical stepping during an API wait.
+    assert len(list((tmp_path/'observations').iterdir()))==4
+    with pytest.raises(ValueError):ObservationHistory(robot,tmp_path,events.append,interval_s=0.)
+
+
+def test_temporal_handoff_preserves_every_periodic_frame_and_each_calibration(tmp_path):
+    trial=tmp_path/'a';trial.mkdir();robot=TickRobot()
+    def emit(event):
+        with (trial/'planning_events.jsonl').open('a') as stream:stream.write(json.dumps(event)+'\n')
+    hub=ToolHub(robot,None,trial,emit,allowed_tools=PERCEPTION_TOOLS)
+    _,first=hub.observe()
+    recorder=ObservationHistory(robot,trial,emit);recorder.attach(hub);robot.on_step=recorder.on_step
+    for _ in range(45):robot.step([0.]*7)
+    _,last=hub.observe();recorder.close();robot.on_step=None
+    source=trial/'final_observation';source.mkdir()
+    (source/'initial_state.json').write_text(json.dumps(robot.state()))
+    (source/'metadata.json').write_text(json.dumps(robot.metadata))
+    for camera in robot.cameras:
+        f=robot.camera(camera);Image.fromarray(f['rgb']).save(source/(camera+'.png'))
+        np.savez(source/(camera+'.npz'),**{k:f[k] for k in ('depth_m','K','world_from_camera')})
+    (trial/'config.json').write_text(json.dumps({'observation':str(source)}))
+    (trial/'planning_transcript.json').write_text(json.dumps(transcript_copy([
+        {'role':'system','content':'A initial observation'}, {'role':'user','content':first},
+        {'role':'user','content':last}])))
+    run=tmp_path/'b';run.mkdir()
+    b,messages=restore_handoff(trial,run,lambda event:None)
+    for identity,expected in [('obs_00000',4.),('obs_00001',4.2),('obs_00002',4.4),('obs_00003',4.45)]:
+        result,_=b.call('back_project',{'observation_id':identity,'camera':'agentview','pixel_xy':[4,5]})
+        assert result['ok'] and result['result']['world_xyz'][0]==pytest.approx(expected)
+        assert result['result']['current'] is False
+    extra=messages[-1]['content']
+    assert sum(v['type']=='image_url' for v in extra)==4
+    descriptions=[json.loads(v['text']) for v in extra[1:] if v['type']=='text']
+    assert {v['source_step'] for v in descriptions}=={20,40}
+    assert all(v['historical_only'] for v in descriptions)
+
+
+def test_recorded_observation_replay_validates_all_controls_before_dispatch(tmp_path):
+    class Robot:
+        max_steps=100
+        calls=[]
+        def step(self,q,g):self.calls.append((q,g))
+    controls=[{'source_step':i,'joint_target':[0.]*7,'gripper_command':-1.} for i in (1,2)]
+    name='controls.jsonl'
+    metadata={'observation_prelude':{'kind':'recorded_observation_controls','steps':2,'controls_file':name}}
+    (tmp_path/name).write_text('\n'.join(map(json.dumps,controls)))
+    robot=Robot();robot.calls=[]
+    replay_observation_prelude(robot,metadata,tmp_path)
+    assert len(robot.calls)==2
+    controls[-1]['gripper_command']=1.
+    (tmp_path/name).write_text('\n'.join(map(json.dumps,controls)))
+    robot.calls=[]
+    with pytest.raises(ValueError,match='no replay dispatched'):replay_observation_prelude(robot,metadata,tmp_path)
+    assert robot.calls==[]
+
+
+def test_observation_a_can_move_b_remains_readonly_and_prompt_describes_parameters(tmp_path):
+    from test_agent import FakeExecutor
+    robot=FakeRobot();allowed=PERCEPTION_TOOLS|{'move_relative'}
+    hub=ToolHub(robot,FakeExecutor(robot),tmp_path,lambda event:None,allowed_tools=allowed)
+    hub.observe()
+    submit={'type':'function','function':{'name':'submit_grasp_sketch','parameters':SKETCH_SCHEMA}}
+    class A:
+        turn=0
+        def complete(self,messages,tools):
+            self.turn+=1
+            item=(call('move_relative',{'source_step':0,'params':{'delta_m':[0,0,.02]}},'move') if self.turn==1
+                  else call('submit_grasp_sketch',{**sketch(),'source_step':3},'submit'))
+            return {'message':{'role':'assistant','tool_calls':[item]}}
+    result,_,_=planning_dialogue(A(),hub,[],submit,allow_actions=True)
+    assert result['source_step']==3 and hub.executor.calls==1
+    with pytest.raises(ProviderError,match='Read-only phase'):planning_dialogue(A(),hub,[],submit)
+    guide=(Path(__file__).resolve().parents[1]/'prompts/grasp_trial.md').read_text()
+    system=planning_instructions(guide,active_observation=True)
+    assert '允许适量感知查询和空爪观察移动' in system
+    assert '观察阶段直接调用move_to/move_pose等工具' in system
+    assert '默认1秒仿真时间' in system and '相同画面反复分割/反投影不会增加可见信息' in system
+
+
+def test_move_and_stale_submit_in_one_reply_does_not_replay_observation_motion(tmp_path):
+    from test_agent import FakeExecutor
+    robot=FakeRobot()
+    hub=ToolHub(robot,FakeExecutor(robot),tmp_path,lambda event:None,
+                allowed_tools=PERCEPTION_TOOLS|{'move_relative'})
+    submit={'type':'function','function':{'name':'submit_grasp_sketch','parameters':SKETCH_SCHEMA}}
+    class A:
+        turn=0
+        def complete(self,messages,tools):
+            self.turn+=1
+            if self.turn==1:
+                calls=[call('move_relative',{'source_step':0,'params':{'delta_m':[0,0,.02]}},'move'),
+                       call('submit_grasp_sketch',sketch(),'stale')]
+            else:
+                receipt=next(m for m in messages if m.get('tool_call_id')=='stale')
+                assert json.loads(receipt['content'])['saved'] is False
+                calls=[call('submit_grasp_sketch',{**sketch(),'source_step':3},'fresh')]
+            return {'message':{'role':'assistant','tool_calls':calls}}
+    result,_,timing=planning_dialogue(A(),hub,[],submit,allow_actions=True)
+    assert result['source_step']==3 and timing['rounds']==2 and hub.executor.calls==1

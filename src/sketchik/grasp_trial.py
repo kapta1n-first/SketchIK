@@ -6,6 +6,7 @@ import base64
 import hashlib
 from datetime import datetime
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -16,7 +17,7 @@ from jsonschema import Draft202012Validator
 
 from .agent import ChatClient, load_settings, transcript_copy, ProviderError
 from .tools import obj, V3, STEPS, public, tool_schemas, ToolHub, PERCEPTION_TOOLS
-from .perception import SavedObservationRobot
+from .perception import SavedObservationRobot, ObservationHistory
 from .grasp_preview import request
 
 
@@ -39,11 +40,31 @@ def image_part(path):
     return {'type':'image_url','image_url':{'url':'data:image/png;base64,'+base64.b64encode(path.read_bytes()).decode()}}
 
 
-def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_tool_calls=100):
-    """Allow read-only perception before submission; never dispatch robot motion."""
+def save_planning_history(run, messages):
+    folder=run/'planning_images';folder.mkdir(exist_ok=True)
+    for message in messages:
+        if not isinstance(message.get('content'),list):continue
+        for part in message['content']:
+            if part.get('type')=='image_url':
+                url=part['image_url']['url']
+                if url.startswith('data:image/png;base64,'):
+                    identity=hashlib.sha256(url.encode()).hexdigest()
+                    (folder/(identity+'.png')).write_bytes(base64.b64decode(url.split(',',1)[1],validate=True))
+    (run/'planning_transcript.json').write_text(json.dumps(transcript_copy(messages),indent=2))
+
+
+def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_tool_calls=100,
+                      allow_actions=False):
+    """Use phase-specific tools; action permission is explicit for initial observation."""
     if min(max_turns, max_tool_calls) < 1:
         raise ValueError('Planning budgets must be positive')
     tools = hub.schemas + [submit_tool]
+    observation_actions = {'move_to', 'move_pose', 'move_relative', 'move_waypoints', 'wait'}
+    names = {t['function']['name'] for t in hub.schemas}
+    if not allow_actions and names - PERCEPTION_TOOLS:
+        raise ProviderError('Read-only phase cannot expose motion or other tools')
+    if allow_actions and names - PERCEPTION_TOOLS - observation_actions:
+        raise ProviderError('Initial observation exposes only perception and observation motion')
     submission_name = submit_tool['function']['name']
     validators = {t['function']['name']: Draft202012Validator(t['function']['parameters']) for t in tools}
     seen = set()
@@ -89,6 +110,12 @@ def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_t
             seen.add(identity)
             call_count += 1
             if name == submission_name:
+                if args['source_step'] != hub.robot.steps:
+                    messages.append({'role':'tool','tool_call_id':identity,'content':json.dumps({
+                        'saved':False,'actions_from_submission':0,'current_source_step':hub.robot.steps,
+                        'error':'An earlier observation action changed source_step; resubmit using its real result.'})})
+                    hub.emit({'event':'submission_rejected_after_observation_action','current_source_step':hub.robot.steps})
+                    continue
                 messages.append({'role':'tool','tool_call_id':identity,
                                  'content':json.dumps({'saved':True,'robot_actions':0})})
                 if pictures:
@@ -97,6 +124,9 @@ def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_t
             result, images = hub.call(name, args)
             messages.append({'role':'tool','tool_call_id':identity,'content':json.dumps(result,allow_nan=False)})
             pictures.extend(images)
+            if hub.fatal:
+                if pictures:messages.append({'role':'user','content':pictures})
+                raise ProviderError('Observation action result is failed or uncertain; no further action dispatched')
         if pictures:
             messages.append({'role':'user','content':pictures})
     raise ProviderError('Grasp planning reply budget exhausted without a sketch')
@@ -122,19 +152,23 @@ def restore_planning_images(messages, roots):
     return messages
 
 
-def planning_instructions(text, allow_perception=True):
-    if allow_perception:
+def planning_instructions(text, allow_perception=True, *, active_observation=False):
+    if allow_perception and not active_observation:
         return text
     head, separator, _ = text.partition('\n本轮开放submit_grasp_sketch')
     _, heading, tail = text.partition('\n## 读图、对象身份与状态')
     if not separator or not heading:
         raise ValueError('Grasp guide structure changed; cannot prepare symbolic-only instructions')
-    return head + '''
+    if active_observation:
+        middle='\n\n'+(Path(__file__).resolve().parents[2]/'prompts/initial_observation.md').read_text()+'\n'
+    else:
+        middle = '''
 
 本次你是双Agent系统中的A，只看程序自动提供的图像、任务和状态，生成符号草图；不调用感知工具，不求像素或三维坐标。程序自动保存并打包历史图像、对应深度和相机信息交给B。B在抓取链执行期间分析可能用于后续放置的参考区域/点；具体感知、几何查询和参数准备由B及执行器负责。
 
 本轮只开放submit_grasp_sketch。当前入口仍只接通抓取草图，按完整任务选择对象、分割范围和抓取意图，不编造未实现的放置动作。SAM3/GraspGen由执行器调用，Mask和抓取位姿仍由常驻Molmo选择ID或NONE；你不代替Molmo选候选。不需要先自行测量尺寸或定位后续放置点才能交草图。当前图片来自保存观测，没有主动移动相机。
-''' + heading + tail
+'''
+    return head + middle + heading + tail
 
 
 def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max_tool_calls=100,
@@ -214,17 +248,121 @@ def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max
         (run/'planning_error.json').write_text(json.dumps({'type':type(e).__name__,'error':str(e),'wall_s':time.perf_counter()-start,'automatic_retry':False},indent=2))
         print(json.dumps({'trial':str(run),'planning_error':type(e).__name__}),flush=True);raise
     finally:
-        # Keep the exact crop/overlay/history pixels needed to restore this dialogue.
-        folder=run/'planning_images';folder.mkdir(exist_ok=True)
-        for message in messages:
-            if isinstance(message.get('content'),list):
-                for part in message['content']:
-                    if part.get('type')=='image_url':
-                        url=part['image_url']['url']
-                        if url.startswith('data:image/png;base64,'):
-                            identity=hashlib.sha256(url.encode()).hexdigest()
-                            (folder/(identity+'.png')).write_bytes(base64.b64decode(url.split(',',1)[1],validate=True))
-        (run/'planning_transcript.json').write_text(json.dumps(transcript_copy(messages),indent=2))
+        save_planning_history(run,messages)
+    return run
+
+
+def replay_observation_prelude(robot, metadata, source):
+    """Replay only recorded robot commands, never object state, then match RGB-D."""
+    prelude=metadata.get('observation_prelude')
+    if not prelude:return
+    count=int(prelude['steps'])
+    if prelude.get('kind')=='recorded_observation_controls':
+        name=prelude['controls_file']
+        if Path(name).name!=name or (source/name).is_symlink():
+            raise ValueError('Recorded observation controls must be a local plain file')
+        controls=[json.loads(line) for line in (source/name).read_text().splitlines()]
+        if not 0<=count<robot.max_steps or len(controls)!=count:
+            raise ValueError('Recorded observation control count/budget mismatch')
+        for i,control in enumerate(controls,1):
+            q=control.get('joint_target')
+            if (set(control)!={'source_step','joint_target','gripper_command'} or control['source_step']!=i
+                    or not isinstance(q,list) or len(q)!=7
+                    or any(type(v) not in (int,float) or not math.isfinite(v) for v in q)
+                    or control['gripper_command']!=-1.0):
+                raise ValueError('Invalid recorded open-gripper observation control; no replay dispatched')
+        for control in controls:robot.step(control['joint_target'],control['gripper_command'])
+    else:
+        if not 0<count<=200 or prelude['gripper']!=-1.0:
+            raise ValueError('Unsupported replay prelude')
+        for _ in range(count):robot.step(prelude['joint_target'],prelude['gripper'])
+
+
+def generate_observing_plan(source, run, env_file, gpu_uuid, peer_pids, *,
+                             max_turns=12, max_tool_calls=60, history_interval_s=1.):
+    """A can move the empty hand to collect real temporal history before its sketch."""
+    import shutil
+    root=Path(__file__).resolve().parents[2];run.mkdir(exist_ok=False)
+    metadata=json.loads((source/'metadata.json').read_text())
+    messages=[];robot=None;history=None;video=None
+    def emit(record):
+        from datetime import timezone
+        with (run/'planning_events.jsonl').open('a') as stream:
+            stream.write(json.dumps({**public(record),'utc':datetime.now(timezone.utc).isoformat()},allow_nan=False)+'\n')
+    begin=time.perf_counter()
+    try:
+        settings=load_settings(env_file)
+        client=ChatClient(settings.get('SKETCHIK_BASE_URL'),settings.get('SKETCHIK_MODEL'),
+                          settings.get('SKETCHIK_API_KEY'),settings.get('SKETCHIK_REASONING'),timeout=120)
+        from .runtime import configure
+        gpu=configure(root,gpu_uuid,metadata['variant'],peer_pids)
+        from .libero import LiberoRobot
+        from .primitives import MotionExecutor
+        import imageio.v2 as imageio
+        import numpy as np
+        from PIL import Image
+        robot=LiberoRobot(metadata['variant'],metadata['suite'],metadata['task'],metadata['seed'],metadata['init_state_id'],
+                          size=metadata['image_size'],max_steps=metadata['max_steps'])
+        video=imageio.get_writer(str(run/'observation_video.mp4'),fps=20,codec='libx264',quality=7)
+        history=ObservationHistory(robot,run,emit,history_interval_s,video)
+        robot.on_step=history.on_step
+        replay_observation_prelude(robot,metadata,source)
+        allowed=PERCEPTION_TOOLS|{'move_to','move_pose','move_relative','move_waypoints','wait'}
+        hub=ToolHub(robot,MotionExecutor(robot,emit),run,emit,allowed_tools=allowed)
+        history.attach(hub)
+        initial,pictures=hub.observe()
+        system=planning_instructions((root/'prompts/grasp_trial.md').read_text(),active_observation=True)
+        tool={'type':'function','function':{'name':'submit_grasp_sketch',
+              'description':'Submit the grasp sketch after useful initial observation; executor and Molmo bind/select grasp later.',
+              'parameters':SKETCH_SCHEMA}}
+        messages=[{'role':'system','content':system},{'role':'user','content':[
+            {'type':'text','text':json.dumps({'phase':'A initial observation then symbolic grasp sketch',
+                'history_interval_s':history.interval_s,'history_purpose':'Frozen temporal RGB-D for B placement geometry preparation',
+                'sampling_clock':'simulation time, not API/wall time'})},*pictures]}]
+        final=run/'final_observation'
+        config={'observation':str(final.resolve()),'initial_observation_source':str(source.resolve()),
+                'provider':client.metadata,'mode':'active_initial_observation',
+                'planning_perception_tools':sorted(PERCEPTION_TOOLS),'observation_motion_tools':sorted(allowed-PERCEPTION_TOOLS),
+                'history_interval_simulation_s':history.interval_s}
+        (run/'config.json').write_text(json.dumps(config,indent=2))
+        (run/'system_prompt.md').write_text(system)
+        (run/'planning_tools.json').write_text(json.dumps(hub.schemas+[tool],indent=2))
+        (run/'planning_tool.json').write_text(json.dumps(tool,indent=2))
+        (run/'planning_input.json').write_text(json.dumps(transcript_copy(messages),indent=2))
+        sketch,response,timing=planning_dialogue(client,hub,messages,tool,max_turns=max_turns,
+                                                max_tool_calls=max_tool_calls,allow_actions=True)
+        if sketch['source_step']!=robot.steps:raise ValueError('Submitted observation state is stale')
+        if robot.done or robot.steps>=robot.max_steps:raise ValueError('Observation used the remaining episode budget')
+        if history.control_count!=robot.steps:raise ValueError('Observation control trace is incomplete')
+        final.mkdir()
+        state=robot.state()
+        (final/'initial_state.json').write_text(json.dumps(state,indent=2))
+        (final/'robot_only.xml').write_text(robot.robot.robot_model.get_xml())
+        prelude={'kind':'recorded_observation_controls','steps':robot.steps,'controls_file':'observation_controls.jsonl'}
+        (final/'metadata.json').write_text(json.dumps({**robot.metadata,'gpu':gpu,'observation_prelude':prelude,
+             'capture_scope':'Final state after A observation motion; diagnostic replay only, not a fresh reset image'},indent=2))
+        history.stream.flush()
+        shutil.copyfile(run/'observation_controls.jsonl',final/'observation_controls.jsonl')
+        for camera in robot.cameras:
+            frame=robot.camera(camera)
+            Image.fromarray(frame['rgb']).save(final/(camera+'.png'))
+            np.savez_compressed(final/(camera+'.npz'),**{k:frame[k] for k in ('depth_m','K','world_from_camera')})
+        (run/'sketch.json').write_text(json.dumps(sketch,indent=2))
+        (run/'high_level_response.json').write_text(json.dumps({'wall_s':timing['api_wall_s'],'planning':timing,**response},indent=2))
+        emit({'event':'a_observation_completed','source_step':robot.steps,'periodic_frames':len(history.periodic_ids),
+              'initial_settle_steps':metadata.get('observation_prelude',{}).get('steps',0),
+              'observation_wall_s':time.perf_counter()-begin,'api_wall_s':timing['api_wall_s']})
+        print(json.dumps({'trial':str(run),'source_step':robot.steps,'planning':timing,'sketch':sketch},indent=2),flush=True)
+    except Exception as exc:
+        (run/'planning_error.json').write_text(json.dumps({'type':type(exc).__name__,'error':str(exc),
+            'wall_s':time.perf_counter()-begin,'automatic_retry':False,'physical_steps':robot.steps if robot else 0},indent=2))
+        raise
+    finally:
+        if robot is not None:robot.on_step=None
+        if history is not None:history.close()
+        if video is not None:video.close()
+        save_planning_history(run,messages)
+        if robot is not None:robot.close()
     return run
 
 
@@ -397,11 +535,12 @@ def execute_selected(trial, gpu_uuid, peer_pids, lift_test_m=0., *, on_execution
     try:
         robot=LiberoRobot(metadata['variant'],metadata['suite'],metadata['task'],metadata['seed'],metadata['init_state_id'],
             size=metadata['image_size'],max_steps=metadata['max_steps'])
-        if prelude:
-            if not 0<int(prelude['steps'])<=200 or prelude['gripper']!=-1.0:
-                raise ValueError('Unsupported replay prelude')
-            for _ in range(int(prelude['steps'])):robot.step(prelude['joint_target'],prelude['gripper'])
+        environment_create_s=time.perf_counter()-start
+        replay_start=time.perf_counter()
+        replay_observation_prelude(robot,metadata,source)
+        replay_wall_s=time.perf_counter()-replay_start
         (run/'metadata.json').write_text(json.dumps({**robot.metadata,'gpu':gpu,'observation_prelude':prelude,
+            'environment_create_wall_s':environment_create_s,'observation_replay_wall_s':replay_wall_s,
             'initialization_wall_s':time.perf_counter()-start},indent=2))
         fresh=robot.state();(run/'initial_state.json').write_text(json.dumps(fresh,indent=2))
         checks={'robot_state':{},'cameras':{},'robot_actions_before_match':robot.steps}
@@ -450,9 +589,17 @@ def main():
     p=sub.add_parser('select');p.add_argument('--trial',type=Path,required=True);p.add_argument('--gpu-uuid',required=True);p.add_argument('--peer-pid',type=int,action='append',default=[]);p.add_argument('--perception-dir',type=Path)
     p=sub.add_parser('execute');p.add_argument('--trial',type=Path,required=True);p.add_argument('--gpu-uuid',required=True)
     p.add_argument('--peer-pid',type=int,action='append',default=[]);p.add_argument('--lift-test-m',type=float,default=0.)
+    p=sub.add_parser('observe-plan');p.add_argument('--source-observation',type=Path,required=True)
+    p.add_argument('--output-run',type=Path,required=True);p.add_argument('--env-file',type=Path,required=True)
+    p.add_argument('--gpu-uuid',required=True);p.add_argument('--peer-pid',type=int,action='append',default=[])
+    p.add_argument('--history-interval-s',type=float,default=1.)
+    p.add_argument('--max-turns',type=int,default=12);p.add_argument('--max-tool-calls',type=int,default=60)
     args=parser.parse_args()
     if args.phase=='plan':generate_plan(args.observation,args.env_file,args.review_trial,max_turns=args.max_turns,max_tool_calls=args.max_tool_calls)
     elif args.phase=='select':run_selection(args.trial,args.gpu_uuid,args.peer_pid,args.perception_dir)
+    elif args.phase=='observe-plan':generate_observing_plan(args.source_observation,args.output_run,args.env_file,
+        args.gpu_uuid,args.peer_pid,max_turns=args.max_turns,max_tool_calls=args.max_tool_calls,
+        history_interval_s=args.history_interval_s)
     else:execute_selected(args.trial,args.gpu_uuid,args.peer_pid,args.lift_test_m)
 
 

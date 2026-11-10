@@ -104,8 +104,8 @@ class MotionExecutor:
         current = self.robot.state()
         pe = float(np.linalg.norm(np.array(current["position"]) - pos))
         re = float((Rotation.from_quat(current["quaternion_xyzw"]) * Rotation.from_quat(quat).inv()).magnitude())
-        result = {"event": "motion_finished", "converged": pe <= .005 and re <= math.radians(3)
-                  and np.max(np.abs(np.array(current["q"])-q)) <= .02,
+        result = {"event": "motion_finished", "converged": bool(pe <= .005 and re <= math.radians(3)
+                  and np.max(np.abs(np.array(current["q"])-q)) <= .02),
                   "position_error_m": pe, "rotation_error_deg": math.degrees(re),
                   "actions": executed, "execution_wall_s": time.perf_counter()-execution_start,
                   "total_wall_s": time.perf_counter()-start, "state": current}

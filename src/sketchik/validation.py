@@ -98,7 +98,7 @@ def run_validation(robot, run: Path, command, plan_file=None, *, client=None,
             snapshot("02_side")
             current = robot.state()
             r = Rotation.from_rotvec([0., 0., np.deg2rad(15)]) * Rotation.from_quat(current["quaternion_xyzw"])
-            results.append(executor.move_pose(current["position"], quaternion_xyzw=r.as_quat()))
+            results.append(executor.move(current["position"], quaternion_xyzw=r.as_quat()))
             snapshot("03_rotate")
             results.append(executor.move_waypoints([
                 {"relative_m": [-.03, .025, 0.], "quaternion_xyzw": home["quaternion_xyzw"]},
@@ -116,7 +116,7 @@ def run_validation(robot, run: Path, command, plan_file=None, *, client=None,
                   "opening_changed": open_width > closed_width + .02})
             before = robot.steps
             try:
-                executor.move_to([1.4, 0., .8])
+                executor.move([1.4, 0., .8])
                 raise AssertionError("Impossible IK target was accepted")
             except IKError as exc:
                 emit({"event": "unreachable_rejected", "error": str(exc),
@@ -130,7 +130,7 @@ def run_validation(robot, run: Path, command, plan_file=None, *, client=None,
             plan = json.loads(raw)
             if set(plan) != {"version", "steps"} or plan["version"] != 1 or not isinstance(plan["steps"], list):
                 raise ValueError("Expected {version:1, steps:[{primitive, params}, ...]}")
-            allowed = {"move_to", "move_relative", "move_pose", "move_waypoints", "set_gripper", "release", "wait"}
+            allowed = {"move", "move_relative", "move", "move_waypoints", "set_gripper", "release", "wait"}
             # Validate method names and Python signatures for the whole plan before dispatch.
             import inspect
             for item in plan["steps"]:

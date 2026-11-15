@@ -125,7 +125,7 @@ def test_grasp_planning_can_inspect_then_submit_with_full_tool_history(hub):
             self.turn += 1
             names = {t['function']['name'] for t in tools}
             assert {'segment', 'look', 'back_project', 'get_state', 'submit_grasp_sketch'} <= names
-            assert not {'measure', 'depth', 'move_to'} & names
+            assert not {'measure', 'depth', 'move'} & names
             if self.turn == 1:
                 calls = [call('segment', {'observation_id':'obs_00000', 'prompt':'visible handle'}, 'one')]
             else:

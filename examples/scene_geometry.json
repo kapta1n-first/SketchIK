@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "scope": "one run only; example, no measured coordinates",
+  "coordinate_frame": "world",
+  "length_unit": "m",
+  "quaternion_order": "xyzw",
+  "objects": {
+    "object_id": {
+      "role": "grasp_target",
+      "importance": "critical",
+      "needed_geometry": "Agent states what the next operation needs",
+      "geometry_status": "not_measured",
+      "observed_geometry": null,
+      "point_cloud_file": null,
+      "source_views": [],
+      "missing": [],
+      "object_motion_validity": "unverified"
+    }
+  }
+}

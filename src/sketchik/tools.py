@@ -13,6 +13,7 @@ from PIL import Image
 from jsonschema import Draft202012Validator
 
 from .libero import back_project
+from .timing import timings_for
 
 
 def obj(properties, required=()):
@@ -26,26 +27,33 @@ WAYPOINT = obj({"position": V3, "relative_m": V3, "quaternion_xyzw": Q4})
 WAYPOINT["oneOf"] = [{"required": ["position"], "not": {"required": ["relative_m"]}},
                      {"required": ["relative_m"], "not": {"required": ["position"]}}]
 PARAMS = {
-    "move_to": obj({"position": V3, "quaternion_xyzw": Q4}, ["position"]),
     "move_relative": obj({"delta_m": V3, "quaternion_xyzw": Q4}, ["delta_m"]),
-    "move_pose": obj({"position": V3, "quaternion_xyzw": Q4,
-                      "finger_direction": V3, "closing_axis": V3}, ["position"]),
+    "move": obj({"position": V3, "quaternion_xyzw": Q4,
+                 "finger_direction": V3, "closing_axis": V3}, ["position"]),
+    "rotate_roll": obj({"angle_rad":{"type":"number"}},["angle_rad"]),
+    "rotate_pitch": obj({"angle_rad":{"type":"number"}},["angle_rad"]),
+    "rotate_yaw": obj({"angle_rad":{"type":"number"}},["angle_rad"]),
     "move_waypoints": obj({"waypoints": {"type": "array", "items": WAYPOINT, "minItems": 1, "maxItems": 30}}, ["waypoints"]),
+    "reset": obj({"settle_steps":{"type":"integer","minimum":0,"maximum":200}}),
     "set_gripper": obj({"command": {"enum": ["open", "close"]}, "steps": STEPS}, ["command"]),
     "release": obj({"steps": STEPS}),
     "wait": obj({"steps": STEPS}),
 }
-PARAMS["move_pose"]["oneOf"] = [
+PARAMS["move"]["oneOf"] = [
     {"required": ["quaternion_xyzw"], "not": {"anyOf": [{"required": ["finger_direction"]}, {"required": ["closing_axis"]}]}},
     {"required": ["finger_direction", "closing_axis"], "not": {"required": ["quaternion_xyzw"]}},
+    {"not": {"anyOf": [{"required": ["quaternion_xyzw"]}, {"required": ["finger_direction"]}, {"required": ["closing_axis"]}]}},
 ]
-for key in ("move_to", "move_relative", "move_pose", "move_waypoints"):
+for key in ("move_relative", "move", "rotate_roll", "rotate_pitch", "rotate_yaw", "move_waypoints"):
     PARAMS[key]["properties"]["settle_steps"] = {"type": "integer", "minimum": 0, "maximum": 200}
 DESCRIPTIONS = {
-    "move_to": "Move EEF to world position (metres), optional xyzw orientation. Missing orientation preserves current orientation. IK + joint control, no collision planner.",
     "move_relative": "Move by signed world XYZ displacement from actual entry pose; preserve orientation unless specified. Displacement is resolved once.",
-    "move_pose": "Move with full orientation: unit xyzw quaternion OR world finger_direction (+tool Z) and closing_axis (+tool X). No automatic grasp pose generation.",
+    "move": "Move EEF to absolute world XYZ (metres) using IK and joint control. Preserve the full entry orientation when omitted; optionally supply a unit xyzw quaternion OR both world finger_direction (+tool Z) and closing_axis (+tool X). Keep the gripper command. No automatic grasp pose generation or collision planner.",
+    "rotate_roll": "Rotate the full EEF orientation by signed relative angle_rad radians about fixed world X using real IK. Keep actual entry XYZ (metres) and gripper command; R1=Rx(angle_rad)@R0. settle_steps defaults to 80. No automatic collision planning.",
+    "rotate_pitch": "Rotate the full EEF orientation by signed relative angle_rad radians about fixed world Y using real IK. Keep actual entry XYZ (metres) and gripper command; R1=Ry(angle_rad)@R0. settle_steps defaults to 80. No automatic collision planning.",
+    "rotate_yaw": "Rotate the full EEF orientation by signed relative angle_rad radians about fixed world Z using real IK. Keep actual entry XYZ (metres) and gripper command; R1=Rz(angle_rad)@R0. settle_steps defaults to 80. No automatic collision planning.",
     "move_waypoints": "Move through supplied EEF waypoints. position is absolute; relative_m is from preceding planned waypoint (first from actual entry). Can express caller-planned detours; does not search for obstacle-free paths.",
+    "reset": "Physically return the arm to this executor's recorded initial full EEF pose using IK and joint control. Keep the gripper command, world objects and observation history. Does not reset the environment or guarantee identical arm joint angles; no automatic collision planning in the ordinary interface.",
     "set_gripper": "Command open/close while holding current joints. Does not establish object identity or holding success.",
     "release": "Open gripper at current pose only. Does not compute a placement point or certify placement.",
     "wait": "Hold measured joint positions and previous gripper command while advancing 1..200 physics steps (20Hz). Not a wall-clock sleep or success detector.",
@@ -161,6 +169,13 @@ class ToolHub:
             raise ValueError("Path escapes listed root")
         return path
 
+    def display_image(self, observation_id, camera, frame):
+        """Presentation hook; saved native RGB-D and pixel geometry stay local."""
+        buffer = BytesIO()
+        Image.fromarray(frame['rgb']).save(buffer, format='PNG')
+        return {}, {'type':'image_url','image_url':{'url':
+            'data:image/png;base64,'+base64.b64encode(buffer.getvalue()).decode()}}
+
     def read_image(self, observation_id, camera):
         frames = self.observations.get(observation_id)
         if frames is None:
@@ -170,10 +185,9 @@ class ToolHub:
                        "source_step": frame["step"], "current": frame["step"] == self.robot.steps,
                        "width": frame["rgb"].shape[1], "height": frame["rgb"].shape[0],
                        "meaning": "Historical RGB, not a new observation"}
-        buffer = BytesIO()
-        Image.fromarray(frame["rgb"]).save(buffer, format="PNG")
-        return description, [{"type": "text", "text": json.dumps(description)},
-            {"type": "image_url", "image_url": {"url": "data:image/png;base64,"+base64.b64encode(buffer.getvalue()).decode()}}]
+        display, picture = self.display_image(observation_id,camera,frame)
+        if display:description['display_annotation']=display
+        return description, [{"type": "text", "text": json.dumps(description)},picture]
 
     def state(self):
         from scipy.spatial.transform import Rotation
@@ -186,7 +200,8 @@ class ToolHub:
 
     def observe(self):
         token = f"obs_{len(self.observations):05d}"
-        frames = {c: self.robot.camera(c) for c in self.robot.cameras}
+        with timings_for(self).scope('rgbd_camera_render'):
+            frames = {c: self.robot.camera(c) for c in self.robot.cameras}
         state = self.state()
         folder = self.run / "observations" / token
         folder.mkdir(parents=True)
@@ -196,17 +211,19 @@ class ToolHub:
                        "static_observation": bool(getattr(self.robot, "static_observation", False))}
         parts = []
         for camera, frame in frames.items():
-            Image.fromarray(frame["rgb"]).save(folder / (camera+".png"))
-            np.savez_compressed(folder / (camera+".npz"), depth_m=frame["depth_m"], K=frame["K"],
-                                world_from_camera=frame["world_from_camera"])
+            with timings_for(self).scope('rgbd_file_write'):
+                Image.fromarray(frame["rgb"]).save(folder / (camera+".png"))
+                np.savez_compressed(folder / (camera+".npz"), depth_m=frame["depth_m"], K=frame["K"],
+                                    world_from_camera=frame["world_from_camera"])
             description["cameras"].append({"camera": camera, "width": frame["rgb"].shape[1],
                                           "height": frame["rgb"].shape[0], "K": public(frame["K"]),
                                           "world_from_camera": public(frame["world_from_camera"]),
                                           "convention": frame["convention"]})
-            buffer = BytesIO()
-            Image.fromarray(frame["rgb"]).save(buffer, format="PNG")
-            parts += [{"type": "text", "text": f"{token}: camera={camera}, source_step={state['step']}"},
-                      {"type": "image_url", "image_url": {"url": "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode()}}]
+            with timings_for(self).scope('rgb_display_annotation'):
+                display, picture = self.display_image(token,camera,frame)
+            label = f"{token}: camera={camera}, source_step={state['step']}"
+            if display:label += '; display_annotation='+json.dumps(display)
+            parts += [{"type": "text", "text": label},picture]
         (folder / "observation.json").write_text(json.dumps(description, indent=2))
         self.emit({"event": "observation_saved", **description})
         return description, [{"type": "text", "text": json.dumps(description)}] + parts
@@ -262,6 +279,12 @@ class ToolHub:
             elif name == "read_image":
                 value, images = self.read_image(**arguments)
             elif name == "back_project":
+                legend = self.run/'observations'/arguments['observation_id']/'a_display'/(arguments['camera']+'.json')
+                if legend.exists():
+                    x0,y0,x1,y1 = json.loads(legend.read_text())['panel_bounds_xyxy']
+                    x,y = arguments['pixel_xy']
+                    if x0 <= x < x1 and y0 <= y < y1:
+                        raise ValueError('World-axis legend pixel is not an observed surface')
                 frames = self.observations.get(arguments["observation_id"])
                 if frames is None:
                     raise ValueError("Unknown observation_id; use an actual saved observation")

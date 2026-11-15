@@ -10,8 +10,8 @@ from sketchik.perception_service import filter_observed_outliers
 
 def sketch():
     return {'source_step':0,'subtask':'grasp','target_description':'visible object','grasp_preference':'secure grip',
-        'steps':[{'primitive':'move_pose','params':{'pose_ref':'selected_grasp.pregrasp'}},
-                 {'primitive':'move_to','params':{'pose_ref':'selected_grasp.grasp'}},
+        'steps':[{'primitive':'move','params':{'pose_ref':'selected_grasp.pregrasp'}},
+                 {'primitive':'move','params':{'pose_ref':'selected_grasp.grasp'}},
                  {'primitive':'set_gripper','params':{'command':'close','steps':20}}]}
 
 

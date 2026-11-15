@@ -89,6 +89,7 @@ def main():
     parser.add_argument('--iterations', type=int, default=50)
     parser.add_argument('--gpu-uuid', required=True)
     parser.add_argument('--peer-pid', action='append', type=int, default=[])
+    parser.add_argument('--same-episode-id', default=None)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
@@ -120,6 +121,10 @@ def run(args, begin):
     child = np.load(args.held_cloud)['points']
     state = json.loads(args.held_state.read_text())
     point = json.loads(args.destination_point.read_text())
+    same_episode = args.same_episode_id is not None
+    if same_episode and (state.get('episode_id') != args.same_episode_id
+                         or point.get('episode_id') != args.same_episode_id):
+        raise ValueError('Held state and destination reference do not share the declared episode')
     anchor = np.asarray(point['world_xyz'], dtype=float)
     if anchor.shape != (3,) or not np.isfinite(anchor).all() or not 0 < args.crop_radius < 1:
         raise ValueError('Invalid observed anchor/crop')
@@ -189,7 +194,8 @@ def run(args, begin):
                          'unused legacy KNN branch fails explicitly if called'],
         'learned_success_scores_available':False,'hidden_object_gt_used':False,
         'held_rigid_transform_assumed':True,'scene_and_path_collision_certified':False,
-        'destination_observation_same_episode_as_grasp':False}
+        'destination_observation_same_episode_as_grasp':same_episode,
+        'episode_id':args.same_episode_id}
     (args.output/'result.json').write_text(json.dumps(result,indent=2))
     print(json.dumps(result['timing_s']),flush=True)
 

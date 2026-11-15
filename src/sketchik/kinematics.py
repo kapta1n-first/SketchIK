@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from contextlib import contextmanager
 import math
 import time
 
@@ -78,6 +79,19 @@ class RobotIK:
         return (self.data.site_xpos[self.site_id].copy(),
                 self.data.site_xmat[self.site_id].reshape(3, 3).copy())
 
+    @contextmanager
+    def recovery_search(self, timeout_s=5.):
+        """One bounded alternative joint-seed search; never change the pose/tolerances."""
+        if not math.isfinite(timeout_s) or timeout_s <= 0:
+            raise ValueError('IK recovery timeout must be finite and positive')
+        previous = getattr(self, '_recovery_deadline', None)
+        deadline = time.perf_counter() + timeout_s
+        self._recovery_deadline = min(previous, deadline) if previous is not None else deadline
+        try:
+            yield self
+        finally:
+            self._recovery_deadline = previous
+
     def solve(self, position, quat_xyzw, seed):
         target = vector(position, 3, "position")
         target_r = Rotation.from_quat(quaternion(quat_xyzw))
@@ -85,14 +99,28 @@ class RobotIK:
         if np.any(seed < self.limits[:, 0]) or np.any(seed > self.limits[:, 1]):
             raise IKError("Measured seed is outside joint limits")
         start = time.perf_counter()
+        deadline = getattr(self, '_recovery_deadline', None)
         # Weak regularization resolves the redundant seventh joint near the seed.
         # Full SO(3) error is used; no Euler component is silently discarded.
         def residual(q):
+            if deadline is not None and time.perf_counter() >= deadline:
+                raise IKError('Bounded alternative-seed IK search exhausted its time budget')
             p, r = self.fk(q)
             return np.r_[p - target, 0.15 * (target_r * Rotation.from_matrix(r).inv()).as_rotvec(),
                          1e-5 * (q - seed)]
         candidates = [seed, seed + np.array([0, .12, 0, -.12, 0, .12, 0]),
-                      seed + np.array([.12, -.12, .12, 0, -.12, 0, 0])]
+                      seed + np.array([.12, -.12, .12, 0, -.12, 0, 0]),
+                      (self.lower + self.upper) / 2]
+        if deadline is not None:
+            alternatives = []
+            for joint in (0, 2, 4):
+                for sign in (-1., 1.):
+                    candidate = seed.copy()
+                    candidate[joint] += sign * .08 * (self.upper[joint] - self.lower[joint])
+                    alternatives.append(candidate)
+            candidates = alternatives + candidates
+        # Try one bounded, model-derived fallback only after the local starts fail.
+        # A remote solution still has to pass cartesian_path's continuity check.
         total = 0
         best_error = None
         for candidate in candidates:

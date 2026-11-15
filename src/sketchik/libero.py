@@ -14,7 +14,9 @@ class LiberoRobot:
     cameras = ("agentview", "robot0_eye_in_hand")
 
     def __init__(self, variant="pro", suite="libero_10", task=0, seed=0, init_state=0,
-                 size=1024, max_steps=2000):
+                 size=1024, max_steps=2000, *, completion_diagnostic=False):
+        if type(completion_diagnostic) is not bool:
+            raise ValueError('completion_diagnostic must be boolean')
         import robosuite
         from robosuite.environments.manipulation.manipulation_env import ManipulationEnv
         from robosuite.controllers.parts.controller_factory import load_part_controller_config
@@ -59,6 +61,8 @@ class LiberoRobot:
             ignore_done=False, hard_reset=True, seed=seed)
         self.size, self.max_steps, self.steps = size, max_steps, 0
         self.done = False
+        self.completion_diagnostic = completion_diagnostic
+        self.first_official_success_step = None
         self.gripper_command = -1.0
         self.on_step = None
         self.env.reset()
@@ -81,7 +85,10 @@ class LiberoRobot:
                          "input_type": controller.input_type, "kp": arm["kp"],
                          "control_hz": 20, "action_dim": self.env.action_dim,
                          "object_observations": False, "joint_names": self.joint_names,
-                         "eef_site": self.site, "max_steps": max_steps, "image_size": size}
+                         "eef_site": self.site, "max_steps": max_steps, "image_size": size,
+                         "completion_diagnostic": completion_diagnostic,
+                         "termination_policy": ("physical_budget_or_backend_termination; official success is evaluation-only"
+                             if completion_diagnostic else "official benchmark done or physical budget")}
         from importlib.metadata import distribution
         packages = {}
         for package in ("mujoco", "robosuite", "numpy", "scipy", "torch",
@@ -117,7 +124,11 @@ class LiberoRobot:
         start = time.perf_counter()
         _, _, done, _ = self.env.step(np.r_[q, command])
         self.steps += 1
-        self.done = bool(done)
+        # LIBERO replaces the step return's done with _check_success(); the
+        # underlying env.done still tracks the physical horizon. In this
+        # explicit diagnostic, never use task GT to select the next action.
+        self.done = (bool(self.steps >= self.max_steps or getattr(self.env, 'done', False))
+                     if getattr(self, 'completion_diagnostic', False) else bool(done))
         self.gripper_command = command
         # Integration advances qpos beyond the last cached site/camera transforms.
         # Refresh without advancing time before recording state or RGB-D.
@@ -128,10 +139,19 @@ class LiberoRobot:
             self.done = True
             raise RuntimeError("Backend changed absolute joint target; execution stopped")
         state = self.state()
+        if state.get('official_success') and getattr(self, 'first_official_success_step', None) is None:
+            self.first_official_success_step = self.steps
         state.update(joint_target=q.tolist(), step_wall_s=time.perf_counter() - start)
         if self.on_step is not None:
             self.on_step(state)
         return state
+
+    def camera_rgb(self, name):
+        """Native video frame without unused depth conversion or calibration."""
+        if name not in self.cameras:
+            raise ValueError(f"Unknown calibrated camera {name}")
+        rgb = self.env.sim.render(camera_name=name, width=self.size, height=self.size, depth=False)
+        return np.ascontiguousarray(rgb[::-1])
 
     def camera(self, name):
         if name not in self.cameras:

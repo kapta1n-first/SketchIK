@@ -157,7 +157,7 @@ def test_config_is_literal_not_shell(tmp_path, monkeypatch):
         load_settings(file)
 
 
-def test_http_chat_payload_and_truncated_response_no_tool_execution():
+def test_http_chat_payload_and_truncated_response_no_tool_execution(tmp_path):
     requests = []
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -174,7 +174,7 @@ def test_http_chat_payload_and_truncated_response_no_tool_execution():
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        client = ChatClient(f"http://127.0.0.1:{server.server_port}/v1", "unit-model", "unit-secret", "low")
+        client = ChatClient(f"http://127.0.0.1:{server.server_port}/v1", "unit-model", "unit-secret", "low",transport_dir=tmp_path)
         result = client.complete([{"role": "user", "content": "test"}], [])
         assert result["usage"]["prompt_tokens"] == 12
         assert requests[0][0] == "/v1/chat/completions" and requests[0][2] == "Bearer unit-secret"
@@ -183,10 +183,59 @@ def test_http_chat_payload_and_truncated_response_no_tool_execution():
         with pytest.raises(ProviderError, match="Truncated"):
             client.complete([], [])
         assert len(requests) == 2
+        archived=[json.loads(line) for line in (tmp_path/'responses.jsonl').read_text().splitlines()]
+        assert [row['finish_reason'] for row in archived]==['stop','length']
+        assert archived[1]['usage']=={'prompt_tokens':12}
+        assert archived[1]['message']['content']=='local protocol fixture'
+        assert client.last_response_metadata['finish_reason']=='length'
     finally:
         server.shutdown()
         server.server_close()
         thread.join()
+
+
+def test_plain_parameter_request_does_not_advertise_tools():
+    captured = []
+    class Opener:
+        def open(self, request, timeout):
+            captured.append(json.loads(request.data))
+            return BytesIO(json.dumps({'choices': [{'finish_reason': 'stop',
+                'message': {'role': 'assistant', 'content': '{"steps":15}'}}]}).encode())
+    client = ChatClient('http://127.0.0.1:1/v1', 'unit-model', 'unit-secret')
+    client.opener = Opener()
+    result = client.complete([{'role': 'user', 'content': 'Return selected-tool parameters'}])
+    assert result['message']['content'] == '{"steps":15}'
+    assert not {'tools', 'tool_choice', 'parallel_tool_calls'} & captured[0].keys()
+
+
+
+
+@pytest.mark.parametrize('budget',[None,8192])
+def test_explicit_output_budget_is_sent_and_audited_without_changing_history(budget,tmp_path):
+    captured=[]
+    class Opener:
+        def open(self,request,timeout):
+            captured.append(json.loads(request.data))
+            return BytesIO(json.dumps({'choices':[{'finish_reason':'stop',
+                'message':{'role':'assistant','content':'{}'}}]}).encode())
+    client=ChatClient('http://127.0.0.1:1/v1','unit-model','unit-secret','low',
+        max_tokens=budget,transport_dir=tmp_path)
+    client.opener=Opener()
+    messages=[{'role':'assistant','content':'prior result','reasoning_content':'full preserved source'},
+        {'role':'user','content':'next stage'}]
+    client.complete(messages,[])
+    assert captured[0]['messages']==messages
+    assert captured[0].get('max_tokens')==budget
+    assert ('max_tokens' in captured[0])==(budget is not None)
+    assert client.metadata['requested_max_tokens']==budget
+    assert client.last_request_metadata['requested_max_tokens']==budget
+    assert json.loads((tmp_path/'requests.jsonl').read_text())['requested_max_tokens']==budget
+
+
+@pytest.mark.parametrize('budget',[0,-1,True,1.5])
+def test_invalid_output_budget_is_rejected_before_request(budget):
+    with pytest.raises(ValueError,match='max_tokens'):
+        ChatClient('http://127.0.0.1:1/v1','unit-model','unit-secret',max_tokens=budget)
 
 
 @pytest.mark.parametrize('reason', [TimeoutError('private unit-secret'),
@@ -205,6 +254,52 @@ def test_transport_reason_class_retained_without_secret_or_retry(reason):
     assert f'reason_type={type(reason).__name__}' in str(result.value)
     assert 'unit-secret' not in str(result.value)
     assert client.opener.calls == 1
+
+
+@pytest.mark.parametrize('detail,expected',[
+    ({'code':'insufficient_quota','type':'invalid_request_error'},('insufficient_quota','invalid_request_error')),
+    ({'code':'unit-secret','type':'private provider echo'},(None,None)),
+])
+def test_http_failure_archives_only_status_and_known_categories_without_retry(tmp_path,detail,expected):
+    body=json.dumps({'error':{**detail,'message':'Bearer unit-secret private user input'},
+        'authorization':'unit-secret'}).encode()
+    class BrokenOpener:
+        calls=0
+        def open(self,request,timeout):
+            self.calls+=1
+            raise urllib.error.HTTPError('https://unit.invalid/private-unit-secret',403,
+                'private unit-secret provider echo',{},BytesIO(body))
+    client=ChatClient('https://unit.invalid/v1','unit-model','unit-secret',transport_dir=tmp_path)
+    client.opener=BrokenOpener()
+    with pytest.raises(ProviderError,match='HTTP 403; no automatic retry') as failure:
+        client.complete([{'role':'user','content':'public protocol fixture'}])
+    audit=json.loads((tmp_path/'responses.jsonl').read_text())
+    assert audit==client.last_response_metadata==failure.value.response_metadata
+    assert audit['http_status']==403 and audit['status']=='http_error'
+    assert (audit['provider_error_code'],audit['provider_error_type'])==expected
+    assert audit['request_body_sha256']==client.last_request_metadata['body_sha256']
+    assert audit['error_body_bytes_read']==len(body) and not audit['error_body_truncated']
+    assert client.opener.calls==1 and 'message' not in audit
+    serialized=json.dumps(audit)+str(failure.value)
+    assert 'unit-secret' not in serialized and 'private' not in serialized and 'Bearer' not in serialized
+
+
+@pytest.mark.parametrize('body',[b'<html>private unit-secret gateway error</html>',b'[]',
+    b'{"error":{"code":"permission_denied","message":"'+b'x'*20000+b'"}}'])
+def test_unstructured_or_oversized_http_error_preserves_original_status(body,tmp_path):
+    class BrokenOpener:
+        calls=0
+        def open(self,request,timeout):
+            self.calls+=1
+            raise urllib.error.HTTPError('https://unit.invalid/v1',403,'Forbidden',{},BytesIO(body))
+    client=ChatClient('https://unit.invalid/v1','unit-model','unit-secret',transport_dir=tmp_path)
+    client.opener=BrokenOpener()
+    with pytest.raises(ProviderError,match='HTTP 403'):
+        client.complete([])
+    audit=client.last_response_metadata
+    assert audit['provider_error_code'] is None and audit['provider_error_type'] is None
+    assert audit['error_body_bytes_read']<=16_385
+    assert audit['error_body_truncated']==(len(body)>16_384) and client.opener.calls==1
 
 
 def test_proxy_bypass_is_explicit_and_defaults_remain(monkeypatch):
@@ -259,6 +354,96 @@ def test_jpeg_wire_encoding_preserves_full_source_history_and_saves_exact_sent_i
 def test_invalid_jpeg_transport_quality_is_rejected_before_network(quality):
     with pytest.raises(ValueError, match='JPEG transport quality'):
         ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret', image_jpeg_quality=quality)
+
+
+def test_exact_image_references_are_opt_in_and_reversible(tmp_path):
+    image_a = {'type': 'image_url', 'image_url': {'url': 'data:image/png;base64,YQ==', 'detail': 'high'}}
+    image_b = {'type': 'image_url', 'image_url': {'url': 'data:image/png;base64,Yg==', 'detail': 'high'}}
+    different_detail = {'type': 'image_url', 'image_url': {'url': image_a['image_url']['url'], 'detail': 'low'}}
+    messages = [
+        {'role': 'system', 'content': 'keep all context'},
+        {'role': 'user', 'content': [{'type': 'text', 'text': 'first'}, deepcopy(image_a), deepcopy(image_b)]},
+        {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'call_1', 'type': 'function',
+            'function': {'name': 'look', 'arguments': '{}'}}]},
+        {'role': 'tool', 'tool_call_id': 'call_1', 'content': '{"ok":true}'},
+        {'role': 'user', 'content': [{'type': 'text', 'text': 'later'}, deepcopy(image_a),
+            deepcopy(different_detail), {'type': 'text', 'text': 'tail'}, deepcopy(image_b)]},
+    ]
+    original = deepcopy(messages)
+    captured = []
+    class Opener:
+        def open(self, request, timeout):
+            captured.append(json.loads(request.data)['messages'])
+            return BytesIO(json.dumps({'choices': [{'finish_reason': 'stop',
+                'message': {'role': 'assistant', 'content': 'fixture'}}]}).encode())
+
+    default = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret')
+    default.opener = Opener()
+    default.complete(messages)
+    assert captured[-1] == original
+    assert default.last_request_metadata['image_count'] == 5
+    assert default.last_request_metadata['original_image_count'] == 5
+    assert default.last_request_metadata['image_references'] == []
+
+    client = ChatClient('https://unit.invalid/v1', 'unit-model', 'unit-secret',
+                        reference_exact_images=True, transport_dir=tmp_path/'wire')
+    client.opener = Opener()
+    client.complete(messages)
+    wire = captured[-1]
+    assert messages == original
+    assert [m['role'] for m in wire] == [m['role'] for m in original]
+    assert wire[2:4] == original[2:4]
+    assert wire[1]['content'][0] == original[1]['content'][0]
+    assert wire[4]['content'][0] == original[4]['content'][0]
+    assert wire[4]['content'][-2] == original[4]['content'][-2]
+    sent_images = [part for message in wire if isinstance(message.get('content'), list)
+                   for part in message['content'] if part['type'] == 'image_url']
+    assert sent_images == [image_a, image_b, different_detail]
+    metadata = client.last_request_metadata
+    assert metadata['image_count'] == 3 and metadata['original_image_count'] == 5
+    assert len(metadata['image_references']) == 2
+    assert 'data:image' not in json.dumps(metadata)
+    record = json.loads((tmp_path/'wire/requests.jsonl').read_text().splitlines()[0])
+    assert record['image_references'] == metadata['image_references']
+    assert 'data:image' not in json.dumps(record)
+
+    # Reconstruct the pre-reference wire from first copies and recorded positions.
+    canonical = {tuple(mapping['canonical_position']): mapping['image_id']
+                 for mapping in metadata['image_references']}
+    duplicates = {tuple(mapping['original_position']): mapping for mapping in metadata['image_references']}
+    first_image_by_id = {}
+    for message in wire:
+        if not isinstance(message.get('content'), list):
+            continue
+        for before, after in zip(message['content'], message['content'][1:]):
+            if before.get('type') == 'text' and before.get('text', '').startswith('Image ID '):
+                image_id = before['text'].removeprefix('Image ID ').removesuffix(':')
+                assert after['type'] == 'image_url'
+                first_image_by_id[image_id] = after
+    reconstructed = deepcopy(wire)
+    for message_index, message in enumerate(reconstructed):
+        if not isinstance(message.get('content'), list):
+            continue
+        restored = []
+        original_parts = original[message_index]['content']
+        wire_index = 0
+        for part_index in range(len(original_parts)):
+            location = (message_index, part_index)
+            if location in duplicates:
+                mapping = duplicates[location]
+                assert message['content'][wire_index]['text'] == f"Image reference {mapping['image_id']}."
+                restored.append(deepcopy(first_image_by_id[mapping['image_id']]))
+                wire_index += 1
+            elif location in canonical or original_parts[part_index]['type'] == 'image_url':
+                assert message['content'][wire_index]['text'].startswith('Image ID ')
+                restored.append(message['content'][wire_index + 1])
+                wire_index += 2
+            else:
+                restored.append(message['content'][wire_index])
+                wire_index += 1
+        assert wire_index == len(message['content'])
+        message['content'] = restored
+    assert reconstructed == captured[0]
 
 
 def test_run_files_create_read_list_and_explicit_overwrite(hub):

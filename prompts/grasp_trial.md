@@ -62,8 +62,8 @@ GraspGen生成完整位置和朝向的候选。执行器先做可见场景的夹
 
 所有动作项使用primitive和params；草图steps长度为1～20。坐标与相对位移为世界坐标系下的米制XYZ；物理步数为整数1～200。没有统一接近方向、固定抬升高度或必须照抄的完整动作序列。
 
-- move_to：params仅填写pose_ref，值为selected_grasp.pregrasp或selected_grasp.grasp。当前草图绑定的是完整位置和朝向，不是只移动XYZ。
-- move_pose：params同样仅填写上述pose_ref，保留所选候选的完整朝向；本草图接口不接收额外pitch/yaw或手写四元数。
+- move：params仅填写pose_ref，值为selected_grasp.pregrasp或selected_grasp.grasp。当前草图绑定的是完整位置和朝向，不是只移动XYZ。
+- move：params同样仅填写上述pose_ref，保留所选候选的完整朝向；本草图接口不接收额外pitch/yaw或手写四元数。
 - set_gripper：params.command为open或close，可选steps；省略时基础执行器默认15步。该动作在当前位置开闭夹爪，不自动寻找接触位置，不证明抓取成功。
 - move_relative：params.delta_m为世界坐标三元位移。按进入动作时的真实位置求目标，不沿候选局部坐标自动转换；姿态和上一条夹爪命令保持。仅在当前抓取确有需要时使用，不凭空添加固定抬升。
 - wait：params.steps为推进的物理步数，保持当前关节位置和夹爪命令；20步对应1秒仿真时间。它不是等待模型推理，也不自动判断持物。

@@ -47,22 +47,25 @@ class SavedObservationRobot:
 
 
 class ObservationHistory:
-    """Record controls and periodic RGB-D during motion, without calling an LLM."""
+    """Record controls/video; legacy diagnostics may explicitly sample RGB-D."""
     def __init__(self, robot, run, emit, interval_s=1., video=None):
-        if not np.isfinite(interval_s) or interval_s < .05:
+        if interval_s is not None and (not np.isfinite(interval_s) or interval_s < .05):
             raise ValueError('History interval must be at least one 20Hz simulation step')
         self.robot, self.run, self.emit, self.video = robot, run, emit, video
-        self.interval_steps = max(1, round(interval_s * 20))
-        self.interval_s = self.interval_steps / 20
+        self.interval_steps = None if interval_s is None else max(1, round(interval_s * 20))
+        self.interval_s = None if self.interval_steps is None else self.interval_steps / 20
         self.hub = None
         self.next_step = None
         self.periodic_ids = []
         self.control_count = 0
+        self.video_frames = 0
+        self.video_wall_s = 0.
+        self.periodic_wall_s = 0.
         self.stream = (run / 'observation_controls.jsonl').open('x', buffering=1)
 
     def attach(self, hub):
         self.hub = hub
-        self.next_step = self.robot.steps + self.interval_steps
+        self.next_step = None if self.interval_steps is None else self.robot.steps + self.interval_steps
 
     def on_step(self, state):
         self.control_count += 1
@@ -70,9 +73,14 @@ class ObservationHistory:
                   'gripper_command': state['gripper_command']}
         self.stream.write(json.dumps(record, allow_nan=False) + '\n')
         if self.video is not None:
-            self.video.append_data(self.robot.camera('agentview')['rgb'])
-        if self.hub is not None and state['step'] >= self.next_step:
+            started = time.perf_counter()
+            self.video.append_data(self.robot.camera_rgb('agentview'))
+            self.video_frames += 1
+            self.video_wall_s += time.perf_counter() - started
+        if self.hub is not None and self.next_step is not None and state['step'] >= self.next_step:
+            started = time.perf_counter()
             observation, _ = self.hub.observe()
+            self.periodic_wall_s += time.perf_counter() - started
             self.periodic_ids.append(observation['observation_id'])
             self.emit({'event': 'periodic_history_saved', 'observation_id': observation['observation_id'],
                        'source_step': state['step'], 'interval_simulation_s': self.interval_s})
@@ -81,6 +89,10 @@ class ObservationHistory:
     def close(self):
         self.stream.close()
         manifest = {'interval_simulation_s': self.interval_s, 'periodic_observation_ids': self.periodic_ids,
+                    'periodic_rgbd_enabled': self.interval_steps is not None,
+                    'video_recorded': self.video is not None,
+                    'video_frames': self.video_frames, 'video_wall_s': self.video_wall_s,
+                    'periodic_capture_wall_s': self.periodic_wall_s,
                     'recorded_control_steps': self.control_count,
                     'keyframes': 'Initial image and each completed/failed action are also saved by ToolHub.',
                     'sampling_clock': '20Hz physics steps; no captures during API waiting without physics'}
@@ -225,3 +237,94 @@ class PerceptionTools:
                  "selection": "all candidates; no automatic highest-score or positional selection"}
         _, pictures = self.look(observation_id, candidate_ids=record["candidate_ids"])
         return value, pictures
+
+
+def saved_frame(source, identity, camera):
+    folder = source / 'observations' / identity
+    description = json.loads((folder / 'observation.json').read_text())
+    with np.load(folder / (camera+'.npz')) as arrays:
+        frame = {name: arrays[name].copy() for name in arrays.files}
+    frame.update(rgb=np.asarray(Image.open(folder / (camera+'.png')).convert('RGB')),
+                 step=description['source_step'], camera=camera,
+                 convention='top-left pixels; camera x right, y down, z forward; metric depth')
+    return frame
+
+
+def verify_replay_observation(robot, source, identity, *, rgb_roundoff_pixels=0, diagnostic_dir=None, snapshot=False):
+    folder = source / identity if snapshot else source / 'observations' / identity
+    if snapshot:
+        saved_state=json.loads((folder/'initial_state.json').read_text())
+        description={'source_step':saved_state['step'],'state':saved_state}
+    else:description = json.loads((folder / 'observation.json').read_text())
+    state = robot.state()
+    if state['step'] != description['source_step']:
+        raise ValueError('Replay observation step mismatch')
+    for field in ['q', 'position', 'quaternion_xyzw', 'finger_joint_positions']:
+        if not np.array_equal(state[field], description['state'][field]):
+            raise ValueError(f'Replay robot state mismatch: {identity}/{field}')
+    differences = {}
+    for camera in robot.cameras:
+        actual=robot.camera(camera)
+        if snapshot:
+            with np.load(folder/(camera+'.npz')) as arrays:expected={key:arrays[key] for key in arrays.files}
+            expected['rgb']=np.asarray(Image.open(folder/(camera+'.png')).convert('RGB'))
+        else:expected=saved_frame(source,identity,camera)
+        for field in ['depth_m', 'K', 'world_from_camera']:
+            if not np.array_equal(actual[field], expected[field]):
+                raise ValueError(f'Replay native RGB-D/calibration mismatch: {identity}/{camera}/{field}')
+        diff = np.abs(actual['rgb'].astype(np.int16)-expected['rgb'].astype(np.int16))
+        pixels = int(np.count_nonzero(np.any(diff, axis=2)))
+        maximum = int(diff.max())
+        differences[camera] = {'different_rgb_pixels': pixels, 'max_channel_difference': maximum}
+        if pixels > rgb_roundoff_pixels or maximum > 1:
+            # A repeated render at unchanged physics sometimes removes a raster
+            # difference. Preserve the first draw; never advance or restore GT.
+            first_difference = dict(differences[camera])
+            if diagnostic_dir is not None:
+                diagnostic_dir.mkdir(parents=True, exist_ok=True)
+                Image.fromarray(actual['rgb']).save(diagnostic_dir / (identity+'_'+camera+'_first.png'))
+            redraws=[]
+            for redraw in range(1,4):
+                again = robot.camera(camera)
+                now = robot.state()
+                if now['step']!=state['step'] or any(not np.array_equal(now[field],state[field])
+                        for field in ['q','position','quaternion_xyzw','finger_joint_positions']):
+                    raise ValueError('Replay state changed during repeated render')
+                for field in ['depth_m', 'K', 'world_from_camera']:
+                    if not np.array_equal(again[field], expected[field]):
+                        raise ValueError(f'Replay repeated render geometry mismatch: {identity}/{camera}/{field}')
+                diff = np.abs(again['rgb'].astype(np.int16)-expected['rgb'].astype(np.int16))
+                pixels, maximum = int(np.count_nonzero(np.any(diff, axis=2))), int(diff.max())
+                accepted=pixels<=rgb_roundoff_pixels and maximum<=1
+                redraws.append({'redraw':redraw,'different_rgb_pixels':pixels,
+                    'max_channel_difference':maximum,'accepted':accepted})
+                if diagnostic_dir is not None:
+                    Image.fromarray(again['rgb']).save(diagnostic_dir/f'{identity}_{camera}_redraw_{redraw:02d}.png')
+                    (diagnostic_dir/f'{identity}_{camera}_redraws.json').write_text(json.dumps({
+                        'source_step':state['step'],'first_draw_difference':first_difference,
+                        'rgb_roundoff_limit_pixels':rgb_roundoff_pixels,'redraws':redraws},indent=2))
+                if accepted:break
+            else:
+                raise ValueError(f'Replay native RGB-D/calibration mismatch: {identity}/{camera}/rgb')
+            differences[camera] = {'different_rgb_pixels': pixels, 'max_channel_difference': maximum,
+                                   'same_physical_step_rerender': True, 'first_draw_difference': first_difference,
+                                   'same_physical_step_redraws':redraws}
+    exact = all(item['different_rgb_pixels'] == 0 for item in differences.values())
+    return {'observation_id': identity, 'source_step': state['step'],
+            'robot_state_exact': True, 'native_geometry_and_calibration_exact': True,
+            'native_rgbd_and_calibration_exact': exact, 'rgb_roundoff_limit_pixels': rgb_roundoff_pixels,
+            'rgb_differences': differences}
+
+
+def snapshot(robot, folder, metadata, episode_id):
+    from .tools import public
+    folder.mkdir(exist_ok=False)
+    state = public(robot.state()) | {'episode_id': episode_id}
+    (folder/'initial_state.json').write_text(json.dumps(state, indent=2))
+    (folder/'metadata.json').write_text(json.dumps(metadata | {'episode_id': episode_id}, indent=2))
+    (folder/'robot_only.xml').write_text(robot.robot.robot_model.get_xml())
+    for camera in robot.cameras:
+        frame = robot.camera(camera)
+        Image.fromarray(frame['rgb']).save(folder/(camera+'.png'))
+        np.savez_compressed(folder/(camera+'.npz'), **{k: frame[k] for k in ('depth_m', 'K', 'world_from_camera')})
+    return state

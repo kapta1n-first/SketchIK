@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation
 
+import sketchik.kinematics as kinematics
 from sketchik.kinematics import IKError, RobotIK, joint_trajectory, rotation_from_directions
 from sketchik.libero import back_project
 
@@ -31,6 +32,65 @@ def test_full_pose_ik_round_trip(ik, shift):
     assert np.linalg.norm(recovered_p-p) < .0005
     assert (Rotation.from_matrix(recovered_r) * Rotation.from_matrix(r).inv()).magnitude() < np.deg2rad(.5)
     assert np.all(sol.q >= ik.limits[:, 0]) and np.all(sol.q <= ik.limits[:, 1])
+
+
+def test_nearby_ik_returns_original_first_start(ik, monkeypatch):
+    seed = np.array([0., -.5, 0., -2., 0., 1.5, .7])
+    p, r = ik.fk(seed + np.array([.02, -.01, .01, .02, -.02, .01, -.01]))
+    real_optimizer = kinematics.least_squares
+    calls = []
+    def tracked_optimizer(fun, x0, **kwargs):
+        result = real_optimizer(fun, x0, **kwargs)
+        calls.append((x0.copy(), result))
+        return result
+    monkeypatch.setattr(kinematics, "least_squares", tracked_optimizer)
+    sol = ik.solve(p, Rotation.from_matrix(r).as_quat(), seed)
+    assert len(calls) == 1
+    np.testing.assert_array_equal(calls[0][0], seed)
+    np.testing.assert_array_equal(sol.q, calls[0][1].x)
+    assert sol.evaluations == calls[0][1].nfev
+
+
+@pytest.fixture
+def alternate_branch_pose(ik):
+    # FK-generated full pose on another arm branch; no scene or object data.
+    seed = np.array([-.38, .91, .18, -1.39, 1.01, 1.57, 1.61])
+    goal = np.array([-.85, 1.14, .87, -1.44, .46, 1.84, -2.87])
+    p, r = ik.fk(goal)
+    return seed, p, Rotation.from_matrix(r).as_quat()
+
+
+def test_midpoint_fallback_recovers_full_pose(ik, alternate_branch_pose, monkeypatch):
+    seed, p, quat = alternate_branch_pose
+    real_optimizer = kinematics.least_squares
+    starts = []
+    def tracked_optimizer(fun, x0, **kwargs):
+        starts.append(x0.copy())
+        return real_optimizer(fun, x0, **kwargs)
+    monkeypatch.setattr(kinematics, "least_squares", tracked_optimizer)
+    sol = ik.solve(p, quat, seed)
+    assert len(starts) == 4
+    np.testing.assert_array_equal(starts[0], seed)
+    np.testing.assert_allclose(starts[-1], (ik.lower + ik.upper) / 2, atol=0)
+    actual_p, actual_r = ik.fk(sol.q)
+    assert np.linalg.norm(actual_p-p) < .0005
+    assert (Rotation.from_matrix(actual_r) * Rotation.from_quat(quat).inv()).magnitude() < np.deg2rad(.5)
+    assert np.all(sol.q >= ik.lower) and np.all(sol.q <= ik.upper)
+
+
+def test_fallback_branch_still_rejected_by_cartesian_continuity(ik, alternate_branch_pose, monkeypatch):
+    seed, p, quat = alternate_branch_pose
+    real_solve = ik.solve
+    jumps = []
+    def tracked_solve(position, orientation, current_q):
+        sol = real_solve(position, orientation, current_q)
+        jumps.append(float(np.max(np.abs(sol.q-current_q))))
+        return sol
+    monkeypatch.setattr(ik, "solve", tracked_solve)
+    with pytest.raises(IKError, match="Discontinuous IK branch; no trajectory dispatched"):
+        ik.cartesian_path(seed, p, quat)
+    assert jumps[-1] > .4
+    assert all(jump <= .4 for jump in jumps[:-1])
 
 
 def test_unreachable_ik_rejects(ik):

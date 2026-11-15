@@ -12,17 +12,19 @@ from pathlib import Path
 import subprocess
 import sys
 import time
+from copy import deepcopy
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, ValidationError
 
 from .agent import ChatClient, load_settings, transcript_copy, ProviderError
+from .planning import image_part, save_planning_history, planning_dialogue
 from .tools import obj, V3, STEPS, public, tool_schemas, ToolHub, PERCEPTION_TOOLS
 from .perception import SavedObservationRobot, ObservationHistory
 from .grasp_preview import request
 
 
 POSE = obj({'pose_ref':{'enum':['selected_grasp.pregrasp','selected_grasp.grasp']}},['pose_ref'])
-SKETCH_PARAMS = {'move_to':POSE,'move_pose':POSE,
+SKETCH_PARAMS = {'move':POSE,
     'set_gripper':obj({'command':{'enum':['open','close']},'steps':STEPS},['command']),
     'move_relative':obj({'delta_m':V3},['delta_m']),'wait':obj({'steps':STEPS},['steps'])}
 SKETCH_SCHEMA = obj({'source_step':{'type':'integer','minimum':0},'subtask':{'type':'string','minLength':1},
@@ -36,100 +38,10 @@ SKETCH_SCHEMA = obj({'source_step':{'type':'integer','minimum':0},'subtask':{'ty
     ['source_step','subtask','target_description','grasp_preference','steps'])
 
 
-def image_part(path):
-    return {'type':'image_url','image_url':{'url':'data:image/png;base64,'+base64.b64encode(path.read_bytes()).decode()}}
 
 
-def save_planning_history(run, messages):
-    folder=run/'planning_images';folder.mkdir(exist_ok=True)
-    for message in messages:
-        if not isinstance(message.get('content'),list):continue
-        for part in message['content']:
-            if part.get('type')=='image_url':
-                url=part['image_url']['url']
-                if url.startswith('data:image/png;base64,'):
-                    identity=hashlib.sha256(url.encode()).hexdigest()
-                    (folder/(identity+'.png')).write_bytes(base64.b64decode(url.split(',',1)[1],validate=True))
-    (run/'planning_transcript.json').write_text(json.dumps(transcript_copy(messages),indent=2))
 
 
-def planning_dialogue(client, hub, messages, submit_tool, *, max_turns=40, max_tool_calls=100,
-                      allow_actions=False):
-    """Use phase-specific tools; action permission is explicit for initial observation."""
-    if min(max_turns, max_tool_calls) < 1:
-        raise ValueError('Planning budgets must be positive')
-    tools = hub.schemas + [submit_tool]
-    observation_actions = {'move_to', 'move_pose', 'move_relative', 'move_waypoints', 'wait'}
-    names = {t['function']['name'] for t in hub.schemas}
-    if not allow_actions and names - PERCEPTION_TOOLS:
-        raise ProviderError('Read-only phase cannot expose motion or other tools')
-    if allow_actions and names - PERCEPTION_TOOLS - observation_actions:
-        raise ProviderError('Initial observation exposes only perception and observation motion')
-    submission_name = submit_tool['function']['name']
-    validators = {t['function']['name']: Draft202012Validator(t['function']['parameters']) for t in tools}
-    seen = set()
-    total_s = 0.
-    call_count = 0
-    for turn in range(1, max_turns + 1):
-        start = time.perf_counter()
-        response = client.complete(messages, tools)
-        elapsed = time.perf_counter() - start
-        total_s += elapsed
-        message = response['message']
-        calls = message.get('tool_calls') or []
-        if not calls:
-            raise ProviderError('No tool call or sketch submitted; no automatic API retry')
-        if call_count + len(calls) > max_tool_calls:
-            raise ProviderError('Grasp planning tool budget exhausted')
-        parsed = []
-        batch = set()
-        # Validate the entire batch before even invoking a read-only service.
-        for call in calls:
-            identity = call.get('id')
-            function = call.get('function', {})
-            name = function.get('name')
-            if call.get('type') != 'function' or not isinstance(identity, str) or not identity or identity in seen or identity in batch:
-                raise ProviderError('Malformed or duplicate tool call ID')
-            if name not in validators:
-                raise ProviderError('Unknown planning tool; motion is not exposed in this phase')
-            args = json.loads(function['arguments'], parse_constant=lambda s: (_ for _ in ()).throw(ValueError(s)))
-            validators[name].validate(args)
-            if name == submission_name and args['source_step'] != hub.robot.steps:
-                raise ValueError('Stale sketch source_step')
-            batch.add(identity)
-            parsed.append((identity, name, args))
-        submissions = [v for v in parsed if v[1] == submission_name]
-        if len(submissions) > 1 or (submissions and parsed[-1][1] != submission_name):
-            raise ProviderError('Submit at most one final sketch, after any read-only calls in the batch')
-        messages.append(message)
-        hub.emit({'event':'grasp_planning_response','round':turn,'wall_s':elapsed,
-                  'usage':response.get('usage'),'finish_reason':response.get('finish_reason'),
-                  'tool_names':[v[1] for v in parsed]})
-        pictures = []
-        for identity, name, args in parsed:
-            seen.add(identity)
-            call_count += 1
-            if name == submission_name:
-                if args['source_step'] != hub.robot.steps:
-                    messages.append({'role':'tool','tool_call_id':identity,'content':json.dumps({
-                        'saved':False,'actions_from_submission':0,'current_source_step':hub.robot.steps,
-                        'error':'An earlier observation action changed source_step; resubmit using its real result.'})})
-                    hub.emit({'event':'submission_rejected_after_observation_action','current_source_step':hub.robot.steps})
-                    continue
-                messages.append({'role':'tool','tool_call_id':identity,
-                                 'content':json.dumps({'saved':True,'robot_actions':0})})
-                if pictures:
-                    messages.append({'role':'user','content':pictures})
-                return args, response, {'api_wall_s':total_s,'rounds':turn,'tool_calls':call_count}
-            result, images = hub.call(name, args)
-            messages.append({'role':'tool','tool_call_id':identity,'content':json.dumps(result,allow_nan=False)})
-            pictures.extend(images)
-            if hub.fatal:
-                if pictures:messages.append({'role':'user','content':pictures})
-                raise ProviderError('Observation action result is failed or uncertain; no further action dispatched')
-        if pictures:
-            messages.append({'role':'user','content':pictures})
-    raise ProviderError('Grasp planning reply budget exhausted without a sketch')
 
 
 def restore_planning_images(messages, roots):
@@ -164,7 +76,7 @@ def planning_instructions(text, allow_perception=True, *, active_observation=Fal
     else:
         middle = '''
 
-本次你是双Agent系统中的A，只看程序自动提供的图像、任务和状态，生成符号草图；不调用感知工具，不求像素或三维坐标。程序自动保存并打包历史图像、对应深度和相机信息交给B。B在抓取链执行期间分析可能用于后续放置的参考区域/点；具体感知、几何查询和参数准备由B及执行器负责。
+本次是独立静态抓取诊断：只看程序提供的保存图像、任务和状态，生成符号抓取草图；不调用感知工具，不求像素或三维坐标。当前没有后台Agent或放置路线分析。
 
 本轮只开放submit_grasp_sketch。当前入口仍只接通抓取草图，按完整任务选择对象、分割范围和抓取意图，不编造未实现的放置动作。SAM3/GraspGen由执行器调用，Mask和抓取位姿仍由常驻Molmo选择ID或NONE；你不代替Molmo选候选。不需要先自行测量尺寸或定位后续放置点才能交草图。当前图片来自保存观测，没有主动移动相机。
 '''
@@ -252,7 +164,7 @@ def generate_plan(observation, env_file, review_trial=None, *, max_turns=40, max
     return run
 
 
-def replay_observation_prelude(robot, metadata, source):
+def replay_observation_prelude(robot, metadata, source, *, allow_recorded_closing=False):
     """Replay only recorded robot commands, never object state, then match RGB-D."""
     prelude=metadata.get('observation_prelude')
     if not prelude:return
@@ -269,7 +181,7 @@ def replay_observation_prelude(robot, metadata, source):
             if (set(control)!={'source_step','joint_target','gripper_command'} or control['source_step']!=i
                     or not isinstance(q,list) or len(q)!=7
                     or any(type(v) not in (int,float) or not math.isfinite(v) for v in q)
-                    or control['gripper_command']!=-1.0):
+                    or control['gripper_command'] not in ((-1.0, 1.0) if allow_recorded_closing else (-1.0,))):
                 raise ValueError('Invalid recorded open-gripper observation control; no replay dispatched')
         for control in controls:robot.step(control['joint_target'],control['gripper_command'])
     else:
@@ -307,7 +219,7 @@ def generate_observing_plan(source, run, env_file, gpu_uuid, peer_pids, *,
         history=ObservationHistory(robot,run,emit,history_interval_s,video)
         robot.on_step=history.on_step
         replay_observation_prelude(robot,metadata,source)
-        allowed=PERCEPTION_TOOLS|{'move_to','move_pose','move_relative','move_waypoints','wait'}
+        allowed=PERCEPTION_TOOLS|{'move','move_relative','move_waypoints','wait'}
         hub=ToolHub(robot,MotionExecutor(robot,emit),run,emit,allowed_tools=allowed)
         history.attach(hub)
         initial,pictures=hub.observe()
@@ -317,7 +229,7 @@ def generate_observing_plan(source, run, env_file, gpu_uuid, peer_pids, *,
               'parameters':SKETCH_SCHEMA}}
         messages=[{'role':'system','content':system},{'role':'user','content':[
             {'type':'text','text':json.dumps({'phase':'A initial observation then symbolic grasp sketch',
-                'history_interval_s':history.interval_s,'history_purpose':'Frozen temporal RGB-D for B placement geometry preparation',
+                'history_interval_s':history.interval_s,'history_purpose':'Saved calibrated observation history for independent grasp diagnosis; no background agent',
                 'sampling_clock':'simulation time, not API/wall time'})},*pictures]}]
         final=run/'final_observation'
         config={'observation':str(final.resolve()),'initial_observation_source':str(source.resolve()),

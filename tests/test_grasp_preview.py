@@ -133,3 +133,29 @@ def test_part_query_reaches_sam_and_mask_selector_without_replacing_parent_ident
     assert intent['target_description'] == 'yellow and white mug'
     assert intent['segmentation_description'] == calls[0]['prompt']
     assert source['views'][1]['status'] == 'molmo_none'
+
+
+def test_image_region_hint_reaches_molmo_without_removing_sam_candidates(tmp_path, monkeypatch):
+    folder = make_observation(tmp_path)
+    views = [dict(camera=c, candidates=[candidate(0,.99), candidate(1,.4)]) for c in CAMERAS]
+    region = {'camera': 'agentview', 'bounds_xyxy': [0,0,10,10],
+              'description': 'visible support behind the partition', 'visible_evidence': 'separating edges visible'}
+    calls = []
+    def call(url, payload):
+        calls.append(payload)
+        if len(calls) == 1:
+            return response(views)
+        return {'answer': '{"selected_ids": [2], "reason": "visible support"}'}
+    monkeypatch.setattr('sketchik.grasp_preview.request', call)
+    output = tmp_path/'result'; output.mkdir()
+    _, _, source = mask_clouds(folder, 'container', {}, 'sam', output,
+        sam_prompt='support inside identified region', molmo_url='molmo', selection_context=region)
+    import json
+    intent = json.loads(calls[1]['prompt'].splitlines()[-1])
+    assert intent['high_level_image_region'] == region
+    assert len(intent['candidate_mapping']) == 4
+    assert all(set(value) == {'camera'} for value in intent['candidate_mapping'].values())
+    assert intent['allowed_ids'] == [1,2,3,4]
+    assert source['views'][0]['selected_candidate_id'] == 1
+    assert source['views'][0]['selected_score'] == .4
+    assert source['views'][1]['status'] == 'molmo_none'

@@ -104,7 +104,7 @@ def main():
             panel = Image.fromarray(rgb)
             draw = ImageDraw.Draw(panel)
             draw.rectangle((0,0,1024,65),fill='white')
-            draw.text((10,6), f'AnyPlace {index:02d} | {camera} | partial observed mug: pink',fill='black')
+            draw.text((10,6), f'AnyPlace {index:02d} | {camera} | partial observed held object: pink',fill='black')
             draw.text((10,27), f'Local floor gap {signed.min()*1000:.1f} mm | final IK: {record["final_ik"]}',fill='black')
             draw.text((10,47), 'DEPTH OCCLUDED OVERLAY - unknown surfaces are not reconstructed',fill='black')
             panel.save(directory/f'candidate_{index:02d}_{camera}.png')

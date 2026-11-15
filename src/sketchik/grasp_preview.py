@@ -49,7 +49,7 @@ def validate_mask_choice(answer, mapping):
     return {mapping[i]['camera']:mapping[i]['local_id'] for i in ids}
 
 
-def select_masks(folder, views, target, molmo_url, output, sam_prompt=None):
+def select_masks(folder, views, target, molmo_url, output, sam_prompt=None, selection_context=None):
     mapping={};items=[];next_id=1
     for camera in CAMERAS:
         image=Image.open(folder/(camera+'.png')).convert('RGB');overlay=np.array(image);labels=[]
@@ -66,12 +66,31 @@ def select_masks(folder, views, target, molmo_url, output, sam_prompt=None):
         for box,identity in labels:
             box=[max(0,min(1023,float(v))) for v in box]
             draw.rectangle(box,outline='red',width=3);draw.text((box[0]+3,box[1]+3),str(identity),font=font,fill='red',stroke_width=2,stroke_fill='white')
+        if selection_context and selection_context['camera'] == camera:
+            x0,y0,x1,y1=selection_context['bounds_xyxy']
+            draw.rectangle([x0,y0,x1-1,y1-1],outline='cyan',width=3)
+            draw.text((x0,y0), 'Requested region',font=font,fill='cyan',stroke_width=2,stroke_fill='black')
         path=output/(camera+'_mask_choices.png');picture.save(path)
         items.append({'label':camera+' numbered SAM3 candidates','image_base64':base64.b64encode(path.read_bytes()).decode()})
     if not mapping:
         (output/'molmo_mask_selection.json').write_text(json.dumps({'selected_ids':[],'reason':'SAM returned no candidates; Molmo not called'}))
         return {},set(CAMERAS)
-    prompt=(Path(__file__).resolve().parents[2]/'prompts/mask_selector.md').read_text()+'\n'+json.dumps({'target_description':target,'segmentation_description':sam_prompt or target,'candidate_mapping':mapping})
+    intent={'target_description':target,'segmentation_description':sam_prompt or target,'candidate_mapping':mapping}
+    guide=(Path(__file__).resolve().parents[2]/'prompts/mask_selector.md').read_text()
+    if selection_context:
+        intent['high_level_image_region']=selection_context
+        # Global display IDs are the only IDs the selector may return. Exposing
+        # SAM-local zero-based IDs here confused the regional selector in real probes.
+        intent['candidate_mapping']={identity:{'camera':record['camera']} for identity,record in mapping.items()}
+        intent['allowed_ids']=list(mapping)
+        guide+= ('\nThe cyan rectangle is a coarse high-level image-region hint, not a SAM mask. '
+                 'Use its description and visible evidence to distinguish the intended region from adjacent ones. '
+                 'All SAM candidates remain available. Preserve the actual segmentation_description scope: '
+                 'a whole-parent query selects the parent, while a part query must not substitute the whole object. '
+                 'A parent mask does not certify the requested reference surface. '
+                 'Return only allowed global display IDs, never a zero-based SAM-local index; '
+                 'return no selection when no candidate matches.')
+    prompt=guide+'\n'+json.dumps(intent)
     (output/'molmo_mask_input.json').write_text(json.dumps({'prompt':prompt,'image_files':[c+'_mask_choices.png' for c in CAMERAS]},indent=2))
     start=time.perf_counter();response=request(molmo_url+'/infer',{'prompt':prompt,'images':items})
     response['client_wall_s']=time.perf_counter()-start
@@ -81,7 +100,8 @@ def select_masks(folder, views, target, molmo_url, output, sam_prompt=None):
     return selected,set(CAMERAS)-set(selected)
 
 
-def mask_clouds(folder, target, candidate_ids, sam_url, output, sam_prompt=None, molmo_url=None):
+def mask_clouds(folder, target, candidate_ids, sam_url, output, sam_prompt=None, molmo_url=None,
+                selection_context=None):
     images = {c: Image.open(folder/(c+".png")).convert("RGB") for c in CAMERAS}
     if any(image.size != (1024,1024) for image in images.values()):
         raise ValueError("Dual-view preview requires native 1024x1024 RGB-D; do not upscale saved 256 images")
@@ -98,7 +118,8 @@ def mask_clouds(folder, target, candidate_ids, sam_url, output, sam_prompt=None,
     rejected_views=set()
     if molmo_url:
         if candidate_ids:raise ValueError('Do not combine forced Mask IDs with semantic Molmo selection')
-        candidate_ids,rejected_views=select_masks(folder,views,target,molmo_url,output,sam_prompt=query)
+        candidate_ids,rejected_views=select_masks(folder,views,target,molmo_url,output,sam_prompt=query,
+                                                selection_context=selection_context)
     all_points,all_colors,origins,records = [],[],[],[]
     palette = [(255,80,40), (40,210,100), (100,100,255), (220,80,220)]
     for index,camera in enumerate(CAMERAS):

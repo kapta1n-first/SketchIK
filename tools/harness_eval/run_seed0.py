@@ -1,5 +1,6 @@
 """Prepared future native HarnessVLA runner; requires separate launch authorization.
-External launch/accounting only. Frozen RPent source and native policy stay unchanged.
+External launch/accounting and an explicitly labeled duplicate-primitive adapter.
+Frozen RPent files and ordinary planning policy stay unchanged.
 """
 import os,sys,json,time,hashlib,subprocess,socket,threading,shutil,urllib.request,urllib.error
 from pathlib import Path
@@ -42,13 +43,31 @@ def selected_gpu_index(gpu_rows, gpu_uuid, minimum_free_mib=18000):
    return fields[0]
  raise RuntimeError('Selected GPU UUID not found; refusing fallback to another GPU')
 
+def configure_primitive_guard(command, environment, run, profile):
+ if profile=='off':return command
+ if profile!='reject-duplicate-primitives-v1':raise ValueError('Unknown primitive guard profile')
+ if command[1:3]!=['-m','rpent.cli.main']:
+  raise ValueError('Primitive guard requires the prepared native module entry')
+ environment['HARNESS_GUARD_AUDIT']=str(Path(run)/'primitive_guard.jsonl')
+ return [command[0],str(ROOT/'tools/harness_eval/guarded_native.py'),*command[3:]]
+
+def guard_hashes(profile):
+ if profile=='off':return {}
+ return {name:hashlib.sha256((ROOT/'tools/harness_eval'/name).read_bytes()).hexdigest()
+         for name in ('primitive_guard.py','guarded_native.py')}
+
 def main():
  tasks=selected_tasks(os.environ.get('HARNESS_TASKS','0'))
+ guard_profile=os.environ.get('HARNESS_PRIMITIVE_GUARD','reject-duplicate-primitives-v1')
+ if guard_profile not in ('off','reject-duplicate-primitives-v1'):raise ValueError('Unknown primitive guard profile')
+ guard_source_hash=guard_hashes(guard_profile)
  if OUT.exists() or STATE.exists():raise RuntimeError('Refusing overwrite of previous run')
  OUT.mkdir(mode=0o700);(OUT/'private/data').mkdir(parents=True,mode=0o700)
  cfg=read(BASE/'prepared_command.json');source_hash=hashes();write(OUT/'source_hashes.json',source_hash)
  env=os.environ.copy();env.update(cfg['environment']);env.update(CUDA_DEVICE_ORDER='PCI_BUS_ID',MUJOCO_EGL_DEVICE_ID='0',MUJOCO_GL='egl',PYOPENGL_PLATFORM='egl',PYTHONUNBUFFERED='1',PYTHONDONTWRITEBYTECODE='1',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',NO_PROXY='127.0.0.1,localhost',no_proxy='127.0.0.1,localhost',HF_HUB_OFFLINE='1')
  state={'status':'starting_services','pid':os.getpid(),'started_at_unix':time.time(),'source_commit':cfg['source_commit'],'scope':'New separately authorized full-initial-state experiment only; 1800s effective budget excludes confirmed network failures and retry backoff. No old process continuation or action replay. Empty per-task local memory as explicitly requested, matching the earlier DS setup; Sol low/65536 retained.','model':'gpt-6.1-sol','reasoning_effort':'low','max_tokens':65536,'planner_timeout_s':1800,'native_max_turns':100,'authorized_tasks':tasks,'stop_after_selected_tasks':True,'memory_profile':'local','evaluation_label':'native-local-prompt-empty-external-memory','strict_zero_shot':False,'built_in_task_priors_retained':True,'tool_protocol':'flowith_xml_bridge','memory_initial_files':'zero-byte MEMORY.md only; empty global/task-family/task-specific','native_wall_watchdog_s':1000000000,'budget_policy':'1800s effective at model-response boundary; confirmed failed network attempts and retry backoff excluded; pending/unknown model wait counted','gpu_uuid':GPU,'services':{},'jobs':[],'output':str(OUT)};write(STATE,state)
+ state.update(primitive_guard_profile=guard_profile,primitive_guard_source_hashes=guard_source_hash)
+ if guard_profile!='off':state['evaluation_label']+='-duplicate-primitive-rejection-adapter'
  processes=[];child=None;servers=[]
  def save():write(STATE,state)
  try:
@@ -91,6 +110,7 @@ def main():
   results=[]
   for task in tasks:
    if hashes()!=source_hash:raise RuntimeError('Frozen native source changed')
+   if guard_hashes(guard_profile)!=guard_source_hash:raise RuntimeError('Frozen primitive guard changed')
    if any(p.poll() is not None for p in processes):raise RuntimeError('Dedicated service exited')
    if shutil.disk_usage(OUT).free<10*1024**3:raise RuntimeError('Less than 10GiB on output filesystem')
    run=OUT/f'task_{task:02d}';run.mkdir();(run/'api').mkdir()
@@ -153,6 +173,7 @@ def main():
    command+=['--planner-timeout-s','1000000000']
    command=configure_empty_local_memory(command,run)
    for name,service in state['services'].items():command.extend([f'--{name}-endpoint',service['endpoint']])
+   command=configure_primitive_guard(command,runenv,run,guard_profile)
    job={'task':task,'seed':0,'init':0,'status':'running','run':str(run),'started_at_unix':time.time(),'command':command,'balance_before':credit_snapshot(CREDITS)}
    with (run/'console.log').open('xb') as log:child=subprocess.Popen(command,cwd=cfg['cwd'],env=runenv,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
    job['pid']=child.pid;state['jobs'].append(job);save();print(json.dumps({'event':'task_started','task':task,'pid':child.pid}),flush=True)
@@ -163,9 +184,10 @@ def main():
    api=[read(p) for p in sorted((run/'api').glob('*/summary.json'))];excluded=sum(x.get('excluded_network_s',0) for x in api)
    terminated=any(bool(x.get('terminated')) for x in read(run/'states.json').get('steps',[]));error=transcript.get('error');budget_timeout=isinstance(error,str) and 'planner timed out after 1800s' in error
    effective_timeout=any(x.get('state')=='effective_budget_exhausted' for x in api)
-   bad=not transcript or (rc!=0 and not budget_timeout and not effective_timeout) or (bool(error) and not budget_timeout and not effective_timeout) or hashes()!=source_hash
+   bad=not transcript or (rc!=0 and not budget_timeout and not effective_timeout) or (bool(error) and not budget_timeout and not effective_timeout) or hashes()!=source_hash or guard_hashes(guard_profile)!=guard_source_hash
    job.update(status='stopped_for_inspection' if bad else 'finished',official_success=transcript.get('environment_success'),native_error=error)
    row={'task':task,'seed':0,'init':0,'official_success':transcript.get('environment_success') if transcript.get('environment_success') is not None else (terminated if not bad or terminated else None),'raw_environment_success':transcript.get('environment_success'),'native_termination_success':terminated,'native_finish':transcript.get('finish'),'native_error':error,'budget_exhausted':budget_timeout or effective_timeout,'native_elapsed_s':transcript.get('elapsed_s'),'wall_s':job['ended_at_unix']-job['started_at_unix'],'excluded_network_s':excluded,'effective_wall_s':max(0,job['ended_at_unix']-job['started_at_unix']-excluded),'planner_requests':len(api),'upstream_attempts':len(attempts),'balance_before':job['balance_before'],'balance_after':job['balance_after'],'program_or_api_error':bad,'run':str(run)}
+   row.update(primitive_guard_profile=guard_profile,primitive_guard_source_hashes=guard_source_hash)
    results.append(row);write(run/'control_summary.json',row);write(OUT/'results.json',{'status':'running' if not bad else 'stopped_for_inspection','tasks':results,'shared_account_not_exclusive_cost':True});save();print(json.dumps({'event':'task_finished','task':task,'official':row['official_success'],'wall_s':row['wall_s'],'error':bool(error)}),flush=True)
    if bad:state['status']='stopped_for_inspection';save();break
   else:state.update(status='finished',ended_at_unix=time.time());save()

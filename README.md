@@ -139,3 +139,5 @@ PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 完整异步 seed0 十轮公开日志、动作回执、终态图和视频入口见 [实验记录](reports/async74-seed0-20261117/README.md)。原始官方评分与 A 自报分别保留。
 
 HarnessVLA 对照的空外部记忆配置、有效预算计时与工具通道核查见 [复现审计](reports/harness-audit-20261117/README.md)；原版 local 提示仍含内置任务经验，不将其标成严格 zero-shot。外部启动器位于 [tools/harness_eval](tools/harness_eval/README.md)。
+
+外部HarnessVLA对照启动与审计见[tools/harness_eval/README.md](tools/harness_eval/README.md)。当前用户授权的适配仅在同一回复中出现同名同参重复机器人primitive时整条零执行并交同一A纠正；反复观察与其他原版行为保留，纠正请求/耗时照常计入。该profile与未适配原始结果分开标注，不据离线检查声明在线提速或严格zero-shot。

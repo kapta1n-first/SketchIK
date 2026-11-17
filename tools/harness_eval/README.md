@@ -2,6 +2,10 @@
 
 This directory contains our external launch, transport, accounting, and empty-memory helpers. It does not vendor or replace the native HarnessVLA planner, prompts, robot tools, or environment.
 
+The newly authorized default is labeled **native core + duplicate-primitive rejection adapter** (`HARNESS_PRIMITIVE_GUARD=reject-duplicate-primitives-v1`). Before the SDK dispatches any tools, the adapter checks only for same-name, same-argument physical primitives repeated within that response, using the native LIBERO primitive classifier and registered tools. If found, the whole response executes zero tools and the native SDK asks the same agent to correct it. The original response is retained in SDK history and separately archived under the run's private directory; RPent's custom dispatched-tool transcript alone does not include rejected replies. Every correction uses the original request/retry/effective-time budgets. There is no new four-reply limit, automatic deduplication, invented receipt, or network retry.
+
+Repeated observations, guide reads, segmentation, localization, distinct-primitive batches, cross-response same-target retries, and native finish behavior stay unchanged. No prompt, memory, primitive or motion policy is rewritten. `HARNESS_PRIMITIVE_GUARD=off` selects the original baseline entry. Keep results from the two profiles separate; this adapter is not a claim of strict zero-shot, speedup, or online validation. Native source files remain unchanged; the opt-in entry subclasses the native SDK lifecycle session in memory.
+
 Prepared configuration: native commit `0e406bb96d670d0c18a4cea9a6ea047119661d19`; `gpt-6.1-sol`, low, 65536 completion limit; seed0; local prompt with a fresh empty external memory directory per task; 1800 seconds of effective time. The original local prompt still includes task-specific experience, so this is **empty-external-memory evaluation**, not a claim of strict zero-shot.
 
 The currently configured channel still uses a Flowith XML tool bridge. Private raw completion tracing is enabled for the next dedicated gateway; tracing is not a protocol fix. Credentials and runtime configuration stay outside Git. An existing native snapshot, prepared native command, model assets, configured gateway binary and credentials are required under `.runtime/harness_original_control_v168` and `.runtime/flowith_probe/private`; this source checkout alone is not a self-contained reproduction bundle. `HARNESS_PYTHON` and `HARNESS_GPU_UUID` override the local dependency interpreter and GPU selection.
@@ -13,7 +17,7 @@ The native raw wall timer is disabled for this configuration. Effective budget i
 Offline checks (loopback mock HTTP only; no provider/GPU calls):
 
 ```sh
-python -m pytest tools/harness_eval/test_empty_memory.py tools/harness_eval/test_network_recovery.py -q
+python -m pytest tools/harness_eval/test_empty_memory.py tools/harness_eval/test_network_recovery.py tools/harness_eval/test_primitive_guard.py -q
 ```
 
 See [the audit](../../reports/harness-audit-20261117/README.md) for native configuration differences and limits of the conversion checks.

@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_4125d30c-213",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing segment is intended to complete the remaining placement and withdrawal. The last actual images show the burner glowing red and the upright moka pot lifted with its handle between the fingers. After execution, review the actual images to determine whether the pot rests upright on the burner and the stove remains on; use normal finish or recovery tools according to the real outcome. Placement success is not yet known.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

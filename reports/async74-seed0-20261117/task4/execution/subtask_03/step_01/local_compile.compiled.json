@@ -1,0 +1,74 @@
+{
+  "cloud_view_id": "plate_G8_historical_focus",
+  "cloud_pixel_xy": [
+    600,
+    430
+  ],
+  "cloud_point_index": 37106,
+  "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task4/single_a_geometry/object_03/historical_surfaces.npz",
+  "cloud_role": "historical multiview surfaces",
+  "source_observation": {
+    "observation_id": "obs_00004",
+    "camera": "robot0_eye_in_hand",
+    "source_step": 618,
+    "role": "historical_shape"
+  },
+  "source_pixel_xy": [
+    210,
+    262
+  ],
+  "cloud_group_id": 1,
+  "binding": {
+    "anchor": {
+      "group_id": 1,
+      "kind": "cloud_point",
+      "pixel_xy": [
+        600,
+        430
+      ],
+      "view_id": "plate_G8_historical_focus"
+    },
+    "offset_frame": "world",
+    "offset_m": [
+      -0.012,
+      -0.037,
+      0.003
+    ],
+    "orientation": "preserve",
+    "reference": "held_bottom"
+  },
+  "anchor_world_xyz_m": [
+    0.003451619064435363,
+    0.3362245559692383,
+    0.4446125626564026
+  ],
+  "offset_world_m": [
+    -0.012,
+    -0.037,
+    0.003
+  ],
+  "reference_offset_world_m": [
+    5.254119860794576e-05,
+    0.04866806727735946,
+    -0.0732656587628465
+  ],
+  "compiled_pose": {
+    "position": [
+      -0.008600922134172583,
+      0.25055648869187885,
+      0.5208782214192491
+    ],
+    "quaternion_xyzw": [
+      0.9999999980498308,
+      -4.25994663744156e-05,
+      -3.5272455664664994e-05,
+      -2.900823997112455e-05
+    ]
+  },
+  "source_step": 2210,
+  "executed": false,
+  "reference_is_complete_object_geometry": false,
+  "grounding_source_step": 618,
+  "execution_source_step": 2210,
+  "execution_observation_id": "obs_00019"
+}

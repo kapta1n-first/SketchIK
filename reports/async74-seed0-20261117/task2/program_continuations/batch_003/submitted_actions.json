@@ -1,0 +1,109 @@
+{
+  "intent": "Carry the upright moka pot above the burner, lower it onto the coil, release its handle, and withdraw.",
+  "actions": [
+    {
+      "intent": "Raise the pot farther before lateral transport to clear the stove edge",
+      "primitive": "move",
+      "reference_target_id": "moka_pot",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.05
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "moka_pot"
+    },
+    {
+      "intent": "Center the pot body above the burner and lower its base onto the support surface, accounting for the handle's asymmetric observed bounds",
+      "primitive": "move",
+      "reference_target_id": "stove",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 2,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                657,
+                533
+              ],
+              "view_id": "stove_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.017,
+              0.12
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          },
+          {
+            "anchor": {
+              "group_id": 2,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                657,
+                533
+              ],
+              "view_id": "stove_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.017,
+              0.006
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          }
+        ]
+      },
+      "target_id": "moka_pot"
+    },
+    {
+      "intent": "Release the moka pot handle at the burner support height",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 25
+      },
+      "target_id": "moka_pot"
+    },
+    {
+      "intent": "Withdraw the open fingers vertically from the handle for actual placement review",
+      "primitive": "move",
+      "reference_target_id": "stove",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.15
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "moka_pot"
+    }
+  ],
+  "source_step": 1738
+}

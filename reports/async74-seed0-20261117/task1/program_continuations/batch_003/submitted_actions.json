@@ -1,0 +1,108 @@
+{
+  "intent": "Carry the cream cheese box over the basket opening and release centrally from just above the rim, keeping the broad palm out of the narrow cavity.",
+  "actions": [
+    {
+      "intent": "Translate over the basket at elevated height, then lower only to a rim-clear release pose.",
+      "primitive": "move",
+      "reference_target_id": "basket",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                475,
+                500
+              ],
+              "view_id": "basket_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.21
+            ],
+            "orientation": {
+              "closing_axis": [
+                0,
+                1,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                475,
+                500
+              ],
+              "view_id": "basket_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.17
+            ],
+            "orientation": {
+              "closing_axis": [
+                0,
+                1,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "cream_cheese_box"
+    },
+    {
+      "intent": "Release the box over the interior support with fingers and palm above the rim.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 100
+      },
+      "target_id": "cream_cheese_box"
+    },
+    {
+      "intent": "Retract vertically to expose the basket contents for the actual placement check.",
+      "primitive": "move",
+      "reference_target_id": "basket",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.1
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cream_cheese_box"
+    }
+  ],
+  "source_step": 1550
+}

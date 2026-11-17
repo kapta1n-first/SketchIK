@@ -1,0 +1,30 @@
+{
+  "actions": [
+    {
+      "intent": "Relieve roof-edge interference by backing the palm slightly while settling the upright mug onto the cavity floor.",
+      "primitive": "move",
+      "reference_target_id": "microwave",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.012,
+              -0.004
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    }
+  ],
+  "held_object_id": "yellow_white_mug",
+  "held_pose_relation": "unchanged",
+  "visible_evidence": "Current measured side samples show the upright yellow mug still between the same pads, with its base immediately above the interior support. Compared with obs_00018 the handle and body descended with the hand without evident slip. The palm remains at the roof edge. Back the palm slightly away from the entrance while settling the base the final few millimetres; do not repeat either stalled absolute goal or release yet."
+}

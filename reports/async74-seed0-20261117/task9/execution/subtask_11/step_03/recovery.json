@@ -1,0 +1,199 @@
+[
+  {
+    "tier": "T1",
+    "decision": "skip_continuation",
+    "source_step": 4590,
+    "recent_progress": false,
+    "reason": "No remaining T1 allowance or no measured recent progress; do not repeat a stalled command"
+  },
+  {
+    "tier": "T2",
+    "decision": "return_to_A",
+    "source_step": 4590,
+    "failure": {
+      "failure_stage": "motion",
+      "error": "Motion did not converge",
+      "physical_cause": "not_determined",
+      "executed": true,
+      "original_absolute_goal": {
+        "position": [
+          0.08000833748796292,
+          0.2277842491658378,
+          1.0367540618611752
+        ],
+        "quaternion_xyzw": [
+          0.7072541069408769,
+          0.0006614194011703714,
+          -5.7394465344695604e-05,
+          -0.7069591129941772
+        ]
+      },
+      "parameters": {
+        "position": [
+          0.08000833748796292,
+          0.2277842491658378,
+          1.0367540618611752
+        ],
+        "quaternion_xyzw": [
+          0.7072541069408769,
+          0.0006614194011703714,
+          -5.7394465344695604e-05,
+          -0.7069591129941772
+        ]
+      },
+      "actual_motion": {
+        "event": "motion_finished",
+        "converged": false,
+        "position_error_m": 0.02229791634669844,
+        "rotation_error_deg": 1.6625302953937517,
+        "actions": 101,
+        "execution_wall_s": 2.2894343119114637,
+        "total_wall_s": 2.3263738583773375,
+        "state": {
+          "step": 4590,
+          "q": [
+            -0.12366635309155255,
+            1.2361780390675412,
+            0.24057889171853147,
+            -1.0395249832172908,
+            1.3661849184147055,
+            1.7099330086130085,
+            1.6712996178559252
+          ],
+          "position": [
+            0.08647680581336523,
+            0.20646292593249366,
+            1.0358839087097775
+          ],
+          "quaternion_xyzw": [
+            0.7137318333388383,
+            -0.005150048839528799,
+            0.009476130574157141,
+            -0.7003360265080418
+          ],
+          "finger_joint_positions": [
+            0.003288490493421075,
+            -3.345725689407337e-06
+          ],
+          "finger_joint_names": [
+            "gripper0_right_finger_joint1",
+            "gripper0_right_finger_joint2"
+          ],
+          "gripper_command": 1.0,
+          "done": false
+        },
+        "tracking": {
+          "source_step_start": 4489,
+          "source_step_end": 4590,
+          "samples": 101,
+          "phase_at_stop": "settling",
+          "goal_joint_positions_rad": [
+            -0.10888445180893687,
+            1.2391751219522513,
+            0.26301131609652867,
+            -1.0464880022964855,
+            1.3650831524649136,
+            1.7134844225086294,
+            1.6694404380437031
+          ],
+          "actual_joint_positions_rad": [
+            -0.12366635309155255,
+            1.2361780390675412,
+            0.24057889171853147,
+            -1.0395249832172908,
+            1.3661849184147055,
+            1.7099330086130085,
+            1.6712996178559252
+          ],
+          "signed_goal_joint_errors_rad": [
+            -0.014781901282615681,
+            -0.0029970828847101227,
+            -0.022432424377997195,
+            0.006963019079194721,
+            0.001101765949791833,
+            -0.0035514138956209695,
+            0.001859179812222056
+          ],
+          "max_goal_joint_error_rad": 0.022432424377997195,
+          "max_error_joint_index": 2,
+          "max_error_joint_name": "robot0_joint3",
+          "last_sent_joint_target_rad": [
+            -0.10888445180893687,
+            1.2391751219522513,
+            0.26301131609652867,
+            -1.0464880022964855,
+            1.3650831524649136,
+            1.7134844225086294,
+            1.6694404380437031
+          ],
+          "final_goal_commanded": true,
+          "last_command_held_since_step": 4510,
+          "last_command_consecutive_steps": 81,
+          "peak_current_setpoint_joint_error_rad": 0.02249799467903288,
+          "first_joint_tolerance_exceedance_step": 4509,
+          "recent_measured_window": {
+            "samples": 10,
+            "first_step": 4581,
+            "last_step": 4590,
+            "position_axis_ranges_m": [
+              2.318657654186429e-05,
+              6.579359953365338e-05,
+              9.239761346302444e-05
+            ],
+            "joint_ranges_rad": [
+              0.00010856681367375776,
+              0.000103703345494921,
+              4.0584499906209937e-05,
+              1.8417815524252035e-05,
+              5.8995920306115224e-05,
+              0.0003621721220550267,
+              2.012932844097648e-05
+            ],
+            "maximum_rotation_from_first_rad": 0.0002628282203410622
+          },
+          "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+        },
+        "tracking_tolerances": {
+          "position_m": 0.005,
+          "orientation_deg": 3.0,
+          "max_joint_rad": 0.02
+        },
+        "compiled_motion_id": "6e6817adcd3ec5cc291ed4bf853c1c899a26693f3b85247f76641e9fb526ab00",
+        "motion_progress": {
+          "recent_progress": false,
+          "samples": 10,
+          "recent_position_progress_m": 4.105771745641085e-05,
+          "recent_rotation_progress_rad": -0.00016701638241968866,
+          "recent_joint_error_progress_rad": 3.0479199571720184e-05,
+          "meaning": "Measured error reduction only; contact cause and attachment remain unknown"
+        },
+        "continuation_goal": {
+          "position": [
+            0.08000833748796292,
+            0.2277842491658378,
+            1.0367540618611752
+          ],
+          "quaternion_xyzw": [
+            0.7072541069408769,
+            0.0006614194011703714,
+            -5.7394465344695604e-05,
+            -0.7069591129941772
+          ],
+          "joint_target": [
+            -0.10888445180893687,
+            1.2391751219522513,
+            0.26301131609652867,
+            -1.0464880022964855,
+            1.3650831524649136,
+            1.7134844225086294,
+            1.6694404380437031
+          ],
+          "gripper_command": 1.0,
+          "source_step": 4590,
+          "position_tolerance_m": 0.005
+        },
+        "physical_cause": "not_determined"
+      }
+    }
+  }
+]

@@ -1,0 +1,162 @@
+{
+  "turn": 6,
+  "executing_batch": 4,
+  "request_wall_s": 14.260484151542187,
+  "execution_wall_s": 15.566559663042426,
+  "overlap_wall_s": 14.260484151542187,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": true,
+  "cancellation_reason": "execution_failed",
+  "cancellation_cleanup_wall_s": 0.0,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "957434297b1b6b68fda447e4455b4281a1bd36508693a30366e650092b86e916",
+  "discarded": "Execution failed or episode ended; review actual stop and replan with same A",
+  "transport": {
+    "body_bytes": 4408680,
+    "body_sha256": "d9a515f0052d1b438fc7089b5e3e7744120db85e753c9b857368396ae69a9951",
+    "image_count": 15,
+    "original_image_count": 41,
+    "image_references": [
+      {
+        "image_id": "image_ref_0011",
+        "original_position": [
+          17,
+          2
+        ],
+        "canonical_position": [
+          9,
+          4
+        ]
+      },
+      {
+        "image_id": "image_ref_0012",
+        "original_position": [
+          17,
+          4
+        ],
+        "canonical_position": [
+          9,
+          6
+        ]
+      }
+    ],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 3,
+      "boundary_source_step": 1637,
+      "source": {
+        "messages": 42,
+        "text_chars": 351691,
+        "reasoning_chars": 948,
+        "image_occurrences": 41
+      },
+      "active": {
+        "messages": 23,
+        "text_chars": 135629,
+        "reasoning_chars": 415,
+        "image_occurrences": 17
+      },
+      "omitted_source_messages": 19,
+      "retained_tail_messages": 18,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        26,
+        28,
+        29,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 15,
+        "images_after": 15,
+        "encoded_image_url_bytes_before": 4235369,
+        "encoded_image_url_bytes_after": 4235369,
+        "protected_image_ids": [
+          "history_image_28b2399bf23a68dbb384a80c25dff495391e65d0fc172353b0d1e5f57ae96881",
+          "history_image_3f16422442a1c363059d2c970845688e96bcce7a3d568f3b90ddc85eb5cbecac",
+          "history_image_53a11617de7cda97bda29d9a75b2fe4c209cb4c848f59893c1a4895eff350508",
+          "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "history_image_8ea9b8998aac3b85cac8c159837079e371ecd7b40189578a0307eb615821ee05",
+          "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82",
+          "history_image_9ddb7f9abb1857d0aef59e84eb5adab0195b1e2d0228d490e4c952731b3f2927",
+          "history_image_a94b68a01858f3582f847733672267efb91f43f264988aa2b28862a38de08919",
+          "history_image_bb05e77c355e69e2fbde31df8be3682461f08b6ed0eeba1ce580e303ae8660ad",
+          "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "history_image_fb6c95f5d7b35db06e99db6bb7c2570fbb24e26b8b96e0f9587c7c645f0b4f32"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "current_clouds/latest/object_00_face.png": "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "current_clouds/latest/object_01_face.png": "history_image_a94b68a01858f3582f847733672267efb91f43f264988aa2b28862a38de08919",
+          "current_clouds/latest/object_00_side.png": "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "current_clouds/latest/object_01_side.png": "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "current_clouds/latest/object_00_top.png": "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "current_clouds/latest/object_01_top.png": "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 415,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.0417330246418715,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing sketch attempts the remaining drawer closure and retracts the hand. Actual completion is unknown. After its result, review the current dual RGB and read the cabinet’s latest local point image to check the lowest drawer’s closure against the cabinet frame. Use the observed bowl resting within the drawer after release at step 1637 as placement evidence, together with the actual closure outcome; finish only if both relations are supported, otherwise plan recovery.",
+    "status": "finish_review",
+    "prepared_from_step": 1637,
+    "after_batch": 4,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task3",
+      "source_step": 1637,
+      "request_turn": 6,
+      "grasp_epoch": 2,
+      "reference": null,
+      "executing_targets": [
+        "cabinet"
+      ]
+    },
+    "candidate_id": "957434297b1b6b68fda447e4455b4281a1bd36508693a30366e650092b86e916",
+    "executed": false
+  }
+}

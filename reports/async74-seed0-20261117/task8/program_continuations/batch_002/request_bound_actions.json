@@ -1,0 +1,109 @@
+{
+  "intent": "Place pot 1 on one side of the stove and withdraw upward.",
+  "actions": [
+    {
+      "intent": "Increase transport clearance before crossing toward the stove",
+      "primitive": "move",
+      "reference_target_id": "moka_pot_1",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.07
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "moka_pot_1"
+    },
+    {
+      "intent": "Carry the pot above the first stove support location and lower its base onto the surface",
+      "primitive": "move",
+      "reference_target_id": "stove",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                520,
+                430
+              ],
+              "view_id": "stove_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.15
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                520,
+                430
+              ],
+              "view_id": "stove_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.006
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          }
+        ]
+      },
+      "target_id": "moka_pot_1"
+    },
+    {
+      "intent": "Release the first pot at the stove support location",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 60
+      },
+      "target_id": "moka_pot_1"
+    },
+    {
+      "intent": "Withdraw vertically clear of the released pot",
+      "primitive": "move",
+      "reference_target_id": "stove",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.16
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "moka_pot_1"
+    }
+  ],
+  "source_step": 1032
+}

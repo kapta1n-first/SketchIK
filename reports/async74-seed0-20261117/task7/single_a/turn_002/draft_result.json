@@ -1,0 +1,210 @@
+{
+  "turn": 2,
+  "executing_batch": 1,
+  "request_wall_s": 23.947257846593857,
+  "execution_wall_s": 19.469186114147305,
+  "overlap_wall_s": 19.468684988096356,
+  "post_execution_wait_wall_s": 4.4785728584975,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "81fe044a288fd2f7dc077544c0ed6e80285590dc79a51bdd1508efc060e6169b",
+  "transport": {
+    "body_bytes": 4368672,
+    "body_sha256": "9caf04df33bb49d5a6291bd2c1b94f7a9eb06c0d6117189100d7b19a955a2fd4",
+    "image_count": 15,
+    "original_image_count": 31,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 0,
+      "source": {
+        "messages": 14,
+        "text_chars": 120378,
+        "reasoning_chars": 0,
+        "image_occurrences": 31
+      },
+      "active": {
+        "messages": 11,
+        "text_chars": 75423,
+        "reasoning_chars": 0,
+        "image_occurrences": 15
+      },
+      "omitted_source_messages": 3,
+      "active_source_indices": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 15,
+        "images_after": 15,
+        "encoded_image_url_bytes_before": 4254901,
+        "encoded_image_url_bytes_after": 4254901,
+        "protected_image_ids": [
+          "history_image_070016394e0d5b991acd8684b26ca1baa286df326868120bc8445b93ecf49c57",
+          "history_image_4c48fcfd22725a7987f774539dce6d00be0f4b997b731c3eec7d2245c3684bfa",
+          "history_image_4d395b7cafc287337f068c79247b18fa7dd41833537a5449525125138f9cfc94",
+          "history_image_548635b226964a852aaa7a7c53967329a0f376b21d2b2909485b17f974c3c26e",
+          "history_image_7a49e46d24316ac98445e1a94bc437d7057f960b86103d3ba24ae3a021058ee7",
+          "history_image_97454748ebb22abeaf19fbb46ad1d71c98f2e9c6140d169aab51e8dac7ace5d3",
+          "history_image_9ad43a027f4680defc29c80e9f802139d19f7e30f5109ee974632d1c3fdf47d0",
+          "history_image_9d558d35d95769e47b8ce7d1a130d3e67033f1280cd54cb91367acd15bda71bf",
+          "history_image_a083b5b484ae96197e8f069c3754320bc95e0b1ba4fbf159a7de42c2e36f139e",
+          "history_image_a0be25653f7aa95d716d92191b8f659571cc0362bbfac34957ae251193132be1",
+          "history_image_af8aeeafd15daeb54d98ef56f461f0f0f154c8db3881f81374b905aca52f0b1e",
+          "history_image_b87f526085bc9a8a3670c1abeacc6c11fe3d5953952d9d33eb8000ed1c71829d",
+          "history_image_bbbe1352a22caef11541b9931931025cfa1c59d591af2d2ee2c7de050b93da0b",
+          "history_image_c58fd410fedaa3464c9cbe9f76d7d0cedb6b662172e11ae72ad205619bb2dd8a",
+          "history_image_e7c3a5d354dbf589e57929c608cab018b4ed6a9b0eab8e2552f007ee32e5216f"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_548635b226964a852aaa7a7c53967329a0f376b21d2b2909485b17f974c3c26e",
+          "current_clouds/latest/object_00_face.png": "history_image_9d558d35d95769e47b8ce7d1a130d3e67033f1280cd54cb91367acd15bda71bf",
+          "current_clouds/latest/object_01_face.png": "history_image_e7c3a5d354dbf589e57929c608cab018b4ed6a9b0eab8e2552f007ee32e5216f",
+          "current_clouds/latest/object_02_face.png": "history_image_4d395b7cafc287337f068c79247b18fa7dd41833537a5449525125138f9cfc94",
+          "current_clouds/latest/object_00_side.png": "history_image_a0be25653f7aa95d716d92191b8f659571cc0362bbfac34957ae251193132be1",
+          "current_clouds/latest/object_01_side.png": "history_image_c58fd410fedaa3464c9cbe9f76d7d0cedb6b662172e11ae72ad205619bb2dd8a",
+          "current_clouds/latest/object_02_side.png": "history_image_7a49e46d24316ac98445e1a94bc437d7057f960b86103d3ba24ae3a021058ee7",
+          "current_clouds/latest/object_00_top.png": "history_image_070016394e0d5b991acd8684b26ca1baa286df326868120bc8445b93ecf49c57",
+          "current_clouds/latest/object_01_top.png": "history_image_4c48fcfd22725a7987f774539dce6d00be0f4b997b731c3eec7d2245c3684bfa",
+          "current_clouds/latest/object_02_top.png": "history_image_a083b5b484ae96197e8f069c3754320bc95e0b1ba4fbf159a7de42c2e36f139e"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 0,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.7464289851486683,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Translate above the basket with the carried can bottom well above the rim, then lower within the opening while retaining palm clearance.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  500,
+                  400
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.22
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  500,
+                  400
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.07
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            }
+          ]
+        },
+        "target_id": "alphabet_soup"
+      },
+      {
+        "intent": "Release the can inside the basket opening to settle on its lined support.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "open",
+          "steps": 100
+        },
+        "target_id": "alphabet_soup"
+      },
+      {
+        "intent": "Withdraw the open hand vertically clear of the basket rim.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.16
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "alphabet_soup"
+      }
+    ],
+    "intent": "Carry the soup can over the basket and release it within the opening, leaving the other side available for the cream cheese box.",
+    "preconditions": "The current grasp-and-lift segment completes normally, with the soup can carried and its held-bottom reference supported. The basket remains stationary. The selected white interior patch is inside the rim; release height keeps the broad palm above the rim rather than driving it into the basket.",
+    "reason": "Prepare the immediate soup-can placement using the stationary basket’s observed interior support; the executing grasp outcome remains unknown.",
+    "status": "ready",
+    "prepared_from_step": 1042,
+    "after_batch": 1,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task7",
+      "source_step": 1042,
+      "request_turn": 2,
+      "grasp_epoch": 0,
+      "reference": null,
+      "executing_targets": [
+        "alphabet_soup"
+      ]
+    },
+    "candidate_id": "81fe044a288fd2f7dc077544c0ed6e80285590dc79a51bdd1508efc060e6169b",
+    "executed": false
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "turn": 8,
+  "executing_batch": 5,
+  "request_wall_s": 12.712075682356954,
+  "execution_wall_s": 17.336297784000635,
+  "overlap_wall_s": 12.712075682356954,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": true,
+  "cancellation_reason": "execution_failed",
+  "cancellation_cleanup_wall_s": 0.0,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "86a1b70da87f7789e809a49558da9ec7fc1f3c3ff3b57d5942502784d8c49e4f",
+  "discarded": "Execution failed or episode ended; review actual stop and replan with same A",
+  "transport": {
+    "body_bytes": 5291584,
+    "body_sha256": "02db9d8fe9ca3fecc441588b404cbda62a55179703fd8de7b5b4e89413b1ab80",
+    "image_count": 18,
+    "original_image_count": 46,
+    "image_references": [
+      {
+        "image_id": "image_ref_0011",
+        "original_position": [
+          10,
+          2
+        ],
+        "canonical_position": [
+          3,
+          4
+        ]
+      },
+      {
+        "image_id": "image_ref_0012",
+        "original_position": [
+          10,
+          4
+        ],
+        "canonical_position": [
+          3,
+          6
+        ]
+      },
+      {
+        "image_id": "image_ref_0011",
+        "original_position": [
+          20,
+          2
+        ],
+        "canonical_position": [
+          3,
+          4
+        ]
+      },
+      {
+        "image_id": "image_ref_0012",
+        "original_position": [
+          20,
+          4
+        ],
+        "canonical_position": [
+          3,
+          6
+        ]
+      }
+    ],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 4,
+      "boundary_source_step": 1944,
+      "source": {
+        "messages": 52,
+        "text_chars": 436076,
+        "reasoning_chars": 948,
+        "image_occurrences": 46
+      },
+      "active": {
+        "messages": 25,
+        "text_chars": 141957,
+        "reasoning_chars": 415,
+        "image_occurrences": 22
+      },
+      "omitted_source_messages": 27,
+      "retained_tail_messages": 18,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        26,
+        28,
+        29,
+        31,
+        32,
+        33,
+        34,
+        36,
+        37,
+        38,
+        39,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 18,
+        "images_after": 18,
+        "encoded_image_url_bytes_before": 5112214,
+        "encoded_image_url_bytes_after": 5112214,
+        "protected_image_ids": [
+          "history_image_1e834a15771281adf46d445197672a2e9f1076f21f0328ca7738eaca934245fc",
+          "history_image_1fbda81f51bebd6d70d37ef66c5e8ca033a120ad46f57c6cb95bcf066fc73ac5",
+          "history_image_28b2399bf23a68dbb384a80c25dff495391e65d0fc172353b0d1e5f57ae96881",
+          "history_image_53a11617de7cda97bda29d9a75b2fe4c209cb4c848f59893c1a4895eff350508",
+          "history_image_763b97d9030b4007fb95d1d4c6b56b394fada4ee2bf340753e052d2e438035bd",
+          "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82",
+          "history_image_a94b68a01858f3582f847733672267efb91f43f264988aa2b28862a38de08919",
+          "history_image_bb05e77c355e69e2fbde31df8be3682461f08b6ed0eeba1ce580e303ae8660ad",
+          "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "history_image_fb6c95f5d7b35db06e99db6bb7c2570fbb24e26b8b96e0f9587c7c645f0b4f32"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "current_clouds/latest/object_00_face.png": "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "current_clouds/latest/object_01_face.png": "history_image_a94b68a01858f3582f847733672267efb91f43f264988aa2b28862a38de08919",
+          "current_clouds/latest/object_00_side.png": "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "current_clouds/latest/object_01_side.png": "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "current_clouds/latest/object_00_top.png": "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "current_clouds/latest/object_01_top.png": "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 415,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.123737532645464,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing recovery attempts the remaining bottom-drawer closure and withdraws the hand, so it may complete the task. Its outcome is not yet known. After actual feedback, read the cabinet’s latest local point image and compare the current dual RGB to verify that the lowest drawer front is closed against the cabinet frame. Combine that outcome with the actual images at steps 1637 and 1944 showing the released bowl resting upright inside that drawer. Finish only if placement and closure are supported; otherwise plan recovery from the actual stop.",
+    "status": "finish_review",
+    "prepared_from_step": 1944,
+    "after_batch": 5,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task3",
+      "source_step": 1944,
+      "request_turn": 8,
+      "grasp_epoch": 3,
+      "reference": null,
+      "executing_targets": [
+        "cabinet"
+      ]
+    },
+    "candidate_id": "86a1b70da87f7789e809a49558da9ec7fc1f3c3ff3b57d5942502784d8c49e4f",
+    "executed": false
+  }
+}

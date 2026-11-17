@@ -1,0 +1,160 @@
+{
+  "object_id": "alphabet_soup",
+  "source_kind": "scan_cloud",
+  "status": "predicted_rigid",
+  "identity_source": "Agent grasp target and selected contact point; not holding certification",
+  "source_step": 1287,
+  "source_world_to_eef_rotation": [
+    [
+      -0.0003604518164467051,
+      0.9999997963966588,
+      0.0005265749036331964
+    ],
+    [
+      0.9999998992138007,
+      0.00036059270153723246,
+      -0.0002674795176247298
+    ],
+    [
+      -0.00026766934223206913,
+      0.0005264784370837231,
+      -0.9999998255867742
+    ]
+  ],
+  "source_cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task0/single_a_geometry/object_00/historical_surfaces.npz",
+  "source_observations": [
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "agentview",
+      "source_step": 322,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 322,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "agentview",
+      "source_step": 399,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 399,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "agentview",
+      "source_step": 546,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 546,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "agentview",
+      "source_step": 637,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 637,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "agentview",
+      "source_step": 764,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 764,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1059,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1059,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "points": 9742,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "points": 34045,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1059,
+      "points": 34114,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1059,
+      "points": 9742,
+      "role": "current_surfaces"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1059,
+      "points": 34114,
+      "role": "current_surfaces"
+    }
+  ],
+  "component_group_id": 1,
+  "points": 61293,
+  "anchor_world_xyz_m": [
+    -0.09899896383285522,
+    -0.15375018119812012,
+    0.5092630982398987
+  ],
+  "rigid_attachment_verified": false,
+  "reference_scope": "initial_observed_component",
+  "reference_id": "206f33f5a83a21ac1d5b6b9415be82513c232a1a84860fc1eebc94ddcb6cb251",
+  "grasp_epoch": 1,
+  "relation_revision": 0,
+  "validity": "active",
+  "wall_s": 0.02751927636563778
+}

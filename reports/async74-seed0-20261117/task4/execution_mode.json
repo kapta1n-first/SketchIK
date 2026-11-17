@@ -1,0 +1,8 @@
+{
+  "motion_check_mode": "ik_only",
+  "observed_collision_checks_enabled": false,
+  "full_pose_ik": true,
+  "joint_limits_checked": true,
+  "strict_fk_retained": true,
+  "task_success_from_commands": false
+}

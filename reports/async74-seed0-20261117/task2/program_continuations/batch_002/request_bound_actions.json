@@ -1,0 +1,97 @@
+{
+  "intent": "Grasp the moka pot handle from above and lift it clear of the tabletop while preserving its upright attitude.",
+  "actions": [
+    {
+      "intent": "Approach above the outer black handle with fingers straddling its narrow world-X dimension, then lower to pinch it",
+      "primitive": "move",
+      "reference_target_id": "moka_pot",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                510,
+                810
+              ],
+              "view_id": "moka_pot_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.13
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                510,
+                810
+              ],
+              "view_id": "moka_pot_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.009
+            ],
+            "orientation": "preserve",
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "moka_pot"
+    },
+    {
+      "intent": "Pinch the black handle of the moka pot",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 30
+      },
+      "target_id": "moka_pot"
+    },
+    {
+      "intent": "Lift vertically for verification that the pot body follows the fingers and clears the table",
+      "primitive": "move",
+      "reference_target_id": "moka_pot",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.08
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "moka_pot"
+    }
+  ],
+  "source_step": 1308
+}

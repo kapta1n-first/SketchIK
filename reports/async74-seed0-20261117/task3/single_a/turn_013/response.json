@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_d9ab649a-dec",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing withdrawal is expected to complete the remaining robot motion after the bottom-drawer closing attempt. Closure and retained bowl placement are not yet certified. On the actual outcome, read the latest cabinet local point image and compare it with the actual dual RGB to check the lowest front's closed relationship and the supported placement history; then finish if supported or plan recovery if not.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

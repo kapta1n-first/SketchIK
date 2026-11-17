@@ -1,0 +1,4668 @@
+{
+  "version": 2,
+  "scope": "This episode only. Original model expressions, dispatch evidence and actual results are separate; no automatic replay or task-success certification.",
+  "batches": [
+    {
+      "batch": 1,
+      "request_turn": 1,
+      "request_source_step": 840,
+      "status": "finished",
+      "model_submission": {
+        "actions": [
+          {
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "primitive": "move",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      510,
+                      510
+                    ],
+                    "view_id": "book_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.09
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      0.64,
+                      0.768374908,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "pad_midpoint"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      510,
+                      510
+                    ],
+                    "view_id": "book_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    -0.018
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      0.64,
+                      0.768374908,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "pad_midpoint"
+                }
+              ]
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Pinch the opposite book covers.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "close",
+              "steps": 70
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Lift vertically to test whether the book moves with the fingers and clear the table.",
+            "primitive": "move",
+            "reference_target_id": "book",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.12
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "held_object_id": null,
+        "held_pose_relation": "none",
+        "visible_evidence": "The current dual RGB shows the black book upright on the table, separate from the brown four-compartment caddy. Its page-edge top and opposite covers are visible; the top-view book point map shows the thickness direction approximately world [0.64,0.77,0]. I will pinch near the upper edge and verify lift in the actual outcome images."
+      },
+      "program_submission": null,
+      "dispatch_origin": "model_tool",
+      "request_bound_submission": {
+        "actions": [
+          {
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "primitive": "move",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      510,
+                      510
+                    ],
+                    "view_id": "book_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.09
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      0.64,
+                      0.768374908,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "pad_midpoint"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      510,
+                      510
+                    ],
+                    "view_id": "book_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    -0.018
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      0.64,
+                      0.768374908,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "pad_midpoint"
+                }
+              ]
+            },
+            "target_id": "book",
+            "reference_target_id": "book"
+          },
+          {
+            "intent": "Pinch the opposite book covers.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "close",
+              "steps": 70
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Lift vertically to test whether the book moves with the fingers and clear the table.",
+            "primitive": "move",
+            "reference_target_id": "book",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.12
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "held_object_id": null,
+        "held_pose_relation": "none",
+        "visible_evidence": "The current dual RGB shows the black book upright on the table, separate from the brown four-compartment caddy. Its page-edge top and opposite covers are visible; the top-view book point map shows the thickness direction approximately world [0.64,0.77,0]. I will pinch near the upper edge and verify lift in the actual outcome images.",
+        "source_step": 840
+      },
+      "expanded_steps": [
+        {
+          "expanded_step_index": 0,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 0,
+            "grounding_source_step": 30
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+          "selection_expression": {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                510,
+                510
+              ],
+              "view_id": "book_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.09
+            ],
+            "orientation": {
+              "closing_axis": [
+                0.64,
+                0.768374908,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 840,
+              "actual_entry_state": {
+                "step": 840,
+                "q": [
+                  -0.24035908883566126,
+                  -0.16534933157236292,
+                  0.26137132346303227,
+                  -2.427707216849818,
+                  0.0979632526807296,
+                  2.1884628894784868,
+                  0.7668699623171485
+                ],
+                "position": [
+                  -0.2997435197853753,
+                  0.016285508737262682,
+                  1.1770013469201706
+                ],
+                "quaternion_xyzw": [
+                  0.7152178227307638,
+                  0.6975924385235837,
+                  -0.015162453917188276,
+                  -0.03997944164436347
+                ],
+                "finger_joint_positions": [
+                  0.04000135487457225,
+                  -0.03994372042174618
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.21964528127833421,
+                  0.17587807705360584,
+                  1.1069811262130738
+                ],
+                "quaternion_xyzw": [
+                  0.90553851388053,
+                  0.42426406856937743,
+                  0.0,
+                  0.0
+                ]
+              },
+              "compiled_motion_id": "83a13cf70fa3ab37784c785ee2759375c3b9a6c43a8bc5efa016ffdf3c9f2b2b",
+              "recorded_joint_target_rad": [
+                -0.02843243512580187,
+                0.232521345926489,
+                0.3533382366781013,
+                -2.1734694397640677,
+                -0.11687961366588784,
+                2.3886787554138538,
+                1.8819986567696372
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.21964528127833421,
+                0.17587807705360584,
+                1.1069811262130738
+              ],
+              "quaternion_xyzw": [
+                0.90553851388053,
+                0.42426406856937743,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.001959914196326993,
+              "rotation_error_deg": 0.4660751817086087,
+              "actions": 150,
+              "execution_wall_s": 2.821907788515091,
+              "total_wall_s": 3.1965666487812996,
+              "state": {
+                "step": 990,
+                "q": [
+                  -0.03203467123795324,
+                  0.22781455416118898,
+                  0.3545866588962283,
+                  -2.177653945829378,
+                  -0.11337355549821819,
+                  2.3874719812783987,
+                  1.8693766611190632
+                ],
+                "position": [
+                  -0.22065323841100576,
+                  0.17435342695656378,
+                  1.1076887476918675
+                ],
+                "quaternion_xyzw": [
+                  0.9038321253271719,
+                  0.4278866454599584,
+                  -0.0004593275168684807,
+                  -0.0005448686296078235
+                ],
+                "finger_joint_positions": [
+                  0.03999878412941958,
+                  -0.039995608398504134
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 840,
+                "source_step_end": 990,
+                "samples": 150,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.02843243512580187,
+                  0.232521345926489,
+                  0.3533382366781013,
+                  -2.1734694397640677,
+                  -0.11687961366588784,
+                  2.3886787554138538,
+                  1.8819986567696372
+                ],
+                "actual_joint_positions_rad": [
+                  -0.03203467123795324,
+                  0.22781455416118898,
+                  0.3545866588962283,
+                  -2.177653945829378,
+                  -0.11337355549821819,
+                  2.3874719812783987,
+                  1.8693766611190632
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.0036022361121513698,
+                  -0.004706791765300006,
+                  0.0012484222181269877,
+                  -0.0041845060653105115,
+                  0.0035060581676696484,
+                  -0.0012067741354551131,
+                  -0.01262199565057398
+                ],
+                "max_goal_joint_error_rad": 0.01262199565057398,
+                "max_error_joint_index": 6,
+                "max_error_joint_name": "robot0_joint7",
+                "last_sent_joint_target_rad": [
+                  -0.028432435125801875,
+                  0.232521345926489,
+                  0.3533382366781013,
+                  -2.1734694397640677,
+                  -0.11687961366588784,
+                  2.3886787554138538,
+                  1.8819986567696372
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 990,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.036169665343606994,
+                "first_joint_tolerance_exceedance_step": 846,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 981,
+                  "last_step": 990,
+                  "position_axis_ranges_m": [
+                    0.006236795044037846,
+                    0.01251767717117877,
+                    0.005488317157723799
+                  ],
+                  "joint_ranges_rad": [
+                    0.027275022159329046,
+                    0.0349566727397283,
+                    0.006898733773302079,
+                    0.03048150333362898,
+                    0.024777740550586555,
+                    0.005183952652456636,
+                    0.08808456709328794
+                  ],
+                  "maximum_rotation_from_first_rad": 0.052207434657599305
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "83a13cf70fa3ab37784c785ee2759375c3b9a6c43a8bc5efa016ffdf3c9f2b2b"
+            },
+            "expanded_step_index": 0,
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "source_step": 990,
+            "observation_id": "obs_00006",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 30
+            }
+          },
+          "source_step_end": 990,
+          "physical_steps_advanced": 150
+        },
+        {
+          "expanded_step_index": 1,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 1,
+            "grounding_source_step": 30
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+          "selection_expression": {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                510,
+                510
+              ],
+              "view_id": "book_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.018
+            ],
+            "orientation": {
+              "closing_axis": [
+                0.64,
+                0.768374908,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 990,
+              "actual_entry_state": {
+                "step": 990,
+                "q": [
+                  -0.03203467123795324,
+                  0.22781455416118898,
+                  0.3545866588962283,
+                  -2.177653945829378,
+                  -0.11337355549821819,
+                  2.3874719812783987,
+                  1.8693766611190632
+                ],
+                "position": [
+                  -0.22065323841100576,
+                  0.17435342695656378,
+                  1.1076887476918675
+                ],
+                "quaternion_xyzw": [
+                  0.9038321253271719,
+                  0.4278866454599584,
+                  -0.0004593275168684807,
+                  -0.0005448686296078235
+                ],
+                "finger_joint_positions": [
+                  0.03999878412941958,
+                  -0.039995608398504134
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.2196627080693522,
+                  0.17585715469587904,
+                  0.9989811262130738
+                ],
+                "quaternion_xyzw": [
+                  0.90553851388053,
+                  0.42426406856937743,
+                  0.0,
+                  0.0
+                ]
+              },
+              "compiled_motion_id": "671ceb8f75553c293b1172da7ef0ae4d402b0a344dd4824f9244c3663ef118d0",
+              "recorded_joint_target_rad": [
+                0.2945130958660811,
+                0.44065685120156145,
+                0.02432862366828413,
+                -2.184559708208753,
+                -0.021009171556878776,
+                2.625007611880857,
+                1.8151758512791574
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.2196627080693522,
+                0.17585715469587904,
+                0.9989811262130738
+              ],
+              "quaternion_xyzw": [
+                0.90553851388053,
+                0.42426406856937743,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0027041454149992553,
+              "rotation_error_deg": 0.0490989610309257,
+              "actions": 67,
+              "execution_wall_s": 1.3065113071352243,
+              "total_wall_s": 1.5554902162402868,
+              "state": {
+                "step": 1057,
+                "q": [
+                  0.2832786732568717,
+                  0.4343381315493798,
+                  0.035289818512795085,
+                  -2.1856135554900704,
+                  -0.028979872963078853,
+                  2.6187698027764172,
+                  1.8209023021671153
+                ],
+                "position": [
+                  -0.2199059481493759,
+                  0.17593053175359166,
+                  1.0016733098056865
+                ],
+                "quaternion_xyzw": [
+                  0.9055591425009378,
+                  0.42421982300485234,
+                  -0.000355140055895701,
+                  -0.00023468753413538975
+                ],
+                "finger_joint_positions": [
+                  0.039999378222551674,
+                  -0.040000033961227824
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 990,
+                "source_step_end": 1057,
+                "samples": 67,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  0.2945130958660811,
+                  0.44065685120156145,
+                  0.02432862366828413,
+                  -2.184559708208753,
+                  -0.021009171556878776,
+                  2.625007611880857,
+                  1.8151758512791574
+                ],
+                "actual_joint_positions_rad": [
+                  0.2832786732568717,
+                  0.4343381315493798,
+                  0.035289818512795085,
+                  -2.1856135554900704,
+                  -0.028979872963078853,
+                  2.6187698027764172,
+                  1.8209023021671153
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.011234422609209371,
+                  -0.00631871965218167,
+                  0.010961194844510955,
+                  -0.0010538472813172994,
+                  -0.007970701406200077,
+                  -0.00623780910443994,
+                  0.005726450887957979
+                ],
+                "max_goal_joint_error_rad": 0.011234422609209371,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  0.2945130958660811,
+                  0.44065685120156145,
+                  0.02432862366828413,
+                  -2.184559708208753,
+                  -0.021009171556878772,
+                  2.625007611880857,
+                  1.8151758512791574
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1057,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.026383823270422546,
+                "first_joint_tolerance_exceedance_step": 997,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1048,
+                  "last_step": 1057,
+                  "position_axis_ranges_m": [
+                    0.00012246130714752002,
+                    0.00032467346270362296,
+                    0.015688704897631744
+                  ],
+                  "joint_ranges_rad": [
+                    0.06273458882214619,
+                    0.03434810064183075,
+                    0.06060635840224973,
+                    0.0043101525875539615,
+                    0.0415028053369475,
+                    0.03241173968206734,
+                    0.027295440102098167
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0011718508502209085
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "671ceb8f75553c293b1172da7ef0ae4d402b0a344dd4824f9244c3663ef118d0"
+            },
+            "expanded_step_index": 1,
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "source_step": 1057,
+            "observation_id": "obs_00007",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 30
+            }
+          },
+          "source_step_end": 1057,
+          "physical_steps_advanced": 67
+        },
+        {
+          "expanded_step_index": 2,
+          "location": {
+            "semantic_step_index": 1,
+            "waypoint_index": 0,
+            "grounding_source_step": 840
+          },
+          "primitive": "set_gripper",
+          "target_id": "book",
+          "intent": "Pinch the opposite book covers.",
+          "selection_expression": {
+            "command": "close",
+            "steps": 70
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1057,
+              "actual_entry_state": {
+                "step": 1057,
+                "q": [
+                  0.2832786732568717,
+                  0.4343381315493798,
+                  0.035289818512795085,
+                  -2.1856135554900704,
+                  -0.028979872963078853,
+                  2.6187698027764172,
+                  1.8209023021671153
+                ],
+                "position": [
+                  -0.2199059481493759,
+                  0.17593053175359166,
+                  1.0016733098056865
+                ],
+                "quaternion_xyzw": [
+                  0.9055591425009378,
+                  0.42421982300485234,
+                  -0.000355140055895701,
+                  -0.00023468753413538975
+                ],
+                "finger_joint_positions": [
+                  0.039999378222551674,
+                  -0.040000033961227824
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "parameters": {
+                "command": "close",
+                "steps": 70
+              }
+            }
+          ],
+          "actual_result": {
+            "primitive": "set_gripper",
+            "parameters": {
+              "command": "close",
+              "steps": 70
+            },
+            "result": {
+              "step": 1127,
+              "q": [
+                0.28340348695986595,
+                0.4346099649312285,
+                0.03511045053255148,
+                -2.1857494981664365,
+                -0.028618318901403393,
+                2.6190663439023187,
+                1.8203441554069657
+              ],
+              "position": [
+                -0.2199680660129657,
+                0.1758828629239642,
+                1.0014984171694337
+              ],
+              "quaternion_xyzw": [
+                0.9055148297870337,
+                0.4243143136132398,
+                -0.0004062837669411473,
+                -0.0003020466609335981
+              ],
+              "finger_joint_positions": [
+                0.014682299280090585,
+                -0.014680022207215312
+              ],
+              "finger_joint_names": [
+                "gripper0_right_finger_joint1",
+                "gripper0_right_finger_joint2"
+              ],
+              "gripper_command": 1.0,
+              "done": false
+            },
+            "expanded_step_index": 2,
+            "intent": "Pinch the opposite book covers.",
+            "source_step": 1127,
+            "observation_id": "obs_00008",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            },
+            "initial_grasp_contact": {
+              "status": "contact_geometry_supported",
+              "holding_certified": false,
+              "target_identity_certified": false,
+              "whole_object_reference_required": false,
+              "empty_gap_threshold_m": 0.003,
+              "contact_margin_m": 0.004,
+              "minimum_visible_free_fraction": 0.8,
+              "reason": "Current non-robot surfaces reach the measured pad contact zone; their identity, friction and attachment remain unverified.",
+              "before": {
+                "available": true,
+                "source_step": 1057,
+                "jaw_gap_m": 0.07899941218377905,
+                "pad_zone_eef_tool_m": [
+                  [
+                    -0.039499378222551444,
+                    -0.00799999999999993,
+                    -0.011599999999999996
+                  ],
+                  [
+                    0.03950003396122761,
+                    0.00799999999999993,
+                    0.004399999999999882
+                  ]
+                ],
+                "near_pad_surface_samples": 7513,
+                "surface_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1057,
+                    "near_pad_non_robot_samples": 539
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1057,
+                    "near_pad_non_robot_samples": 6974
+                  }
+                ],
+                "visible_free_fraction": 0.5085714285714286,
+                "visibility_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1057,
+                    "valid_probes": 175,
+                    "free_probes": 70
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1057,
+                    "valid_probes": 175,
+                    "free_probes": 44
+                  }
+                ],
+                "probe_count": 175
+              },
+              "after": {
+                "available": true,
+                "source_step": 1127,
+                "jaw_gap_m": 0.028362321487305775,
+                "pad_zone_eef_tool_m": [
+                  [
+                    -0.014182299280090497,
+                    -0.007999999999999964,
+                    -0.011599999999999711
+                  ],
+                  [
+                    0.01418002220721528,
+                    0.007999999999999997,
+                    0.004400000000000117
+                  ]
+                ],
+                "near_pad_surface_samples": 4995,
+                "surface_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1127,
+                    "near_pad_non_robot_samples": 159
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1127,
+                    "near_pad_non_robot_samples": 4836
+                  }
+                ],
+                "visible_free_fraction": 0.19428571428571428,
+                "visibility_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1127,
+                    "valid_probes": 175,
+                    "free_probes": 0
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1127,
+                    "valid_probes": 175,
+                    "free_probes": 34
+                  }
+                ],
+                "probe_count": 175,
+                "close_translation_m": 0.00019162040734345368,
+                "close_rotation_rad": 0.00026866352827755157
+              },
+              "source_step": 1127,
+              "robot_actions": 0,
+              "model_requests": 0,
+              "scope": "Local observed pad-contact geometry only; no task-object truth, whole-object registration, holding certification or collision planning.",
+              "object_id": "book",
+              "grasp_epoch": 1,
+              "active": true,
+              "evidence_scope": "Actual close-event evidence at source_step, not a fresh observation of later motion."
+            }
+          },
+          "source_step_end": 1127,
+          "physical_steps_advanced": 70
+        },
+        {
+          "expanded_step_index": 3,
+          "location": {
+            "semantic_step_index": 2,
+            "waypoint_index": 0,
+            "grounding_source_step": 840
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Lift vertically to test whether the book moves with the fingers and clear the table.",
+          "selection_expression": {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.12
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1127,
+              "actual_entry_state": {
+                "step": 1127,
+                "q": [
+                  0.28340348695986595,
+                  0.4346099649312285,
+                  0.03511045053255148,
+                  -2.1857494981664365,
+                  -0.028618318901403393,
+                  2.6190663439023187,
+                  1.8203441554069657
+                ],
+                "position": [
+                  -0.2199680660129657,
+                  0.1758828629239642,
+                  1.0014984171694337
+                ],
+                "quaternion_xyzw": [
+                  0.9055148297870337,
+                  0.4243143136132398,
+                  -0.0004062837669411473,
+                  -0.0003020466609335981
+                ],
+                "finger_joint_positions": [
+                  0.014682299280090585,
+                  -0.014680022207215312
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.2199680660129657,
+                  0.1758828629239642,
+                  1.1214984171694335
+                ],
+                "quaternion_xyzw": [
+                  0.9055148297870337,
+                  0.4243143136132398,
+                  -0.0004062837669411473,
+                  -0.0003020466609335981
+                ]
+              },
+              "compiled_motion_id": "7e0833071a18749df1951fa3c10479e6944bec343a05cb30fa7446b6ecb2a9d1",
+              "recorded_joint_target_rad": [
+                0.020716905869664824,
+                0.20186502694952407,
+                0.3045332642004324,
+                -2.1661917079215613,
+                -0.08442196901826549,
+                2.3563382310005485,
+                1.8595366775110984
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.2199680660129657,
+                0.1758828629239642,
+                1.1214984171694335
+              ],
+              "quaternion_xyzw": [
+                0.9055148297870337,
+                0.4243143136132398,
+                -0.0004062837669411473,
+                -0.0003020466609335981
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.004503137942508984,
+              "rotation_error_deg": 0.031523545547375624,
+              "actions": 60,
+              "execution_wall_s": 1.2448882181197405,
+              "total_wall_s": 1.3155614230781794,
+              "state": {
+                "step": 1187,
+                "q": [
+                  0.028862458026644756,
+                  0.2091929776648094,
+                  0.29583253249959146,
+                  -2.169060902415089,
+                  -0.08608711241404261,
+                  2.3665045640646487,
+                  1.8610238618377926
+                ],
+                "position": [
+                  -0.22001128421958982,
+                  0.17577268566848087,
+                  1.1169968347267525
+                ],
+                "quaternion_xyzw": [
+                  0.9056222693596252,
+                  0.42408488908798153,
+                  -0.0004997990215215348,
+                  -0.0002495758300233146
+                ],
+                "finger_joint_positions": [
+                  0.014680675399253397,
+                  -0.01468163951090049
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1127,
+                "source_step_end": 1187,
+                "samples": 60,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  0.020716905869664824,
+                  0.20186502694952407,
+                  0.3045332642004324,
+                  -2.1661917079215613,
+                  -0.08442196901826549,
+                  2.3563382310005485,
+                  1.8595366775110984
+                ],
+                "actual_joint_positions_rad": [
+                  0.028862458026644756,
+                  0.2091929776648094,
+                  0.29583253249959146,
+                  -2.169060902415089,
+                  -0.08608711241404261,
+                  2.3665045640646487,
+                  1.8610238618377926
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.008145552156979933,
+                  0.007327950715285331,
+                  -0.008700731700840958,
+                  -0.002869194493527516,
+                  -0.0016651433957771272,
+                  0.010166333064100197,
+                  0.0014871843266941465
+                ],
+                "max_goal_joint_error_rad": 0.010166333064100197,
+                "max_error_joint_index": 5,
+                "max_error_joint_name": "robot0_joint6",
+                "last_sent_joint_target_rad": [
+                  0.020716905869664827,
+                  0.20186502694952407,
+                  0.3045332642004324,
+                  -2.1661917079215613,
+                  -0.08442196901826549,
+                  2.3563382310005485,
+                  1.8595366775110984
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1187,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.02086447084882423,
+                "first_joint_tolerance_exceedance_step": 1134,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1178,
+                  "last_step": 1187,
+                  "position_axis_ranges_m": [
+                    7.29103944067111e-05,
+                    3.346753926042334e-05,
+                    0.018519903640093816
+                  ],
+                  "joint_ranges_rad": [
+                    0.03594506322114125,
+                    0.03160306975788718,
+                    0.03780628152473242,
+                    0.009703076657338272,
+                    0.004341469654836658,
+                    0.04227564222548308,
+                    0.0021184648427472474
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0007095201224093818
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "7e0833071a18749df1951fa3c10479e6944bec343a05cb30fa7446b6ecb2a9d1"
+            },
+            "expanded_step_index": 3,
+            "intent": "Lift vertically to test whether the book moves with the fingers and clear the table.",
+            "source_step": 1187,
+            "observation_id": "obs_00009",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 2,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            }
+          },
+          "source_step_end": 1187,
+          "physical_steps_advanced": 60
+        }
+      ],
+      "planned_execution_steps": 4,
+      "receipt": {
+        "subtask": null,
+        "steps": [
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.21964528127833421,
+                0.17587807705360584,
+                1.1069811262130738
+              ],
+              "quaternion_xyzw": [
+                0.90553851388053,
+                0.42426406856937743,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.001959914196326993,
+              "rotation_error_deg": 0.4660751817086087,
+              "actions": 150,
+              "execution_wall_s": 2.821907788515091,
+              "total_wall_s": 3.1965666487812996,
+              "state": {
+                "step": 990,
+                "q": [
+                  -0.03203467123795324,
+                  0.22781455416118898,
+                  0.3545866588962283,
+                  -2.177653945829378,
+                  -0.11337355549821819,
+                  2.3874719812783987,
+                  1.8693766611190632
+                ],
+                "position": [
+                  -0.22065323841100576,
+                  0.17435342695656378,
+                  1.1076887476918675
+                ],
+                "quaternion_xyzw": [
+                  0.9038321253271719,
+                  0.4278866454599584,
+                  -0.0004593275168684807,
+                  -0.0005448686296078235
+                ],
+                "finger_joint_positions": [
+                  0.03999878412941958,
+                  -0.039995608398504134
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 840,
+                "source_step_end": 990,
+                "samples": 150,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.02843243512580187,
+                  0.232521345926489,
+                  0.3533382366781013,
+                  -2.1734694397640677,
+                  -0.11687961366588784,
+                  2.3886787554138538,
+                  1.8819986567696372
+                ],
+                "actual_joint_positions_rad": [
+                  -0.03203467123795324,
+                  0.22781455416118898,
+                  0.3545866588962283,
+                  -2.177653945829378,
+                  -0.11337355549821819,
+                  2.3874719812783987,
+                  1.8693766611190632
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.0036022361121513698,
+                  -0.004706791765300006,
+                  0.0012484222181269877,
+                  -0.0041845060653105115,
+                  0.0035060581676696484,
+                  -0.0012067741354551131,
+                  -0.01262199565057398
+                ],
+                "max_goal_joint_error_rad": 0.01262199565057398,
+                "max_error_joint_index": 6,
+                "max_error_joint_name": "robot0_joint7",
+                "last_sent_joint_target_rad": [
+                  -0.028432435125801875,
+                  0.232521345926489,
+                  0.3533382366781013,
+                  -2.1734694397640677,
+                  -0.11687961366588784,
+                  2.3886787554138538,
+                  1.8819986567696372
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 990,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.036169665343606994,
+                "first_joint_tolerance_exceedance_step": 846,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 981,
+                  "last_step": 990,
+                  "position_axis_ranges_m": [
+                    0.006236795044037846,
+                    0.01251767717117877,
+                    0.005488317157723799
+                  ],
+                  "joint_ranges_rad": [
+                    0.027275022159329046,
+                    0.0349566727397283,
+                    0.006898733773302079,
+                    0.03048150333362898,
+                    0.024777740550586555,
+                    0.005183952652456636,
+                    0.08808456709328794
+                  ],
+                  "maximum_rotation_from_first_rad": 0.052207434657599305
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "83a13cf70fa3ab37784c785ee2759375c3b9a6c43a8bc5efa016ffdf3c9f2b2b"
+            },
+            "expanded_step_index": 0,
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "source_step": 990,
+            "observation_id": "obs_00006",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 30
+            }
+          },
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.2196627080693522,
+                0.17585715469587904,
+                0.9989811262130738
+              ],
+              "quaternion_xyzw": [
+                0.90553851388053,
+                0.42426406856937743,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0027041454149992553,
+              "rotation_error_deg": 0.0490989610309257,
+              "actions": 67,
+              "execution_wall_s": 1.3065113071352243,
+              "total_wall_s": 1.5554902162402868,
+              "state": {
+                "step": 1057,
+                "q": [
+                  0.2832786732568717,
+                  0.4343381315493798,
+                  0.035289818512795085,
+                  -2.1856135554900704,
+                  -0.028979872963078853,
+                  2.6187698027764172,
+                  1.8209023021671153
+                ],
+                "position": [
+                  -0.2199059481493759,
+                  0.17593053175359166,
+                  1.0016733098056865
+                ],
+                "quaternion_xyzw": [
+                  0.9055591425009378,
+                  0.42421982300485234,
+                  -0.000355140055895701,
+                  -0.00023468753413538975
+                ],
+                "finger_joint_positions": [
+                  0.039999378222551674,
+                  -0.040000033961227824
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 990,
+                "source_step_end": 1057,
+                "samples": 67,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  0.2945130958660811,
+                  0.44065685120156145,
+                  0.02432862366828413,
+                  -2.184559708208753,
+                  -0.021009171556878776,
+                  2.625007611880857,
+                  1.8151758512791574
+                ],
+                "actual_joint_positions_rad": [
+                  0.2832786732568717,
+                  0.4343381315493798,
+                  0.035289818512795085,
+                  -2.1856135554900704,
+                  -0.028979872963078853,
+                  2.6187698027764172,
+                  1.8209023021671153
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.011234422609209371,
+                  -0.00631871965218167,
+                  0.010961194844510955,
+                  -0.0010538472813172994,
+                  -0.007970701406200077,
+                  -0.00623780910443994,
+                  0.005726450887957979
+                ],
+                "max_goal_joint_error_rad": 0.011234422609209371,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  0.2945130958660811,
+                  0.44065685120156145,
+                  0.02432862366828413,
+                  -2.184559708208753,
+                  -0.021009171556878772,
+                  2.625007611880857,
+                  1.8151758512791574
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1057,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.026383823270422546,
+                "first_joint_tolerance_exceedance_step": 997,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1048,
+                  "last_step": 1057,
+                  "position_axis_ranges_m": [
+                    0.00012246130714752002,
+                    0.00032467346270362296,
+                    0.015688704897631744
+                  ],
+                  "joint_ranges_rad": [
+                    0.06273458882214619,
+                    0.03434810064183075,
+                    0.06060635840224973,
+                    0.0043101525875539615,
+                    0.0415028053369475,
+                    0.03241173968206734,
+                    0.027295440102098167
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0011718508502209085
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "671ceb8f75553c293b1172da7ef0ae4d402b0a344dd4824f9244c3663ef118d0"
+            },
+            "expanded_step_index": 1,
+            "intent": "Approach above the middle of the book's upper page edge, then straddle the covers near the top.",
+            "source_step": 1057,
+            "observation_id": "obs_00007",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 30
+            }
+          },
+          {
+            "primitive": "set_gripper",
+            "parameters": {
+              "command": "close",
+              "steps": 70
+            },
+            "result": {
+              "step": 1127,
+              "q": [
+                0.28340348695986595,
+                0.4346099649312285,
+                0.03511045053255148,
+                -2.1857494981664365,
+                -0.028618318901403393,
+                2.6190663439023187,
+                1.8203441554069657
+              ],
+              "position": [
+                -0.2199680660129657,
+                0.1758828629239642,
+                1.0014984171694337
+              ],
+              "quaternion_xyzw": [
+                0.9055148297870337,
+                0.4243143136132398,
+                -0.0004062837669411473,
+                -0.0003020466609335981
+              ],
+              "finger_joint_positions": [
+                0.014682299280090585,
+                -0.014680022207215312
+              ],
+              "finger_joint_names": [
+                "gripper0_right_finger_joint1",
+                "gripper0_right_finger_joint2"
+              ],
+              "gripper_command": 1.0,
+              "done": false
+            },
+            "expanded_step_index": 2,
+            "intent": "Pinch the opposite book covers.",
+            "source_step": 1127,
+            "observation_id": "obs_00008",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            },
+            "initial_grasp_contact": {
+              "status": "contact_geometry_supported",
+              "holding_certified": false,
+              "target_identity_certified": false,
+              "whole_object_reference_required": false,
+              "empty_gap_threshold_m": 0.003,
+              "contact_margin_m": 0.004,
+              "minimum_visible_free_fraction": 0.8,
+              "reason": "Current non-robot surfaces reach the measured pad contact zone; their identity, friction and attachment remain unverified.",
+              "before": {
+                "available": true,
+                "source_step": 1057,
+                "jaw_gap_m": 0.07899941218377905,
+                "pad_zone_eef_tool_m": [
+                  [
+                    -0.039499378222551444,
+                    -0.00799999999999993,
+                    -0.011599999999999996
+                  ],
+                  [
+                    0.03950003396122761,
+                    0.00799999999999993,
+                    0.004399999999999882
+                  ]
+                ],
+                "near_pad_surface_samples": 7513,
+                "surface_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1057,
+                    "near_pad_non_robot_samples": 539
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1057,
+                    "near_pad_non_robot_samples": 6974
+                  }
+                ],
+                "visible_free_fraction": 0.5085714285714286,
+                "visibility_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1057,
+                    "valid_probes": 175,
+                    "free_probes": 70
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1057,
+                    "valid_probes": 175,
+                    "free_probes": 44
+                  }
+                ],
+                "probe_count": 175
+              },
+              "after": {
+                "available": true,
+                "source_step": 1127,
+                "jaw_gap_m": 0.028362321487305775,
+                "pad_zone_eef_tool_m": [
+                  [
+                    -0.014182299280090497,
+                    -0.007999999999999964,
+                    -0.011599999999999711
+                  ],
+                  [
+                    0.01418002220721528,
+                    0.007999999999999997,
+                    0.004400000000000117
+                  ]
+                ],
+                "near_pad_surface_samples": 4995,
+                "surface_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1127,
+                    "near_pad_non_robot_samples": 159
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1127,
+                    "near_pad_non_robot_samples": 4836
+                  }
+                ],
+                "visible_free_fraction": 0.19428571428571428,
+                "visibility_cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1127,
+                    "valid_probes": 175,
+                    "free_probes": 0
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1127,
+                    "valid_probes": 175,
+                    "free_probes": 34
+                  }
+                ],
+                "probe_count": 175,
+                "close_translation_m": 0.00019162040734345368,
+                "close_rotation_rad": 0.00026866352827755157
+              },
+              "source_step": 1127,
+              "robot_actions": 0,
+              "model_requests": 0,
+              "scope": "Local observed pad-contact geometry only; no task-object truth, whole-object registration, holding certification or collision planning.",
+              "object_id": "book",
+              "grasp_epoch": 1,
+              "active": true,
+              "evidence_scope": "Actual close-event evidence at source_step, not a fresh observation of later motion."
+            }
+          },
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.2199680660129657,
+                0.1758828629239642,
+                1.1214984171694335
+              ],
+              "quaternion_xyzw": [
+                0.9055148297870337,
+                0.4243143136132398,
+                -0.0004062837669411473,
+                -0.0003020466609335981
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.004503137942508984,
+              "rotation_error_deg": 0.031523545547375624,
+              "actions": 60,
+              "execution_wall_s": 1.2448882181197405,
+              "total_wall_s": 1.3155614230781794,
+              "state": {
+                "step": 1187,
+                "q": [
+                  0.028862458026644756,
+                  0.2091929776648094,
+                  0.29583253249959146,
+                  -2.169060902415089,
+                  -0.08608711241404261,
+                  2.3665045640646487,
+                  1.8610238618377926
+                ],
+                "position": [
+                  -0.22001128421958982,
+                  0.17577268566848087,
+                  1.1169968347267525
+                ],
+                "quaternion_xyzw": [
+                  0.9056222693596252,
+                  0.42408488908798153,
+                  -0.0004997990215215348,
+                  -0.0002495758300233146
+                ],
+                "finger_joint_positions": [
+                  0.014680675399253397,
+                  -0.01468163951090049
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1127,
+                "source_step_end": 1187,
+                "samples": 60,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  0.020716905869664824,
+                  0.20186502694952407,
+                  0.3045332642004324,
+                  -2.1661917079215613,
+                  -0.08442196901826549,
+                  2.3563382310005485,
+                  1.8595366775110984
+                ],
+                "actual_joint_positions_rad": [
+                  0.028862458026644756,
+                  0.2091929776648094,
+                  0.29583253249959146,
+                  -2.169060902415089,
+                  -0.08608711241404261,
+                  2.3665045640646487,
+                  1.8610238618377926
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.008145552156979933,
+                  0.007327950715285331,
+                  -0.008700731700840958,
+                  -0.002869194493527516,
+                  -0.0016651433957771272,
+                  0.010166333064100197,
+                  0.0014871843266941465
+                ],
+                "max_goal_joint_error_rad": 0.010166333064100197,
+                "max_error_joint_index": 5,
+                "max_error_joint_name": "robot0_joint6",
+                "last_sent_joint_target_rad": [
+                  0.020716905869664827,
+                  0.20186502694952407,
+                  0.3045332642004324,
+                  -2.1661917079215613,
+                  -0.08442196901826549,
+                  2.3563382310005485,
+                  1.8595366775110984
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1187,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.02086447084882423,
+                "first_joint_tolerance_exceedance_step": 1134,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1178,
+                  "last_step": 1187,
+                  "position_axis_ranges_m": [
+                    7.29103944067111e-05,
+                    3.346753926042334e-05,
+                    0.018519903640093816
+                  ],
+                  "joint_ranges_rad": [
+                    0.03594506322114125,
+                    0.03160306975788718,
+                    0.03780628152473242,
+                    0.009703076657338272,
+                    0.004341469654836658,
+                    0.04227564222548308,
+                    0.0021184648427472474
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0007095201224093818
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "7e0833071a18749df1951fa3c10479e6944bec343a05cb30fa7446b6ecb2a9d1"
+            },
+            "expanded_step_index": 3,
+            "intent": "Lift vertically to test whether the book moves with the fingers and clear the table.",
+            "source_step": 1187,
+            "observation_id": "obs_00009",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 2,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            }
+          }
+        ],
+        "commands_completed": true,
+        "source_step": 1187,
+        "observation_id": "obs_00009",
+        "execution_progress": {
+          "history_path": "receipts/sketch_001.json",
+          "completed_prefix_locations": [
+            {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 30
+            },
+            {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 30
+            },
+            {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            },
+            {
+              "semantic_step_index": 2,
+              "waypoint_index": 0,
+              "grounding_source_step": 840
+            }
+          ],
+          "failed_or_unknown_steps": [],
+          "unexecuted_suffix": [],
+          "scope": "Historical expressions, not a recovery command. Undispatched relative EEF points have no resolved absolute target. Review the actual stop and plan the remaining work; never replay the completed prefix."
+        }
+      }
+    },
+    {
+      "batch": 2,
+      "request_turn": 2,
+      "request_source_step": 1187,
+      "status": "finished",
+      "model_submission": null,
+      "program_submission": {
+        "intent": "Carry the upright book above the caddy, align its thin dimension across the rear central compartment, lower onto its internal support, release and withdraw.",
+        "actions": [
+          {
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.09
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      450,
+                      530
+                    ],
+                    "view_id": "caddy_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      1,
+                      0,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "held_bottom"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      450,
+                      530
+                    ],
+                    "view_id": "caddy_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.004
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      1,
+                      0,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "held_bottom"
+                }
+              ]
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Release the book onto the rear central compartment's support.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "open",
+              "steps": 60
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Withdraw the fingers vertically from the compartment to expose the placement.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "source_step": 1187
+      },
+      "dispatch_origin": {
+        "candidate_id": "0c181541d49d0e3bec04ca7930b4453456bced85a92e647ccb2cecb98076c3f4",
+        "continuation_check": {
+          "candidate_id": "0c181541d49d0e3bec04ca7930b4453456bced85a92e647ccb2cecb98076c3f4",
+          "source_step": 1187,
+          "status": "pass",
+          "checks": [
+            {
+              "check": "candidate_identity",
+              "status": "pass"
+            },
+            {
+              "check": "actual_boundary",
+              "status": "pass",
+              "source_step": 1187,
+              "batch": 1
+            },
+            {
+              "check": "execution",
+              "status": "pass"
+            },
+            {
+              "check": "contact_warning",
+              "status": "pass"
+            },
+            {
+              "check": "current_depth_contradiction",
+              "status": "pass",
+              "measured_support": {
+                "method": "current_depth_with_self_and_foreground_occlusion",
+                "testable_points": 69183,
+                "supported_points": 57929,
+                "support_fraction": 0.837329979908359,
+                "status": "supported",
+                "depth_tolerance_m": 0.012,
+                "min_testable_points": 25,
+                "min_support_fraction": 0.25,
+                "is_grasp_or_identity_probability": false,
+                "cameras": [
+                  {
+                    "camera": "agentview",
+                    "source_step": 1187,
+                    "testable_points": 59021,
+                    "supported_points": 52425
+                  },
+                  {
+                    "camera": "robot0_eye_in_hand",
+                    "source_step": 1187,
+                    "testable_points": 38026,
+                    "supported_points": 15102
+                  }
+                ]
+              }
+            },
+            {
+              "check": "retained_depth_contradiction",
+              "status": "pass",
+              "suspended_reference": null
+            }
+          ],
+          "grasp_epoch_transition": {
+            "prepared": 0,
+            "actual": 1,
+            "semantic_certification_required_for_dispatch": false
+          },
+          "holding_certified": false,
+          "task_success_certified": false,
+          "collision_checked": false,
+          "scope": "Normal continuation without A approval; actual used bindings and real IK are still checked."
+        },
+        "model_request_issued_for_dispatch": false
+      },
+      "request_bound_submission": {
+        "intent": "Carry the upright book above the caddy, align its thin dimension across the rear central compartment, lower onto its internal support, release and withdraw.",
+        "actions": [
+          {
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.09
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      450,
+                      530
+                    ],
+                    "view_id": "caddy_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      1,
+                      0,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "held_bottom"
+                },
+                {
+                  "anchor": {
+                    "group_id": 1,
+                    "kind": "cloud_point",
+                    "pixel_xy": [
+                      450,
+                      530
+                    ],
+                    "view_id": "caddy_historical_focus_gravity_top"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.004
+                  ],
+                  "orientation": {
+                    "closing_axis": [
+                      1,
+                      0,
+                      0
+                    ],
+                    "finger_direction": [
+                      0,
+                      0,
+                      -1
+                    ]
+                  },
+                  "reference": "held_bottom"
+                }
+              ]
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Release the book onto the rear central compartment's support.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "open",
+              "steps": 60
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Withdraw the fingers vertically from the compartment to expose the placement.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "source_step": 1187
+      },
+      "expanded_steps": [
+        {
+          "expanded_step_index": 0,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 0,
+            "grounding_source_step": 1187
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+          "selection_expression": {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.09
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1187,
+              "actual_entry_state": {
+                "step": 1187,
+                "q": [
+                  0.028862458026644756,
+                  0.2091929776648094,
+                  0.29583253249959146,
+                  -2.169060902415089,
+                  -0.08608711241404261,
+                  2.3665045640646487,
+                  1.8610238618377926
+                ],
+                "position": [
+                  -0.22001128421958982,
+                  0.17577268566848087,
+                  1.1169968347267525
+                ],
+                "quaternion_xyzw": [
+                  0.9056222693596252,
+                  0.42408488908798153,
+                  -0.0004997990215215348,
+                  -0.0002495758300233146
+                ],
+                "finger_joint_positions": [
+                  0.014680675399253397,
+                  -0.01468163951090049
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.22001128421958982,
+                  0.17577268566848087,
+                  1.2069968347267526
+                ],
+                "quaternion_xyzw": [
+                  0.9056222693596253,
+                  0.4240848890879816,
+                  -0.0004997990215215349,
+                  -0.00024957583002331466
+                ]
+              },
+              "compiled_motion_id": "aa3387951d0e7718ec2b6fbac21bddaa1d63dd107bf50f5299909dc2f2530228",
+              "recorded_joint_target_rad": [
+                -0.13013695579651693,
+                0.08023642796401784,
+                0.4583713717477119,
+                -2.0846116530384973,
+                -0.04207152703909558,
+                2.1551390592577135,
+                1.8309969696907447
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.22001128421958982,
+                0.17577268566848087,
+                1.2069968347267526
+              ],
+              "quaternion_xyzw": [
+                0.9056222693596253,
+                0.4240848890879816,
+                -0.0004997990215215349,
+                -0.00024957583002331466
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.004114679622197812,
+              "rotation_error_deg": 0.039659697259575674,
+              "actions": 48,
+              "execution_wall_s": 1.1067136824131012,
+              "total_wall_s": 1.1797409355640411,
+              "state": {
+                "step": 1235,
+                "q": [
+                  -0.12374912431242191,
+                  0.08514590653876834,
+                  0.451926858161421,
+                  -2.089817097838096,
+                  -0.04469423744464831,
+                  2.164740155782467,
+                  1.8332122519476668
+                ],
+                "position": [
+                  -0.2200063088422788,
+                  0.17563161386938378,
+                  1.202884577148919
+                ],
+                "quaternion_xyzw": [
+                  0.9057502681270827,
+                  0.42381135040314943,
+                  -0.0006129337501225782,
+                  -0.00012397336346231614
+                ],
+                "finger_joint_positions": [
+                  0.014679987218646166,
+                  -0.014682327690897818
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1187,
+                "source_step_end": 1235,
+                "samples": 48,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.13013695579651693,
+                  0.08023642796401784,
+                  0.4583713717477119,
+                  -2.0846116530384973,
+                  -0.04207152703909558,
+                  2.1551390592577135,
+                  1.8309969696907447
+                ],
+                "actual_joint_positions_rad": [
+                  -0.12374912431242191,
+                  0.08514590653876834,
+                  0.451926858161421,
+                  -2.089817097838096,
+                  -0.04469423744464831,
+                  2.164740155782467,
+                  1.8332122519476668
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.0063878314840950245,
+                  0.004909478574750506,
+                  -0.006444513586290945,
+                  -0.005205444799598613,
+                  -0.0026227104055527306,
+                  0.009601096524753494,
+                  0.0022152822569221353
+                ],
+                "max_goal_joint_error_rad": 0.009601096524753494,
+                "max_error_joint_index": 5,
+                "max_error_joint_name": "robot0_joint6",
+                "last_sent_joint_target_rad": [
+                  -0.13013695579651693,
+                  0.08023642796401784,
+                  0.4583713717477119,
+                  -2.0846116530384973,
+                  -0.04207152703909558,
+                  2.1551390592577135,
+                  1.8309969696907447
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1235,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.019396148995916462,
+                "first_joint_tolerance_exceedance_step": null,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1226,
+                  "last_step": 1235,
+                  "position_axis_ranges_m": [
+                    7.190025078560036e-05,
+                    8.634522535938549e-06,
+                    0.016670008917163637
+                  ],
+                  "joint_ranges_rad": [
+                    0.027966673647784962,
+                    0.020873262390250377,
+                    0.02779319373563982,
+                    0.019954456548306077,
+                    0.009241616068690381,
+                    0.03977694613771554,
+                    0.006403828579148563
+                  ],
+                  "maximum_rotation_from_first_rad": 6.537716159991193e-05
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "aa3387951d0e7718ec2b6fbac21bddaa1d63dd107bf50f5299909dc2f2530228"
+            },
+            "expanded_step_index": 0,
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1235,
+            "observation_id": "obs_00010",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1187
+            }
+          },
+          "source_step_end": 1235,
+          "physical_steps_advanced": 48
+        },
+        {
+          "expanded_step_index": 1,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 1,
+            "grounding_source_step": 657
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+          "selection_expression": {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                450,
+                530
+              ],
+              "view_id": "caddy_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.2
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "held_bottom"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1235,
+              "actual_entry_state": {
+                "step": 1235,
+                "q": [
+                  -0.12374912431242191,
+                  0.08514590653876834,
+                  0.451926858161421,
+                  -2.089817097838096,
+                  -0.04469423744464831,
+                  2.164740155782467,
+                  1.8332122519476668
+                ],
+                "position": [
+                  -0.2200063088422788,
+                  0.17563161386938378,
+                  1.202884577148919
+                ],
+                "quaternion_xyzw": [
+                  0.9057502681270827,
+                  0.42381135040314943,
+                  -0.0006129337501225782,
+                  -0.00012397336346231614
+                ],
+                "finger_joint_positions": [
+                  0.014679987218646166,
+                  -0.014682327690897818
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.2155098883463324
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "compiled_motion_id": "e31b049301c29a61bcda256bdc7df0c9912319a4ff6604d5c4e3756974479656",
+              "recorded_joint_target_rad": [
+                -0.4439824026018551,
+                -0.6181844810161152,
+                0.060388818250488495,
+                -2.7406485089410633,
+                0.041093971457690115,
+                2.122948238842874,
+                1.9403741538380535
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.43223305125017997,
+                -0.12784535331817298,
+                1.2155098883463324
+              ],
+              "quaternion_xyzw": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0038811243858907145,
+              "rotation_error_deg": 0.5959764891636911,
+              "actions": 175,
+              "execution_wall_s": 3.7546500992029905,
+              "total_wall_s": 4.169655058532953,
+              "state": {
+                "step": 1410,
+                "q": [
+                  -0.4378294906022373,
+                  -0.6142827355854225,
+                  0.06503517669436697,
+                  -2.738527000930501,
+                  0.04419171561171587,
+                  2.1248232254000174,
+                  1.9383670969366027
+                ],
+                "position": [
+                  -0.4299375167148183,
+                  -0.12472655369867706,
+                  1.2152515540103461
+                ],
+                "quaternion_xyzw": [
+                  0.9999864754749009,
+                  0.005200547264693769,
+                  3.0173194090089365e-05,
+                  -4.759213680405701e-05
+                ],
+                "finger_joint_positions": [
+                  0.014677291543114326,
+                  -0.014685023677153073
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1235,
+                "source_step_end": 1410,
+                "samples": 175,
+                "phase_at_stop": "settling",
+                "goal_joint_positions_rad": [
+                  -0.4439824026018551,
+                  -0.6181844810161152,
+                  0.060388818250488495,
+                  -2.7406485089410633,
+                  0.041093971457690115,
+                  2.122948238842874,
+                  1.9403741538380535
+                ],
+                "actual_joint_positions_rad": [
+                  -0.4378294906022373,
+                  -0.6142827355854225,
+                  0.06503517669436697,
+                  -2.738527000930501,
+                  0.04419171561171587,
+                  2.1248232254000174,
+                  1.9383670969366027
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.006152911999617816,
+                  0.0039017454306927712,
+                  0.004646358443878472,
+                  0.002121508010562323,
+                  0.003097744154025757,
+                  0.0018749865571434654,
+                  -0.0020070569014507544
+                ],
+                "max_goal_joint_error_rad": 0.006152911999617816,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  -0.4439824026018551,
+                  -0.6181844810161152,
+                  0.060388818250488495,
+                  -2.7406485089410633,
+                  0.041093971457690115,
+                  2.122948238842874,
+                  1.9403741538380535
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1409,
+                "last_command_consecutive_steps": 2,
+                "peak_current_setpoint_joint_error_rad": 0.021141516522865444,
+                "first_joint_tolerance_exceedance_step": 1242,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1401,
+                  "last_step": 1410,
+                  "position_axis_ranges_m": [
+                    0.012293365312764815,
+                    0.017540814847671907,
+                    0.0007154448281481152
+                  ],
+                  "joint_ranges_rad": [
+                    0.032586575970811826,
+                    0.021281819652131828,
+                    0.02654992234694452,
+                    0.013907974543208912,
+                    0.016288490691577354,
+                    0.007878565669719784,
+                    0.004259988352614208
+                  ],
+                  "maximum_rotation_from_first_rad": 0.050697062181549055
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "e31b049301c29a61bcda256bdc7df0c9912319a4ff6604d5c4e3756974479656"
+            },
+            "expanded_step_index": 1,
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1410,
+            "observation_id": "obs_00011",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 657
+            }
+          },
+          "source_step_end": 1410,
+          "physical_steps_advanced": 175
+        },
+        {
+          "expanded_step_index": 2,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 2,
+            "grounding_source_step": 657
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+          "selection_expression": {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                450,
+                530
+              ],
+              "view_id": "caddy_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.004
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "held_bottom"
+          },
+          "status": "attempted_failed",
+          "dispatches": [
+            {
+              "source_step": 1410,
+              "actual_entry_state": {
+                "step": 1410,
+                "q": [
+                  -0.4378294906022373,
+                  -0.6142827355854225,
+                  0.06503517669436697,
+                  -2.738527000930501,
+                  0.04419171561171587,
+                  2.1248232254000174,
+                  1.9383670969366027
+                ],
+                "position": [
+                  -0.4299375167148183,
+                  -0.12472655369867706,
+                  1.2152515540103461
+                ],
+                "quaternion_xyzw": [
+                  0.9999864754749009,
+                  0.005200547264693769,
+                  3.0173194090089365e-05,
+                  -4.759213680405701e-05
+                ],
+                "finger_joint_positions": [
+                  0.014677291543114326,
+                  -0.014685023677153073
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "compiled_motion_id": "187d4f6fa062f3b2db31023b9f3a509390d13b7acb2bd6b94c08224511317dcc",
+              "recorded_joint_target_rad": [
+                -0.4600582209587887,
+                -0.06332781840384102,
+                0.0823807374275044,
+                -2.905205081451645,
+                0.01764871554024437,
+                2.842047550774847,
+                1.9619822545298098
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.43223305125017997,
+                -0.12784535331817298,
+                1.0195098883463325
+              ],
+              "quaternion_xyzw": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": false,
+              "position_error_m": 0.007227905720107149,
+              "rotation_error_deg": 0.6529065254570691,
+              "actions": 203,
+              "execution_wall_s": 3.875635504722595,
+              "total_wall_s": 5.747527787461877,
+              "state": {
+                "step": 1613,
+                "q": [
+                  -0.45933973293208996,
+                  -0.07428050298230394,
+                  0.0839130637589118,
+                  -2.8980119335488155,
+                  0.01937962119348007,
+                  2.835318971913094,
+                  1.9621883530076236
+                ],
+                "position": [
+                  -0.4274017130195134,
+                  -0.12917070174841083,
+                  1.024719902121566
+                ],
+                "quaternion_xyzw": [
+                  0.9999837682407862,
+                  0.00021622109257452007,
+                  0.005223981701362889,
+                  0.0022641816580269993
+                ],
+                "finger_joint_positions": [
+                  0.011814521871748735,
+                  -0.017487965510231674
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1410,
+                "source_step_end": 1613,
+                "samples": 203,
+                "phase_at_stop": "settling",
+                "goal_joint_positions_rad": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "actual_joint_positions_rad": [
+                  -0.45933973293208996,
+                  -0.07428050298230394,
+                  0.0839130637589118,
+                  -2.8980119335488155,
+                  0.01937962119348007,
+                  2.835318971913094,
+                  1.9621883530076236
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.0007184880266987159,
+                  -0.01095268457846292,
+                  0.001532326331407402,
+                  0.007193147902829544,
+                  0.0017309056532356995,
+                  -0.006728578861753043,
+                  0.00020609847781383195
+                ],
+                "max_goal_joint_error_rad": 0.01095268457846292,
+                "max_error_joint_index": 1,
+                "max_error_joint_name": "robot0_joint2",
+                "last_sent_joint_target_rad": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1533,
+                "last_command_consecutive_steps": 81,
+                "peak_current_setpoint_joint_error_rad": 0.028576192783885956,
+                "first_joint_tolerance_exceedance_step": 1416,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1604,
+                  "last_step": 1613,
+                  "position_axis_ranges_m": [
+                    3.104515961971366e-06,
+                    2.3039522557832814e-06,
+                    9.808432794855548e-07
+                  ],
+                  "joint_ranges_rad": [
+                    8.579317950452303e-06,
+                    1.7766106371330803e-06,
+                    3.800623019079019e-06,
+                    4.988741858724666e-06,
+                    3.652617776099196e-05,
+                    3.3704232041742443e-05,
+                    4.389100294344139e-05
+                  ],
+                  "maximum_rotation_from_first_rad": 3.2339956155080435e-05
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "187d4f6fa062f3b2db31023b9f3a509390d13b7acb2bd6b94c08224511317dcc",
+              "motion_progress": {
+                "recent_progress": false,
+                "samples": 10,
+                "recent_position_progress_m": -2.4924533657613712e-06,
+                "recent_rotation_progress_rad": -2.06326175304309e-05,
+                "recent_joint_error_progress_rad": 1.381295534499602e-06,
+                "meaning": "Measured error reduction only; contact cause and attachment remain unknown"
+              },
+              "continuation_goal": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "joint_target": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "gripper_command": 1.0,
+                "source_step": 1613,
+                "position_tolerance_m": 0.005
+              },
+              "physical_cause": "not_determined"
+            },
+            "expanded_step_index": 2,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 2,
+              "grounding_source_step": 657
+            },
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1613,
+            "observation_id": "obs_00012",
+            "recovery": [
+              {
+                "tier": "T1",
+                "decision": "skip_continuation",
+                "source_step": 1613,
+                "reason": "No remaining T1 allowance or no measured recent progress; do not repeat a stalled command",
+                "recent_progress": false
+              },
+              {
+                "tier": "T2",
+                "decision": "return_to_A",
+                "source_step": 1613,
+                "failure": {
+                  "failure_stage": "motion",
+                  "error": "Motion did not converge",
+                  "executed": true,
+                  "physical_cause": "not_determined"
+                }
+              }
+            ],
+            "recovery_failure": {
+              "failure_stage": "motion",
+              "error": "Motion did not converge",
+              "physical_cause": "not_determined",
+              "executed": true,
+              "original_absolute_goal": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "parameters": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "actual_motion": {
+                "event": "motion_finished",
+                "converged": false,
+                "position_error_m": 0.007227905720107149,
+                "rotation_error_deg": 0.6529065254570691,
+                "actions": 203,
+                "execution_wall_s": 3.875635504722595,
+                "total_wall_s": 5.747527787461877,
+                "state": {
+                  "step": 1613,
+                  "q": [
+                    -0.45933973293208996,
+                    -0.07428050298230394,
+                    0.0839130637589118,
+                    -2.8980119335488155,
+                    0.01937962119348007,
+                    2.835318971913094,
+                    1.9621883530076236
+                  ],
+                  "position": [
+                    -0.4274017130195134,
+                    -0.12917070174841083,
+                    1.024719902121566
+                  ],
+                  "quaternion_xyzw": [
+                    0.9999837682407862,
+                    0.00021622109257452007,
+                    0.005223981701362889,
+                    0.0022641816580269993
+                  ],
+                  "finger_joint_positions": [
+                    0.011814521871748735,
+                    -0.017487965510231674
+                  ],
+                  "finger_joint_names": [
+                    "gripper0_right_finger_joint1",
+                    "gripper0_right_finger_joint2"
+                  ],
+                  "gripper_command": 1.0,
+                  "done": false
+                },
+                "tracking": {
+                  "source_step_start": 1410,
+                  "source_step_end": 1613,
+                  "samples": 203,
+                  "phase_at_stop": "settling",
+                  "goal_joint_positions_rad": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "actual_joint_positions_rad": [
+                    -0.45933973293208996,
+                    -0.07428050298230394,
+                    0.0839130637589118,
+                    -2.8980119335488155,
+                    0.01937962119348007,
+                    2.835318971913094,
+                    1.9621883530076236
+                  ],
+                  "signed_goal_joint_errors_rad": [
+                    0.0007184880266987159,
+                    -0.01095268457846292,
+                    0.001532326331407402,
+                    0.007193147902829544,
+                    0.0017309056532356995,
+                    -0.006728578861753043,
+                    0.00020609847781383195
+                  ],
+                  "max_goal_joint_error_rad": 0.01095268457846292,
+                  "max_error_joint_index": 1,
+                  "max_error_joint_name": "robot0_joint2",
+                  "last_sent_joint_target_rad": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "final_goal_commanded": true,
+                  "last_command_held_since_step": 1533,
+                  "last_command_consecutive_steps": 81,
+                  "peak_current_setpoint_joint_error_rad": 0.028576192783885956,
+                  "first_joint_tolerance_exceedance_step": 1416,
+                  "recent_measured_window": {
+                    "samples": 10,
+                    "first_step": 1604,
+                    "last_step": 1613,
+                    "position_axis_ranges_m": [
+                      3.104515961971366e-06,
+                      2.3039522557832814e-06,
+                      9.808432794855548e-07
+                    ],
+                    "joint_ranges_rad": [
+                      8.579317950452303e-06,
+                      1.7766106371330803e-06,
+                      3.800623019079019e-06,
+                      4.988741858724666e-06,
+                      3.652617776099196e-05,
+                      3.3704232041742443e-05,
+                      4.389100294344139e-05
+                    ],
+                    "maximum_rotation_from_first_rad": 3.2339956155080435e-05
+                  },
+                  "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+                },
+                "tracking_tolerances": {
+                  "position_m": 0.005,
+                  "orientation_deg": 3.0,
+                  "max_joint_rad": 0.02
+                },
+                "compiled_motion_id": "187d4f6fa062f3b2db31023b9f3a509390d13b7acb2bd6b94c08224511317dcc",
+                "motion_progress": {
+                  "recent_progress": false,
+                  "samples": 10,
+                  "recent_position_progress_m": -2.4924533657613712e-06,
+                  "recent_rotation_progress_rad": -2.06326175304309e-05,
+                  "recent_joint_error_progress_rad": 1.381295534499602e-06,
+                  "meaning": "Measured error reduction only; contact cause and attachment remain unknown"
+                },
+                "continuation_goal": {
+                  "position": [
+                    -0.43223305125017997,
+                    -0.12784535331817298,
+                    1.0195098883463325
+                  ],
+                  "quaternion_xyzw": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "joint_target": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "gripper_command": 1.0,
+                  "source_step": 1613,
+                  "position_tolerance_m": 0.005
+                },
+                "physical_cause": "not_determined"
+              }
+            }
+          },
+          "source_step_end": 1613,
+          "physical_steps_advanced": 203
+        },
+        {
+          "expanded_step_index": 3,
+          "location": {
+            "semantic_step_index": 1,
+            "waypoint_index": 0,
+            "grounding_source_step": 1187
+          },
+          "primitive": "set_gripper",
+          "target_id": "book",
+          "intent": "Release the book onto the rear central compartment's support.",
+          "selection_expression": {
+            "command": "open",
+            "steps": 60
+          },
+          "status": "not_dispatched",
+          "dispatches": []
+        },
+        {
+          "expanded_step_index": 4,
+          "location": {
+            "semantic_step_index": 2,
+            "waypoint_index": 0,
+            "grounding_source_step": 1187
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Withdraw the fingers vertically from the compartment to expose the placement.",
+          "selection_expression": {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.2
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          "status": "not_dispatched",
+          "dispatches": []
+        }
+      ],
+      "planned_execution_steps": 5,
+      "receipt": {
+        "subtask": "Carry the upright book above the caddy, align its thin dimension across the rear central compartment, lower onto its internal support, release and withdraw.",
+        "steps": [
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.22001128421958982,
+                0.17577268566848087,
+                1.2069968347267526
+              ],
+              "quaternion_xyzw": [
+                0.9056222693596253,
+                0.4240848890879816,
+                -0.0004997990215215349,
+                -0.00024957583002331466
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.004114679622197812,
+              "rotation_error_deg": 0.039659697259575674,
+              "actions": 48,
+              "execution_wall_s": 1.1067136824131012,
+              "total_wall_s": 1.1797409355640411,
+              "state": {
+                "step": 1235,
+                "q": [
+                  -0.12374912431242191,
+                  0.08514590653876834,
+                  0.451926858161421,
+                  -2.089817097838096,
+                  -0.04469423744464831,
+                  2.164740155782467,
+                  1.8332122519476668
+                ],
+                "position": [
+                  -0.2200063088422788,
+                  0.17563161386938378,
+                  1.202884577148919
+                ],
+                "quaternion_xyzw": [
+                  0.9057502681270827,
+                  0.42381135040314943,
+                  -0.0006129337501225782,
+                  -0.00012397336346231614
+                ],
+                "finger_joint_positions": [
+                  0.014679987218646166,
+                  -0.014682327690897818
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1187,
+                "source_step_end": 1235,
+                "samples": 48,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.13013695579651693,
+                  0.08023642796401784,
+                  0.4583713717477119,
+                  -2.0846116530384973,
+                  -0.04207152703909558,
+                  2.1551390592577135,
+                  1.8309969696907447
+                ],
+                "actual_joint_positions_rad": [
+                  -0.12374912431242191,
+                  0.08514590653876834,
+                  0.451926858161421,
+                  -2.089817097838096,
+                  -0.04469423744464831,
+                  2.164740155782467,
+                  1.8332122519476668
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.0063878314840950245,
+                  0.004909478574750506,
+                  -0.006444513586290945,
+                  -0.005205444799598613,
+                  -0.0026227104055527306,
+                  0.009601096524753494,
+                  0.0022152822569221353
+                ],
+                "max_goal_joint_error_rad": 0.009601096524753494,
+                "max_error_joint_index": 5,
+                "max_error_joint_name": "robot0_joint6",
+                "last_sent_joint_target_rad": [
+                  -0.13013695579651693,
+                  0.08023642796401784,
+                  0.4583713717477119,
+                  -2.0846116530384973,
+                  -0.04207152703909558,
+                  2.1551390592577135,
+                  1.8309969696907447
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1235,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.019396148995916462,
+                "first_joint_tolerance_exceedance_step": null,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1226,
+                  "last_step": 1235,
+                  "position_axis_ranges_m": [
+                    7.190025078560036e-05,
+                    8.634522535938549e-06,
+                    0.016670008917163637
+                  ],
+                  "joint_ranges_rad": [
+                    0.027966673647784962,
+                    0.020873262390250377,
+                    0.02779319373563982,
+                    0.019954456548306077,
+                    0.009241616068690381,
+                    0.03977694613771554,
+                    0.006403828579148563
+                  ],
+                  "maximum_rotation_from_first_rad": 6.537716159991193e-05
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "aa3387951d0e7718ec2b6fbac21bddaa1d63dd107bf50f5299909dc2f2530228"
+            },
+            "expanded_step_index": 0,
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1235,
+            "observation_id": "obs_00010",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1187
+            }
+          },
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.43223305125017997,
+                -0.12784535331817298,
+                1.2155098883463324
+              ],
+              "quaternion_xyzw": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0038811243858907145,
+              "rotation_error_deg": 0.5959764891636911,
+              "actions": 175,
+              "execution_wall_s": 3.7546500992029905,
+              "total_wall_s": 4.169655058532953,
+              "state": {
+                "step": 1410,
+                "q": [
+                  -0.4378294906022373,
+                  -0.6142827355854225,
+                  0.06503517669436697,
+                  -2.738527000930501,
+                  0.04419171561171587,
+                  2.1248232254000174,
+                  1.9383670969366027
+                ],
+                "position": [
+                  -0.4299375167148183,
+                  -0.12472655369867706,
+                  1.2152515540103461
+                ],
+                "quaternion_xyzw": [
+                  0.9999864754749009,
+                  0.005200547264693769,
+                  3.0173194090089365e-05,
+                  -4.759213680405701e-05
+                ],
+                "finger_joint_positions": [
+                  0.014677291543114326,
+                  -0.014685023677153073
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1235,
+                "source_step_end": 1410,
+                "samples": 175,
+                "phase_at_stop": "settling",
+                "goal_joint_positions_rad": [
+                  -0.4439824026018551,
+                  -0.6181844810161152,
+                  0.060388818250488495,
+                  -2.7406485089410633,
+                  0.041093971457690115,
+                  2.122948238842874,
+                  1.9403741538380535
+                ],
+                "actual_joint_positions_rad": [
+                  -0.4378294906022373,
+                  -0.6142827355854225,
+                  0.06503517669436697,
+                  -2.738527000930501,
+                  0.04419171561171587,
+                  2.1248232254000174,
+                  1.9383670969366027
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.006152911999617816,
+                  0.0039017454306927712,
+                  0.004646358443878472,
+                  0.002121508010562323,
+                  0.003097744154025757,
+                  0.0018749865571434654,
+                  -0.0020070569014507544
+                ],
+                "max_goal_joint_error_rad": 0.006152911999617816,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  -0.4439824026018551,
+                  -0.6181844810161152,
+                  0.060388818250488495,
+                  -2.7406485089410633,
+                  0.041093971457690115,
+                  2.122948238842874,
+                  1.9403741538380535
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1409,
+                "last_command_consecutive_steps": 2,
+                "peak_current_setpoint_joint_error_rad": 0.021141516522865444,
+                "first_joint_tolerance_exceedance_step": 1242,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1401,
+                  "last_step": 1410,
+                  "position_axis_ranges_m": [
+                    0.012293365312764815,
+                    0.017540814847671907,
+                    0.0007154448281481152
+                  ],
+                  "joint_ranges_rad": [
+                    0.032586575970811826,
+                    0.021281819652131828,
+                    0.02654992234694452,
+                    0.013907974543208912,
+                    0.016288490691577354,
+                    0.007878565669719784,
+                    0.004259988352614208
+                  ],
+                  "maximum_rotation_from_first_rad": 0.050697062181549055
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "e31b049301c29a61bcda256bdc7df0c9912319a4ff6604d5c4e3756974479656"
+            },
+            "expanded_step_index": 1,
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1410,
+            "observation_id": "obs_00011",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 657
+            }
+          },
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.43223305125017997,
+                -0.12784535331817298,
+                1.0195098883463325
+              ],
+              "quaternion_xyzw": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": false,
+              "position_error_m": 0.007227905720107149,
+              "rotation_error_deg": 0.6529065254570691,
+              "actions": 203,
+              "execution_wall_s": 3.875635504722595,
+              "total_wall_s": 5.747527787461877,
+              "state": {
+                "step": 1613,
+                "q": [
+                  -0.45933973293208996,
+                  -0.07428050298230394,
+                  0.0839130637589118,
+                  -2.8980119335488155,
+                  0.01937962119348007,
+                  2.835318971913094,
+                  1.9621883530076236
+                ],
+                "position": [
+                  -0.4274017130195134,
+                  -0.12917070174841083,
+                  1.024719902121566
+                ],
+                "quaternion_xyzw": [
+                  0.9999837682407862,
+                  0.00021622109257452007,
+                  0.005223981701362889,
+                  0.0022641816580269993
+                ],
+                "finger_joint_positions": [
+                  0.011814521871748735,
+                  -0.017487965510231674
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1410,
+                "source_step_end": 1613,
+                "samples": 203,
+                "phase_at_stop": "settling",
+                "goal_joint_positions_rad": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "actual_joint_positions_rad": [
+                  -0.45933973293208996,
+                  -0.07428050298230394,
+                  0.0839130637589118,
+                  -2.8980119335488155,
+                  0.01937962119348007,
+                  2.835318971913094,
+                  1.9621883530076236
+                ],
+                "signed_goal_joint_errors_rad": [
+                  0.0007184880266987159,
+                  -0.01095268457846292,
+                  0.001532326331407402,
+                  0.007193147902829544,
+                  0.0017309056532356995,
+                  -0.006728578861753043,
+                  0.00020609847781383195
+                ],
+                "max_goal_joint_error_rad": 0.01095268457846292,
+                "max_error_joint_index": 1,
+                "max_error_joint_name": "robot0_joint2",
+                "last_sent_joint_target_rad": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "final_goal_commanded": true,
+                "last_command_held_since_step": 1533,
+                "last_command_consecutive_steps": 81,
+                "peak_current_setpoint_joint_error_rad": 0.028576192783885956,
+                "first_joint_tolerance_exceedance_step": 1416,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1604,
+                  "last_step": 1613,
+                  "position_axis_ranges_m": [
+                    3.104515961971366e-06,
+                    2.3039522557832814e-06,
+                    9.808432794855548e-07
+                  ],
+                  "joint_ranges_rad": [
+                    8.579317950452303e-06,
+                    1.7766106371330803e-06,
+                    3.800623019079019e-06,
+                    4.988741858724666e-06,
+                    3.652617776099196e-05,
+                    3.3704232041742443e-05,
+                    4.389100294344139e-05
+                  ],
+                  "maximum_rotation_from_first_rad": 3.2339956155080435e-05
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "187d4f6fa062f3b2db31023b9f3a509390d13b7acb2bd6b94c08224511317dcc",
+              "motion_progress": {
+                "recent_progress": false,
+                "samples": 10,
+                "recent_position_progress_m": -2.4924533657613712e-06,
+                "recent_rotation_progress_rad": -2.06326175304309e-05,
+                "recent_joint_error_progress_rad": 1.381295534499602e-06,
+                "meaning": "Measured error reduction only; contact cause and attachment remain unknown"
+              },
+              "continuation_goal": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                "joint_target": [
+                  -0.4600582209587887,
+                  -0.06332781840384102,
+                  0.0823807374275044,
+                  -2.905205081451645,
+                  0.01764871554024437,
+                  2.842047550774847,
+                  1.9619822545298098
+                ],
+                "gripper_command": 1.0,
+                "source_step": 1613,
+                "position_tolerance_m": 0.005
+              },
+              "physical_cause": "not_determined"
+            },
+            "expanded_step_index": 2,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 2,
+              "grounding_source_step": 657
+            },
+            "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+            "source_step": 1613,
+            "observation_id": "obs_00012",
+            "recovery": [
+              {
+                "tier": "T1",
+                "decision": "skip_continuation",
+                "source_step": 1613,
+                "reason": "No remaining T1 allowance or no measured recent progress; do not repeat a stalled command",
+                "recent_progress": false
+              },
+              {
+                "tier": "T2",
+                "decision": "return_to_A",
+                "source_step": 1613,
+                "failure": {
+                  "failure_stage": "motion",
+                  "error": "Motion did not converge",
+                  "executed": true,
+                  "physical_cause": "not_determined"
+                }
+              }
+            ],
+            "recovery_failure": {
+              "failure_stage": "motion",
+              "error": "Motion did not converge",
+              "physical_cause": "not_determined",
+              "executed": true,
+              "original_absolute_goal": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "parameters": {
+                "position": [
+                  -0.43223305125017997,
+                  -0.12784535331817298,
+                  1.0195098883463325
+                ],
+                "quaternion_xyzw": [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ]
+              },
+              "actual_motion": {
+                "event": "motion_finished",
+                "converged": false,
+                "position_error_m": 0.007227905720107149,
+                "rotation_error_deg": 0.6529065254570691,
+                "actions": 203,
+                "execution_wall_s": 3.875635504722595,
+                "total_wall_s": 5.747527787461877,
+                "state": {
+                  "step": 1613,
+                  "q": [
+                    -0.45933973293208996,
+                    -0.07428050298230394,
+                    0.0839130637589118,
+                    -2.8980119335488155,
+                    0.01937962119348007,
+                    2.835318971913094,
+                    1.9621883530076236
+                  ],
+                  "position": [
+                    -0.4274017130195134,
+                    -0.12917070174841083,
+                    1.024719902121566
+                  ],
+                  "quaternion_xyzw": [
+                    0.9999837682407862,
+                    0.00021622109257452007,
+                    0.005223981701362889,
+                    0.0022641816580269993
+                  ],
+                  "finger_joint_positions": [
+                    0.011814521871748735,
+                    -0.017487965510231674
+                  ],
+                  "finger_joint_names": [
+                    "gripper0_right_finger_joint1",
+                    "gripper0_right_finger_joint2"
+                  ],
+                  "gripper_command": 1.0,
+                  "done": false
+                },
+                "tracking": {
+                  "source_step_start": 1410,
+                  "source_step_end": 1613,
+                  "samples": 203,
+                  "phase_at_stop": "settling",
+                  "goal_joint_positions_rad": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "actual_joint_positions_rad": [
+                    -0.45933973293208996,
+                    -0.07428050298230394,
+                    0.0839130637589118,
+                    -2.8980119335488155,
+                    0.01937962119348007,
+                    2.835318971913094,
+                    1.9621883530076236
+                  ],
+                  "signed_goal_joint_errors_rad": [
+                    0.0007184880266987159,
+                    -0.01095268457846292,
+                    0.001532326331407402,
+                    0.007193147902829544,
+                    0.0017309056532356995,
+                    -0.006728578861753043,
+                    0.00020609847781383195
+                  ],
+                  "max_goal_joint_error_rad": 0.01095268457846292,
+                  "max_error_joint_index": 1,
+                  "max_error_joint_name": "robot0_joint2",
+                  "last_sent_joint_target_rad": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "final_goal_commanded": true,
+                  "last_command_held_since_step": 1533,
+                  "last_command_consecutive_steps": 81,
+                  "peak_current_setpoint_joint_error_rad": 0.028576192783885956,
+                  "first_joint_tolerance_exceedance_step": 1416,
+                  "recent_measured_window": {
+                    "samples": 10,
+                    "first_step": 1604,
+                    "last_step": 1613,
+                    "position_axis_ranges_m": [
+                      3.104515961971366e-06,
+                      2.3039522557832814e-06,
+                      9.808432794855548e-07
+                    ],
+                    "joint_ranges_rad": [
+                      8.579317950452303e-06,
+                      1.7766106371330803e-06,
+                      3.800623019079019e-06,
+                      4.988741858724666e-06,
+                      3.652617776099196e-05,
+                      3.3704232041742443e-05,
+                      4.389100294344139e-05
+                    ],
+                    "maximum_rotation_from_first_rad": 3.2339956155080435e-05
+                  },
+                  "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+                },
+                "tracking_tolerances": {
+                  "position_m": 0.005,
+                  "orientation_deg": 3.0,
+                  "max_joint_rad": 0.02
+                },
+                "compiled_motion_id": "187d4f6fa062f3b2db31023b9f3a509390d13b7acb2bd6b94c08224511317dcc",
+                "motion_progress": {
+                  "recent_progress": false,
+                  "samples": 10,
+                  "recent_position_progress_m": -2.4924533657613712e-06,
+                  "recent_rotation_progress_rad": -2.06326175304309e-05,
+                  "recent_joint_error_progress_rad": 1.381295534499602e-06,
+                  "meaning": "Measured error reduction only; contact cause and attachment remain unknown"
+                },
+                "continuation_goal": {
+                  "position": [
+                    -0.43223305125017997,
+                    -0.12784535331817298,
+                    1.0195098883463325
+                  ],
+                  "quaternion_xyzw": [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  "joint_target": [
+                    -0.4600582209587887,
+                    -0.06332781840384102,
+                    0.0823807374275044,
+                    -2.905205081451645,
+                    0.01764871554024437,
+                    2.842047550774847,
+                    1.9619822545298098
+                  ],
+                  "gripper_command": 1.0,
+                  "source_step": 1613,
+                  "position_tolerance_m": 0.005
+                },
+                "physical_cause": "not_determined"
+              }
+            }
+          }
+        ],
+        "commands_completed": false,
+        "failure": "Local recovery failed; suffix not executed",
+        "remaining_suffix_executed": false,
+        "failed_step_index": 2,
+        "failed_location": {
+          "semantic_step_index": 0,
+          "waypoint_index": 2,
+          "grounding_source_step": 657
+        },
+        "recovery": [
+          {
+            "tier": "T1",
+            "decision": "skip_continuation",
+            "source_step": 1613,
+            "reason": "No remaining T1 allowance or no measured recent progress; do not repeat a stalled command",
+            "recent_progress": false
+          },
+          {
+            "tier": "T2",
+            "decision": "return_to_A",
+            "source_step": 1613,
+            "failure": {
+              "failure_stage": "motion",
+              "error": "Motion did not converge",
+              "executed": true,
+              "physical_cause": "not_determined"
+            }
+          }
+        ],
+        "source_step": 1613,
+        "observation_id": "obs_00012",
+        "execution_progress": {
+          "history_path": "receipts/sketch_002.json",
+          "completed_prefix_locations": [
+            {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1187
+            },
+            {
+              "semantic_step_index": 0,
+              "waypoint_index": 1,
+              "grounding_source_step": 657
+            }
+          ],
+          "failed_or_unknown_steps": [
+            {
+              "expanded_step_index": 2,
+              "location": {
+                "semantic_step_index": 0,
+                "waypoint_index": 2,
+                "grounding_source_step": 657
+              },
+              "primitive": "move",
+              "target_id": "book",
+              "intent": "Raise the carried book clear of all rims, align its width along the central compartment, and lower into the rear central pocket.",
+              "selection_expression": {
+                "anchor": {
+                  "group_id": 1,
+                  "kind": "cloud_point",
+                  "pixel_xy": [
+                    450,
+                    530
+                  ],
+                  "view_id": "caddy_historical_focus_gravity_top"
+                },
+                "offset_frame": "world",
+                "offset_m": [
+                  0,
+                  0,
+                  0.004
+                ],
+                "orientation": {
+                  "closing_axis": [
+                    1,
+                    0,
+                    0
+                  ],
+                  "finger_direction": [
+                    0,
+                    0,
+                    -1
+                  ]
+                },
+                "reference": "held_bottom"
+              },
+              "status": "attempted_failed"
+            }
+          ],
+          "unexecuted_suffix": [
+            {
+              "expanded_step_index": 3,
+              "location": {
+                "semantic_step_index": 1,
+                "waypoint_index": 0,
+                "grounding_source_step": 1187
+              },
+              "primitive": "set_gripper",
+              "target_id": "book",
+              "intent": "Release the book onto the rear central compartment's support.",
+              "selection_expression": {
+                "command": "open",
+                "steps": 60
+              },
+              "status": "not_dispatched"
+            },
+            {
+              "expanded_step_index": 4,
+              "location": {
+                "semantic_step_index": 2,
+                "waypoint_index": 0,
+                "grounding_source_step": 1187
+              },
+              "primitive": "move",
+              "target_id": "book",
+              "intent": "Withdraw the fingers vertically from the compartment to expose the placement.",
+              "selection_expression": {
+                "anchor": {
+                  "kind": "current_eef"
+                },
+                "offset_frame": "world",
+                "offset_m": [
+                  0,
+                  0,
+                  0.2
+                ],
+                "orientation": "preserve",
+                "reference": "eef"
+              },
+              "status": "not_dispatched"
+            }
+          ],
+          "scope": "Historical expressions, not a recovery command. Undispatched relative EEF points have no resolved absolute target. Review the actual stop and plan the remaining work; never replay the completed prefix."
+        }
+      }
+    },
+    {
+      "batch": 3,
+      "request_turn": 4,
+      "request_source_step": 1613,
+      "status": "finished",
+      "model_submission": {
+        "actions": [
+          {
+            "intent": "Release the low, upright book inside the rear central pocket without forcing the stalled descent.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "open",
+              "steps": 60
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Withdraw vertically from the pocket and expose the released book for actual placement review.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "held_object_id": "book",
+        "held_pose_relation": "unchanged",
+        "task_referents": [
+          {
+            "image_paths": [
+              "geometry/object_01/caddy_historical_focus_gravity_top.png",
+              "observations/obs_00012/agentview.png"
+            ],
+            "interpretation": "The rear half of the centrally divided pair, behind the transverse divider toward world -X; not either full-depth lateral compartment.",
+            "object_id": "caddy",
+            "status": "selected",
+            "task_phrase": "back compartment"
+          }
+        ],
+        "visible_evidence": "The actual lift images show the book moving with the pads. At the current stop, the front view shows its page edge and covers inside the rear central pocket, behind the central divider; the wrist view shows the same book still between the fingers. The book is already low inside the pocket, with its observed bottom about 9 mm above the measured interior support height. The descent stalled, so I will not push farther or repeat that target. I will release from this low position and withdraw vertically, then inspect the actual resting result."
+      },
+      "program_submission": null,
+      "dispatch_origin": "model_tool",
+      "request_bound_submission": {
+        "actions": [
+          {
+            "intent": "Release the low, upright book inside the rear central pocket without forcing the stalled descent.",
+            "primitive": "set_gripper",
+            "selection": {
+              "command": "open",
+              "steps": 60
+            },
+            "target_id": "book"
+          },
+          {
+            "intent": "Withdraw vertically from the pocket and expose the released book for actual placement review.",
+            "primitive": "move",
+            "reference_target_id": "caddy",
+            "selection": {
+              "waypoints": [
+                {
+                  "anchor": {
+                    "kind": "current_eef"
+                  },
+                  "offset_frame": "world",
+                  "offset_m": [
+                    0,
+                    0,
+                    0.2
+                  ],
+                  "orientation": "preserve",
+                  "reference": "eef"
+                }
+              ]
+            },
+            "target_id": "book"
+          }
+        ],
+        "held_object_id": "book",
+        "held_pose_relation": "unchanged",
+        "task_referents": [
+          {
+            "image_paths": [
+              "geometry/object_01/caddy_historical_focus_gravity_top.png",
+              "observations/obs_00012/agentview.png"
+            ],
+            "interpretation": "The rear half of the centrally divided pair, behind the transverse divider toward world -X; not either full-depth lateral compartment.",
+            "object_id": "caddy",
+            "status": "selected",
+            "task_phrase": "back compartment"
+          }
+        ],
+        "visible_evidence": "The actual lift images show the book moving with the pads. At the current stop, the front view shows its page edge and covers inside the rear central pocket, behind the central divider; the wrist view shows the same book still between the fingers. The book is already low inside the pocket, with its observed bottom about 9 mm above the measured interior support height. The descent stalled, so I will not push farther or repeat that target. I will release from this low position and withdraw vertically, then inspect the actual resting result.",
+        "source_step": 1613
+      },
+      "expanded_steps": [
+        {
+          "expanded_step_index": 0,
+          "location": {
+            "semantic_step_index": 0,
+            "waypoint_index": 0,
+            "grounding_source_step": 1613
+          },
+          "primitive": "set_gripper",
+          "target_id": "book",
+          "intent": "Release the low, upright book inside the rear central pocket without forcing the stalled descent.",
+          "selection_expression": {
+            "command": "open",
+            "steps": 60
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1613,
+              "actual_entry_state": {
+                "step": 1613,
+                "q": [
+                  -0.45933973293208996,
+                  -0.07428050298230394,
+                  0.0839130637589118,
+                  -2.8980119335488155,
+                  0.01937962119348007,
+                  2.835318971913094,
+                  1.9621883530076236
+                ],
+                "position": [
+                  -0.4274017130195134,
+                  -0.12917070174841083,
+                  1.024719902121566
+                ],
+                "quaternion_xyzw": [
+                  0.9999837682407862,
+                  0.00021622109257452007,
+                  0.005223981701362889,
+                  0.0022641816580269993
+                ],
+                "finger_joint_positions": [
+                  0.011814521871748735,
+                  -0.017487965510231674
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": 1.0,
+                "done": false
+              },
+              "parameters": {
+                "command": "open",
+                "steps": 60
+              }
+            }
+          ],
+          "actual_result": {
+            "primitive": "set_gripper",
+            "parameters": {
+              "command": "open",
+              "steps": 60
+            },
+            "result": {
+              "step": 1673,
+              "q": [
+                -0.4573586304756829,
+                -0.06730399776138879,
+                0.08949543499161194,
+                -2.8847161415966207,
+                0.023952968818606812,
+                2.839892283109211,
+                1.962363580162675
+              ],
+              "position": [
+                -0.4203216672911156,
+                -0.129148661979628,
+                1.0265532027032611
+              ],
+              "quaternion_xyzw": [
+                0.999936167531391,
+                0.001766720859202598,
+                0.010592551194647882,
+                0.003512466260121913
+              ],
+              "finger_joint_positions": [
+                0.01868926994103623,
+                -0.03981163174153546
+              ],
+              "finger_joint_names": [
+                "gripper0_right_finger_joint1",
+                "gripper0_right_finger_joint2"
+              ],
+              "gripper_command": -1.0,
+              "done": false
+            },
+            "expanded_step_index": 0,
+            "intent": "Release the low, upright book inside the rear central pocket without forcing the stalled descent.",
+            "source_step": 1673,
+            "observation_id": "obs_00013",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            }
+          },
+          "source_step_end": 1673,
+          "physical_steps_advanced": 60
+        },
+        {
+          "expanded_step_index": 1,
+          "location": {
+            "semantic_step_index": 1,
+            "waypoint_index": 0,
+            "grounding_source_step": 1613
+          },
+          "primitive": "move",
+          "target_id": "book",
+          "intent": "Withdraw vertically from the pocket and expose the released book for actual placement review.",
+          "selection_expression": {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.2
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          "status": "completed",
+          "dispatches": [
+            {
+              "source_step": 1673,
+              "actual_entry_state": {
+                "step": 1673,
+                "q": [
+                  -0.4573586304756829,
+                  -0.06730399776138879,
+                  0.08949543499161194,
+                  -2.8847161415966207,
+                  0.023952968818606812,
+                  2.839892283109211,
+                  1.962363580162675
+                ],
+                "position": [
+                  -0.4203216672911156,
+                  -0.129148661979628,
+                  1.0265532027032611
+                ],
+                "quaternion_xyzw": [
+                  0.999936167531391,
+                  0.001766720859202598,
+                  0.010592551194647882,
+                  0.003512466260121913
+                ],
+                "finger_joint_positions": [
+                  0.01868926994103623,
+                  -0.03981163174153546
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "parameters": {
+                "position": [
+                  -0.4203216672911156,
+                  -0.129148661979628,
+                  1.226553202703261
+                ],
+                "quaternion_xyzw": [
+                  0.999936167531391,
+                  0.001766720859202598,
+                  0.010592551194647882,
+                  0.003512466260121913
+                ]
+              },
+              "compiled_motion_id": "5e2ef111b33ea115ac84b29b9509744cbc05d8bb37e8bdda50ed1133ec1456d8",
+              "recorded_joint_target_rad": [
+                -0.3076944900390213,
+                -0.6036008027685366,
+                -0.06396353908209017,
+                -2.706105215397826,
+                -0.04157934817952764,
+                2.125387737513201,
+                2.013880375424153
+              ]
+            }
+          ],
+          "actual_result": {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.4203216672911156,
+                -0.129148661979628,
+                1.226553202703261
+              ],
+              "quaternion_xyzw": [
+                0.999936167531391,
+                0.001766720859202598,
+                0.010592551194647882,
+                0.003512466260121913
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0023519076389559505,
+              "rotation_error_deg": 0.05222339585215767,
+              "actions": 130,
+              "execution_wall_s": 2.5542802903801203,
+              "total_wall_s": 4.654064446687698,
+              "state": {
+                "step": 1803,
+                "q": [
+                  -0.31812921066126115,
+                  -0.6002384545475252,
+                  -0.053588270084998654,
+                  -2.7104219613977683,
+                  -0.034222261091324126,
+                  2.13327603817873,
+                  2.0076066324655057
+                ],
+                "position": [
+                  -0.4201508428984681,
+                  -0.1289583938212852,
+                  1.2242152363653989
+                ],
+                "quaternion_xyzw": [
+                  0.9999331910906812,
+                  0.002150086272736496,
+                  0.010825964909442288,
+                  0.0034335066632353367
+                ],
+                "finger_joint_positions": [
+                  0.0400008863004747,
+                  -0.03997625625944861
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1673,
+                "source_step_end": 1803,
+                "samples": 130,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.3076944900390213,
+                  -0.6036008027685366,
+                  -0.06396353908209017,
+                  -2.706105215397826,
+                  -0.04157934817952764,
+                  2.125387737513201,
+                  2.013880375424153
+                ],
+                "actual_joint_positions_rad": [
+                  -0.31812921066126115,
+                  -0.6002384545475252,
+                  -0.053588270084998654,
+                  -2.7104219613977683,
+                  -0.034222261091324126,
+                  2.13327603817873,
+                  2.0076066324655057
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.01043472062223988,
+                  0.0033623482210113353,
+                  0.010375268997091514,
+                  -0.004316745999942473,
+                  0.007357087088203512,
+                  0.007888300665528813,
+                  -0.006273742958647244
+                ],
+                "max_goal_joint_error_rad": 0.01043472062223988,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  -0.3076944900390213,
+                  -0.6036008027685366,
+                  -0.06396353908209018,
+                  -2.706105215397826,
+                  -0.041579348179527645,
+                  2.125387737513201,
+                  2.013880375424153
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1803,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.03569041844131582,
+                "first_joint_tolerance_exceedance_step": 1679,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1794,
+                  "last_step": 1803,
+                  "position_axis_ranges_m": [
+                    0.00016680948364466985,
+                    0.00019638599687965552,
+                    0.016379943930426855
+                  ],
+                  "joint_ranges_rad": [
+                    0.07244464693667124,
+                    0.023231391926751055,
+                    0.07068902771342148,
+                    0.02858262583234561,
+                    0.047354087987628746,
+                    0.05139089573153033,
+                    0.038371347305160786
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0006930109939186733
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "5e2ef111b33ea115ac84b29b9509744cbc05d8bb37e8bdda50ed1133ec1456d8"
+            },
+            "expanded_step_index": 1,
+            "intent": "Withdraw vertically from the pocket and expose the released book for actual placement review.",
+            "source_step": 1803,
+            "observation_id": "obs_00014",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            }
+          },
+          "source_step_end": 1803,
+          "physical_steps_advanced": 130
+        }
+      ],
+      "planned_execution_steps": 2,
+      "receipt": {
+        "subtask": null,
+        "steps": [
+          {
+            "primitive": "set_gripper",
+            "parameters": {
+              "command": "open",
+              "steps": 60
+            },
+            "result": {
+              "step": 1673,
+              "q": [
+                -0.4573586304756829,
+                -0.06730399776138879,
+                0.08949543499161194,
+                -2.8847161415966207,
+                0.023952968818606812,
+                2.839892283109211,
+                1.962363580162675
+              ],
+              "position": [
+                -0.4203216672911156,
+                -0.129148661979628,
+                1.0265532027032611
+              ],
+              "quaternion_xyzw": [
+                0.999936167531391,
+                0.001766720859202598,
+                0.010592551194647882,
+                0.003512466260121913
+              ],
+              "finger_joint_positions": [
+                0.01868926994103623,
+                -0.03981163174153546
+              ],
+              "finger_joint_names": [
+                "gripper0_right_finger_joint1",
+                "gripper0_right_finger_joint2"
+              ],
+              "gripper_command": -1.0,
+              "done": false
+            },
+            "expanded_step_index": 0,
+            "intent": "Release the low, upright book inside the rear central pocket without forcing the stalled descent.",
+            "source_step": 1673,
+            "observation_id": "obs_00013",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            }
+          },
+          {
+            "primitive": "move",
+            "parameters": {
+              "position": [
+                -0.4203216672911156,
+                -0.129148661979628,
+                1.226553202703261
+              ],
+              "quaternion_xyzw": [
+                0.999936167531391,
+                0.001766720859202598,
+                0.010592551194647882,
+                0.003512466260121913
+              ]
+            },
+            "result": {
+              "event": "motion_finished",
+              "converged": true,
+              "position_error_m": 0.0023519076389559505,
+              "rotation_error_deg": 0.05222339585215767,
+              "actions": 130,
+              "execution_wall_s": 2.5542802903801203,
+              "total_wall_s": 4.654064446687698,
+              "state": {
+                "step": 1803,
+                "q": [
+                  -0.31812921066126115,
+                  -0.6002384545475252,
+                  -0.053588270084998654,
+                  -2.7104219613977683,
+                  -0.034222261091324126,
+                  2.13327603817873,
+                  2.0076066324655057
+                ],
+                "position": [
+                  -0.4201508428984681,
+                  -0.1289583938212852,
+                  1.2242152363653989
+                ],
+                "quaternion_xyzw": [
+                  0.9999331910906812,
+                  0.002150086272736496,
+                  0.010825964909442288,
+                  0.0034335066632353367
+                ],
+                "finger_joint_positions": [
+                  0.0400008863004747,
+                  -0.03997625625944861
+                ],
+                "finger_joint_names": [
+                  "gripper0_right_finger_joint1",
+                  "gripper0_right_finger_joint2"
+                ],
+                "gripper_command": -1.0,
+                "done": false
+              },
+              "tracking": {
+                "source_step_start": 1673,
+                "source_step_end": 1803,
+                "samples": 130,
+                "phase_at_stop": "trajectory",
+                "goal_joint_positions_rad": [
+                  -0.3076944900390213,
+                  -0.6036008027685366,
+                  -0.06396353908209017,
+                  -2.706105215397826,
+                  -0.04157934817952764,
+                  2.125387737513201,
+                  2.013880375424153
+                ],
+                "actual_joint_positions_rad": [
+                  -0.31812921066126115,
+                  -0.6002384545475252,
+                  -0.053588270084998654,
+                  -2.7104219613977683,
+                  -0.034222261091324126,
+                  2.13327603817873,
+                  2.0076066324655057
+                ],
+                "signed_goal_joint_errors_rad": [
+                  -0.01043472062223988,
+                  0.0033623482210113353,
+                  0.010375268997091514,
+                  -0.004316745999942473,
+                  0.007357087088203512,
+                  0.007888300665528813,
+                  -0.006273742958647244
+                ],
+                "max_goal_joint_error_rad": 0.01043472062223988,
+                "max_error_joint_index": 0,
+                "max_error_joint_name": "robot0_joint1",
+                "last_sent_joint_target_rad": [
+                  -0.3076944900390213,
+                  -0.6036008027685366,
+                  -0.06396353908209018,
+                  -2.706105215397826,
+                  -0.041579348179527645,
+                  2.125387737513201,
+                  2.013880375424153
+                ],
+                "final_goal_commanded": false,
+                "last_command_held_since_step": 1803,
+                "last_command_consecutive_steps": 1,
+                "peak_current_setpoint_joint_error_rad": 0.03569041844131582,
+                "first_joint_tolerance_exceedance_step": 1679,
+                "recent_measured_window": {
+                  "samples": 10,
+                  "first_step": 1794,
+                  "last_step": 1803,
+                  "position_axis_ranges_m": [
+                    0.00016680948364466985,
+                    0.00019638599687965552,
+                    0.016379943930426855
+                  ],
+                  "joint_ranges_rad": [
+                    0.07244464693667124,
+                    0.023231391926751055,
+                    0.07068902771342148,
+                    0.02858262583234561,
+                    0.047354087987628746,
+                    0.05139089573153033,
+                    0.038371347305160786
+                  ],
+                  "maximum_rotation_from_first_rad": 0.0006930109939186733
+                },
+                "scope": "Measured robot tracking only. Tolerance exceedance during a trajectory can be ordinary lag. No collision cause, attachment, task success or new stopping policy inferred."
+              },
+              "tracking_tolerances": {
+                "position_m": 0.005,
+                "orientation_deg": 3.0,
+                "max_joint_rad": 0.02
+              },
+              "compiled_motion_id": "5e2ef111b33ea115ac84b29b9509744cbc05d8bb37e8bdda50ed1133ec1456d8"
+            },
+            "expanded_step_index": 1,
+            "intent": "Withdraw vertically from the pocket and expose the released book for actual placement review.",
+            "source_step": 1803,
+            "observation_id": "obs_00014",
+            "recovery": [],
+            "completed": true,
+            "location": {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            }
+          }
+        ],
+        "commands_completed": true,
+        "source_step": 1803,
+        "observation_id": "obs_00014",
+        "execution_progress": {
+          "history_path": "receipts/sketch_003.json",
+          "completed_prefix_locations": [
+            {
+              "semantic_step_index": 0,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            },
+            {
+              "semantic_step_index": 1,
+              "waypoint_index": 0,
+              "grounding_source_step": 1613
+            }
+          ],
+          "failed_or_unknown_steps": [],
+          "unexecuted_suffix": [],
+          "scope": "Historical expressions, not a recovery command. Undispatched relative EEF points have no resolved absolute target. Review the actual stop and plan the remaining work; never replay the completed prefix."
+        }
+      }
+    }
+  ],
+  "rejected_attempts": []
+}

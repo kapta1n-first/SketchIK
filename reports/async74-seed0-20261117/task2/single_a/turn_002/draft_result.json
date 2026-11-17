@@ -1,0 +1,221 @@
+{
+  "turn": 2,
+  "executing_batch": 1,
+  "request_wall_s": 21.77093597315252,
+  "execution_wall_s": 26.989188304170966,
+  "overlap_wall_s": 21.77093597315252,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "2484721af9812b6078d63fc257155c54b49c87f97aa949f12ce873f21607ed23",
+  "transport": {
+    "body_bytes": 3804227,
+    "body_sha256": "45907555c2cd9c463cd885022f0b1f1667a5f940803de154a6a125a3f8fbc73b",
+    "image_count": 15,
+    "original_image_count": 29,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 0,
+      "source": {
+        "messages": 14,
+        "text_chars": 116910,
+        "reasoning_chars": 923,
+        "image_occurrences": 29
+      },
+      "active": {
+        "messages": 11,
+        "text_chars": 79915,
+        "reasoning_chars": 923,
+        "image_occurrences": 15
+      },
+      "omitted_source_messages": 3,
+      "active_source_indices": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 15,
+        "images_after": 15,
+        "encoded_image_url_bytes_before": 3685989,
+        "encoded_image_url_bytes_after": 3685989,
+        "protected_image_ids": [
+          "history_image_2722dbe6301daaad07345a1c0f1e2524b688b2d455f5fbdc39f799fbd2496804",
+          "history_image_3cce8b7fbf7f0570ea8aa91c536f23c80a10fb34e30576922a45739a7da16b0d",
+          "history_image_530dd881a6db351d143ec78184f1e407af794cb3cf0764d0d62d2b433d543909",
+          "history_image_5c963326da9f1d6ccde0ac4fd88e951ea3f91da1db16993543f6387624c024b6",
+          "history_image_72195558081dd7a2e35e5789387e0a2b4acd1ae37ad719a441ef25c041e20987",
+          "history_image_83eb328e63706ce80947cf20f359a27f4fbb26bbc44c5b12e133c69214f7b023",
+          "history_image_8c5cddffd672f57667d50ec0296ff58cb0b8fe5f16c14fce7065d1a814b9df05",
+          "history_image_8fae545e8371ad3de6ea89c1a852f7786e2ea9c134896f3cacd3deb63beb6055",
+          "history_image_95ae6c7c805972063d3dbb79e0795163c288e0d5ce44c6d38c22ae36e1c82857",
+          "history_image_b4e5422c53120876f7dee4c3b3abb77a8085ca6e6d15d4ff106ffe6cb24f469c",
+          "history_image_bf1c7aa6320a7c04be5593981ec030e21e1a6a4c7b7889bea39a886144e1d918",
+          "history_image_c18c3571d3192af96b1c07a8d6b338ca84c58025e3b756d2e149e59b84ad09b2",
+          "history_image_d25ea3566758b68b3c9c33aa61d41f841f188e088323fd2fec9ed46702d4f437",
+          "history_image_d6b0983cd443d7f2cf8ffcc640218a9f46847980f9b122066d17c677ca59d77d",
+          "history_image_e7cd819127dadfd7b18dafb575fa9606b9b31713280030524b3160131493ae0e"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_95ae6c7c805972063d3dbb79e0795163c288e0d5ce44c6d38c22ae36e1c82857",
+          "current_clouds/latest/object_00_face.png": "history_image_530dd881a6db351d143ec78184f1e407af794cb3cf0764d0d62d2b433d543909",
+          "current_clouds/latest/object_01_face.png": "history_image_c18c3571d3192af96b1c07a8d6b338ca84c58025e3b756d2e149e59b84ad09b2",
+          "current_clouds/latest/object_02_face.png": "history_image_5c963326da9f1d6ccde0ac4fd88e951ea3f91da1db16993543f6387624c024b6",
+          "current_clouds/latest/object_00_side.png": "history_image_3cce8b7fbf7f0570ea8aa91c536f23c80a10fb34e30576922a45739a7da16b0d",
+          "current_clouds/latest/object_01_side.png": "history_image_83eb328e63706ce80947cf20f359a27f4fbb26bbc44c5b12e133c69214f7b023",
+          "current_clouds/latest/object_02_side.png": "history_image_e7cd819127dadfd7b18dafb575fa9606b9b31713280030524b3160131493ae0e",
+          "current_clouds/latest/object_00_top.png": "history_image_d6b0983cd443d7f2cf8ffcc640218a9f46847980f9b122066d17c677ca59d77d",
+          "current_clouds/latest/object_01_top.png": "history_image_72195558081dd7a2e35e5789387e0a2b4acd1ae37ad719a441ef25c041e20987",
+          "current_clouds/latest/object_02_top.png": "history_image_2722dbe6301daaad07345a1c0f1e2524b688b2d455f5fbdc39f799fbd2496804"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 923,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.5128346346318722,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Approach above the outer black handle with fingers straddling its narrow world-X dimension, then lower to pinch it",
+        "primitive": "move",
+        "reference_target_id": "moka_pot",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  810
+                ],
+                "view_id": "moka_pot_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.13
+              ],
+              "orientation": {
+                "closing_axis": [
+                  1,
+                  0,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "pad_midpoint"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  810
+                ],
+                "view_id": "moka_pot_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                -0.009
+              ],
+              "orientation": "preserve",
+              "reference": "pad_midpoint"
+            }
+          ]
+        },
+        "target_id": "moka_pot"
+      },
+      {
+        "intent": "Pinch the black handle of the moka pot",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "close",
+          "steps": 30
+        },
+        "target_id": "moka_pot"
+      },
+      {
+        "intent": "Lift vertically for verification that the pot body follows the fingers and clears the table",
+        "primitive": "move",
+        "reference_target_id": "moka_pot",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.08
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "moka_pot"
+      }
+    ],
+    "intent": "Grasp the moka pot handle from above and lift it clear of the tabletop while preserving its upright attitude.",
+    "preconditions": "The executing control-operation segment completes normally with the gripper released and withdrawn. The moka pot remains upright at its observed table location, and its historical point coordinates remain valid. Stove activation remains subject to actual outcome evidence.",
+    "reason": "Prepare the next subtask: grasp the moka pot by its black side handle and perform a short lift for actual-image verification.",
+    "status": "ready",
+    "prepared_from_step": 875,
+    "after_batch": 1,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task2",
+      "source_step": 875,
+      "request_turn": 2,
+      "grasp_epoch": 0,
+      "reference": null,
+      "executing_targets": [
+        "stove_control_knob"
+      ]
+    },
+    "candidate_id": "2484721af9812b6078d63fc257155c54b49c87f97aa949f12ce873f21607ed23",
+    "executed": false
+  }
+}

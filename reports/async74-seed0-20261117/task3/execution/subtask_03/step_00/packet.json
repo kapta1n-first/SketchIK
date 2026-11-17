@@ -1,0 +1,256 @@
+{
+  "context": {
+    "source_step": 1637,
+    "observation_id": "obs_00015",
+    "eef": {
+      "position": [
+        0.06303628771172747,
+        0.13951889183641744,
+        1.1305082540188058
+      ],
+      "quaternion_xyzw": [
+        0.999996785365028,
+        -0.00016154418395231132,
+        0.00252972773547357,
+        6.033797353185989e-05
+      ],
+      "tool_axes_world": {
+        "finger_direction": [
+          0.00505941971214725,
+          -0.00012149288473989722,
+          -0.9999871936738258
+        ],
+        "closing_axis": [
+          0.9999871487621212,
+          -0.00032278205200316433,
+          0.005059458701142033
+        ]
+      }
+    },
+    "operation_reference_target_id": null,
+    "cloud_views": [],
+    "image_references": [
+      {
+        "observation_id": "obs_00006",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00006",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00009",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00009",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00010",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00010",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00013",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00013",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00015",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00015",
+        "camera": "robot0_eye_in_hand"
+      }
+    ],
+    "observed_opening_frames": [],
+    "motion_check_mode": "ik_only",
+    "grounding_source_step": 1637,
+    "robot_gripper_geometry": {
+      "source": "known robot collision model and actual finger joint state",
+      "source_step": 1637,
+      "coordinate_frame": "eef_tool",
+      "unit": "m",
+      "axis_meaning": {
+        "x": "finger closing/separation",
+        "y": "transverse thickness",
+        "z": "finger forward direction"
+      },
+      "hand_bounds_in_eef_tool_m": [
+        [
+          -0.10042587867547352,
+          -0.03163591668344568,
+          -0.12292480131995966
+        ],
+        [
+          0.10398971979103332,
+          0.03161578415064447,
+          0.009249034596525211
+        ]
+      ],
+      "hand_span_xyz_m": [
+        0.20441559846650684,
+        0.06325170083409015,
+        0.13217383591648488
+      ],
+      "palm_and_fixed_hand": {
+        "bounds_in_eef_tool_m": [
+          [
+            -0.10042587867547352,
+            -0.03163591668344568,
+            -0.12292480131995966
+          ],
+          [
+            0.10398971979103332,
+            0.03161578415064447,
+            -0.03103784941140963
+          ]
+        ],
+        "span_xyz_m": [
+          0.20441559846650684,
+          0.06325170083409015,
+          0.09188695190855002
+        ]
+      },
+      "fingers": [
+        {
+          "joint_name": "gripper0_right_finger_joint1",
+          "joint_position": 0.03999688742322217,
+          "bounds_in_eef_tool_m": [
+            [
+              -0.0664002693564097,
+              -0.010479453077633163,
+              -0.04446830418239646
+            ],
+            [
+              -0.03949688742322209,
+              0.010494818215737198,
+              0.00924903459652509
+            ]
+          ],
+          "span_xyz_m": [
+            0.026903381933187615,
+            0.020974271293370362,
+            0.05371733877892155
+          ],
+          "length_along_tool_z_m": 0.05371733877892155,
+          "tip_z_relative_eef_m": 0.00924903459652509,
+          "pads": [
+            {
+              "bounds_in_eef_tool_m": [
+                [
+                  -0.04749688742322209,
+                  -0.008000000000000033,
+                  -0.011599999999999831
+                ],
+                [
+                  -0.03949688742322209,
+                  0.00799999999999996,
+                  0.004400000000000177
+                ]
+              ],
+              "span_xyz_m": [
+                0.008,
+                0.015999999999999993,
+                0.016000000000000007
+              ]
+            }
+          ]
+        },
+        {
+          "joint_name": "gripper0_right_finger_joint2",
+          "joint_position": -0.039883428346382935,
+          "bounds_in_eef_tool_m": [
+            [
+              0.03938342834638287,
+              -0.010494818215737214,
+              -0.04446830418239615
+            ],
+            [
+              0.06628681027957048,
+              0.010479453077633144,
+              0.009249034596525211
+            ]
+          ],
+          "span_xyz_m": [
+            0.026903381933187608,
+            0.02097427129337036,
+            0.05371733877892136
+          ],
+          "length_along_tool_z_m": 0.05371733877892136,
+          "tip_z_relative_eef_m": 0.009249034596525211,
+          "pads": [
+            {
+              "bounds_in_eef_tool_m": [
+                [
+                  0.03938342834638287,
+                  -0.007999999999999962,
+                  -0.011600000000000067
+                ],
+                [
+                  0.047383428346382865,
+                  0.008000000000000031,
+                  0.004399999999999943
+                ]
+              ],
+              "span_xyz_m": [
+                0.007999999999999993,
+                0.015999999999999993,
+                0.01600000000000001
+              ]
+            }
+          ]
+        }
+      ],
+      "finger_joint_positions_rad_or_m": [
+        0.03999688742322217,
+        -0.039883428346382935
+      ],
+      "meaning": "Robot mechanical envelope at this opening; not object dimensions, a grasp proposal or collision-free certification. EEF is not the fingertip or object centre.",
+      "current_inner_jaw_gap_m": 0.07888031576960497,
+      "pad_centres_in_eef_tool_m": [
+        [
+          -0.04349688742322209,
+          -3.685123684187855e-17,
+          -0.003599999999999827
+        ],
+        [
+          0.04338342834638287,
+          3.5031571110385055e-17,
+          -0.0036000000000000615
+        ]
+      ],
+      "pad_midpoint_in_eef_tool_m": [
+        -5.67295384196094e-05,
+        -9.098328657467474e-19,
+        -0.0035999999999999444
+      ]
+    },
+    "current_vertical_envelope": {
+      "current_eef_world_z_m": 1.1305082540188058,
+      "hand_z_relative_eef_m": [
+        -0.009760808561145595,
+        0.12345314820952515
+      ],
+      "hand_and_observed_z_relative_eef_m": [
+        -0.009760808561145595,
+        0.12345314820952515
+      ],
+      "carried_observed_point_count": null,
+      "carried_geometry_status": "not_supplied",
+      "holding_status_from_geometry": "not_assessed",
+      "orientation_scope": "current_orientation_only",
+      "complete_held_shape_known": false
+    }
+  },
+  "grounding_observation_id": "obs_00015",
+  "execution_observation_id": "obs_00015"
+}

@@ -1,0 +1,55 @@
+{
+  "binding": {
+    "anchor": {
+      "camera": "agentview",
+      "kind": "image_point",
+      "observation_id": "obs_00014",
+      "pixel_xy": [
+        800,
+        865
+      ]
+    },
+    "offset_frame": "world",
+    "offset_m": [
+      0,
+      0,
+      0.004
+    ],
+    "orientation": "preserve",
+    "reference": "held_bottom"
+  },
+  "anchor_world_xyz_m": [
+    0.12280643158018201,
+    0.16153944278467802,
+    0.4253381551945245
+  ],
+  "offset_world_m": [
+    0.0,
+    0.0,
+    0.004
+  ],
+  "reference_offset_world_m": [
+    0.000684314117808827,
+    0.003624432667964141,
+    -0.01688937056682899
+  ],
+  "compiled_pose": {
+    "position": [
+      0.12212211746237318,
+      0.15791501011671388,
+      0.4462275257613535
+    ],
+    "quaternion_xyzw": [
+      0.7070605160366383,
+      0.7071529073042078,
+      0.00029958415769520817,
+      -0.00032031631532819564
+    ]
+  },
+  "source_step": 2271,
+  "executed": false,
+  "reference_is_complete_object_geometry": false,
+  "grounding_source_step": 1749,
+  "execution_source_step": 2271,
+  "execution_observation_id": "obs_00019"
+}

@@ -1,0 +1,198 @@
+{
+  "turn": 7,
+  "executing_batch": 4,
+  "request_wall_s": 22.296290887519717,
+  "execution_wall_s": 5.829362055286765,
+  "overlap_wall_s": 5.829032821580768,
+  "post_execution_wait_wall_s": 16.46725806593895,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "5c2c4b76fa71afb65e34fa21d3bee2dc7345381b6f05f1e8a247924a8364e324",
+  "transport": {
+    "body_bytes": 4788966,
+    "body_sha256": "3043bc3fef1950b839f950c26f6a61f9b219d22fc51b328195e9d824afd577b1",
+    "image_count": 20,
+    "original_image_count": 48,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 1,
+      "boundary_source_step": 3142,
+      "source": {
+        "messages": 39,
+        "text_chars": 393975,
+        "reasoning_chars": 1830,
+        "image_occurrences": 48
+      },
+      "active": {
+        "messages": 19,
+        "text_chars": 169185,
+        "reasoning_chars": 1420,
+        "image_occurrences": 20
+      },
+      "omitted_source_messages": 20,
+      "retained_tail_messages": 14,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        22,
+        23,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 20,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 4583888,
+        "encoded_image_url_bytes_after": 4583888,
+        "protected_image_ids": [
+          "history_image_01fc7bf0edc031f9808a9880df5720372c7c86fff541faaafc909b7f1a0d6758",
+          "history_image_1660306bf3a6d0835522fba7ed4305986dc200be22e9c086b695394b726b6c07",
+          "history_image_1f63e04d23b98f2139d4c3875dfc16b27d586c13b5f462a749f68595e8ecb851",
+          "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "history_image_3c51005dc054317ac7db7b28fa7535273647d0ca3672abdadb6e6456e857957d",
+          "history_image_48b2f9d1e609b310983bb894fa004a5f4efd84db6a7800bc4326a1b38aa3242b",
+          "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "history_image_77dfa5f3d4a1eae85197699e03ae43db76217aeabb0bd4e6cea70702b40ceede",
+          "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "history_image_c394ae6d2cffa3069ab5546c07de04cbeb820b767ec064014b3177d95246c6f9",
+          "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "history_image_ce1e3052bad30dd16988f77ff71718d09b366e00fab77cc19384b579c168d132",
+          "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "current_clouds/latest/object_00_face.png": "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "current_clouds/latest/object_01_face.png": "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "current_clouds/latest/object_02_face.png": "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "current_clouds/latest/object_00_side.png": "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "current_clouds/latest/object_01_side.png": "history_image_ce1e3052bad30dd16988f77ff71718d09b366e00fab77cc19384b579c168d132",
+          "current_clouds/latest/object_02_side.png": "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "current_clouds/latest/object_00_top.png": "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "current_clouds/latest/object_01_top.png": "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "current_clouds/latest/object_02_top.png": "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 1420,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.9187075551599264,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Carry the mug through the entrance above the floor, then lower onto the observed interior support without opening the gripper.",
+        "primitive": "move",
+        "reference_target_id": "microwave",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  555
+                ],
+                "view_id": "microwave_historical_right"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                -0.02,
+                0.025
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  555
+                ],
+                "view_id": "microwave_historical_right"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                -0.02,
+                0
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            }
+          ]
+        },
+        "target_id": "yellow_white_mug"
+      }
+    ],
+    "intent": "Insert the mug upright through the open entrance and lower its bottom onto the visible interior floor, keeping the handle and elevated palm near the entrance.",
+    "preconditions": "The staging motion completes normally with the upright mug still held by its yellow handle and the held-bottom reference supported. The microwave housing and visible interior floor remain stationary and the door remains open. These are continuation assumptions, not future observations.",
+    "reason": "Prepare insertion and lowering while retaining the handle grasp; inspect actual support before any release.",
+    "status": "ready",
+    "prepared_from_step": 3142,
+    "after_batch": 4,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9",
+      "source_step": 3142,
+      "request_turn": 7,
+      "grasp_epoch": 1,
+      "reference": {
+        "reference_id": "f6cc78888f068e58366b6c385af8852eb17a66976ae068f2afdb49e295deb9b2",
+        "grasp_epoch": 1,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "yellow_white_mug"
+      ]
+    },
+    "candidate_id": "5c2c4b76fa71afb65e34fa21d3bee2dc7345381b6f05f1e8a247924a8364e324",
+    "executed": false
+  }
+}

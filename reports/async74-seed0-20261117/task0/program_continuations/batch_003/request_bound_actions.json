@@ -1,0 +1,97 @@
+{
+  "intent": "Grasp and lift the tomato sauce can for subsequent placement in the remaining basket space.",
+  "actions": [
+    {
+      "intent": "Approach the tomato sauce lid from above, first staying high enough to clear the basket rim during the transfer.",
+      "primitive": "move",
+      "reference_target_id": "tomato_sauce",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                515,
+                550
+              ],
+              "view_id": "tomato_sauce_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.17
+            ],
+            "orientation": {
+              "closing_axis": [
+                0,
+                1,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                515,
+                550
+              ],
+              "view_id": "tomato_sauce_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.012
+            ],
+            "orientation": "preserve",
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "tomato_sauce"
+    },
+    {
+      "intent": "Close the pads on opposing sides of the tomato sauce can just below its rim.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 70
+      },
+      "target_id": "tomato_sauce"
+    },
+    {
+      "intent": "Lift vertically clear of the table and basket rim, allowing actual images to reveal whether the can follows the pads.",
+      "primitive": "move",
+      "reference_target_id": "tomato_sauce",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.18
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "tomato_sauce"
+    }
+  ],
+  "source_step": 1994
+}

@@ -1,0 +1,110 @@
+{
+  "actions": [
+    {
+      "intent": "Recover via a higher approach nearer the handle, then lower to the outer handle bar.",
+      "primitive": "move",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                875
+              ],
+              "view_id": "yellow_white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.025,
+              0.065
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                1,
+                0
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                875
+              ],
+              "view_id": "yellow_white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.016
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                1,
+                0
+              ]
+            },
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug",
+      "reference_target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Grip the outer handle bar.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 80
+      },
+      "target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Lift briefly to test grasp by actual mug motion.",
+      "primitive": "move",
+      "reference_target_id": "yellow_white_mug",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.06
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    }
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "visible_evidence": "The mug remains upright on the table and has not moved. The open hand stopped high and well outside the handle; no close or lift was executed. I will approach above the handle and nearer to it before descending, rather than repeat the stalled low outside pose.",
+  "source_step": 2587
+}

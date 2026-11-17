@@ -1,0 +1,160 @@
+{
+  "object_id": "chocolate_pudding",
+  "source_kind": "scan_cloud",
+  "status": "predicted_rigid",
+  "identity_source": "Agent grasp target and selected contact point; not holding certification",
+  "source_step": 2093,
+  "source_world_to_eef_rotation": [
+    [
+      -4.796690159801391e-05,
+      0.9999999845303437,
+      0.00016922910086871205
+    ],
+    [
+      0.9999999334232516,
+      4.80281139689936e-05,
+      -0.00036172751121035324
+    ],
+    [
+      -0.0003617356333690964,
+      0.0001692117386540533,
+      -0.9999999202573562
+    ]
+  ],
+  "source_cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task6/single_a_geometry/object_02/historical_surfaces.npz",
+  "source_observations": [
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "agentview",
+      "source_step": 306,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 306,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "agentview",
+      "source_step": 378,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 378,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "agentview",
+      "source_step": 519,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 519,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "agentview",
+      "source_step": 609,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 609,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "agentview",
+      "source_step": 734,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 734,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1011,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1011,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "points": 15431,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "points": 28658,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1011,
+      "points": 28170,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1011,
+      "points": 15431,
+      "role": "current_surfaces"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1011,
+      "points": 28170,
+      "role": "current_surfaces"
+    }
+  ],
+  "component_group_id": 1,
+  "points": 59083,
+  "anchor_world_xyz_m": [
+    -0.039266038686037064,
+    0.11335209012031555,
+    0.46501168608665466
+  ],
+  "rigid_attachment_verified": false,
+  "reference_scope": "initial_observed_component",
+  "reference_id": "2a2f7e093ccf96eb60ff5cac5d1125fc85488772da9c3416224337ea9695a1d7",
+  "grasp_epoch": 3,
+  "relation_revision": 0,
+  "validity": "active",
+  "wall_s": 0.029846850782632828
+}

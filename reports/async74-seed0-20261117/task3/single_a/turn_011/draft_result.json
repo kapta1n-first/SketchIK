@@ -1,0 +1,129 @@
+{
+  "turn": 11,
+  "executing_batch": 6,
+  "request_wall_s": 11.561359087005258,
+  "execution_wall_s": 11.23051629588008,
+  "overlap_wall_s": 11.230131702497602,
+  "post_execution_wait_wall_s": 0.3312273845076561,
+  "cancellation_requested": true,
+  "cancellation_reason": "execution_failed",
+  "cancellation_cleanup_wall_s": 0.33136971667408943,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": false,
+  "error_type": "RequestCancelled",
+  "cancelled": true,
+  "transport": {
+    "body_bytes": 4831154,
+    "body_sha256": "9bd6ad4d04f84b7def368585680b2a4d5f527b69536c2508f0d2abe13f8d4a5f",
+    "image_count": 17,
+    "original_image_count": 50,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 7,
+      "boundary_source_step": 2393,
+      "source": {
+        "messages": 67,
+        "text_chars": 551029,
+        "reasoning_chars": 1994,
+        "image_occurrences": 50
+      },
+      "active": {
+        "messages": 20,
+        "text_chars": 152351,
+        "reasoning_chars": 1046,
+        "image_occurrences": 18
+      },
+      "omitted_source_messages": 47,
+      "retained_tail_messages": 15,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        47,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        59,
+        60,
+        61,
+        63,
+        64,
+        65,
+        66
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 18,
+        "images_after": 17,
+        "encoded_image_url_bytes_before": 4869590,
+        "encoded_image_url_bytes_after": 4642759,
+        "protected_image_ids": [
+          "history_image_28b2399bf23a68dbb384a80c25dff495391e65d0fc172353b0d1e5f57ae96881",
+          "history_image_4b6a03238e4a05e89b99fa568fa4891106058d5c92788a9e631122483f2b8c51",
+          "history_image_56fdc649b19d06ff872584ccacfceae18af7201231dac2b608c9154a8ddb85d7",
+          "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82",
+          "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "history_image_e2f115ee17bdeaf74bbe7e6d7dec449c6883003bdae6b5504e554bef6612ab53",
+          "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "history_image_f395e9a6e134877d2a2d11290c281fb909fb59ffcdd7409f573e301c8507cef1",
+          "history_image_fb6c95f5d7b35db06e99db6bb7c2570fbb24e26b8b96e0f9587c7c645f0b4f32"
+        ],
+        "omitted_images": [
+          {
+            "history_image_id": "history_image_a94b68a01858f3582f847733672267efb91f43f264988aa2b28862a38de08919",
+            "original_positions": [
+              [
+                2,
+                6
+              ]
+            ],
+            "encoded_url_bytes": 226831,
+            "reason": "superseded_logical_slot"
+          }
+        ],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_8e7e060a1c695348393704cbd093383caad80037040577beab54f0d5a8be3701",
+          "current_clouds/latest/object_00_face.png": "history_image_eb87cc975ca2a687d30e2686ac7cefa9ed4fa4014fff6e450dd3c6f4c3461431",
+          "current_clouds/latest/object_01_face.png": "history_image_f395e9a6e134877d2a2d11290c281fb909fb59ffcdd7409f573e301c8507cef1",
+          "current_clouds/latest/object_00_side.png": "history_image_e19d929eecdf76dc2d066561230cc34548f9715a5e32b01804a98e9612e56e0b",
+          "current_clouds/latest/object_01_side.png": "history_image_e72a87e8cb100e08413c094c7d4a3e5d3d5b6e17bbf578321ea3fe4fbe0df6c6",
+          "current_clouds/latest/object_00_top.png": "history_image_8da686198a30ca452a391793b809f0700c35331a6224d6c5357a0a0d2b533a5a",
+          "current_clouds/latest/object_01_top.png": "history_image_9748fe568bf8f6711a5e05f371fcdd0cf192e424f5753c4fb89e88dfe0c71b82"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 1046,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.9581407830119133,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": null
+}

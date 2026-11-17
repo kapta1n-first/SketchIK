@@ -1,0 +1,160 @@
+{
+  "object_id": "cream_cheese_box",
+  "source_kind": "scan_cloud",
+  "status": "predicted_rigid",
+  "identity_source": "Agent grasp target and selected contact point; not holding certification",
+  "source_step": 1459,
+  "source_world_to_eef_rotation": [
+    [
+      0.004294586098241207,
+      0.9999894043837608,
+      -0.0016576038296765867
+    ],
+    [
+      0.999861690875106,
+      -0.004267392235668607,
+      0.016074466830376735
+    ],
+    [
+      0.016067222865782375,
+      -0.001726407749727859,
+      -0.9998694234077082
+    ]
+  ],
+  "source_cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task1/single_a_geometry/object_00/historical_surfaces.npz",
+  "source_observations": [
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "agentview",
+      "source_step": 324,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 324,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "agentview",
+      "source_step": 394,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 394,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "agentview",
+      "source_step": 531,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 531,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "agentview",
+      "source_step": 618,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 618,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "agentview",
+      "source_step": 742,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 742,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1035,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1035,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "points": 19938,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "agentview",
+      "source_step": 324,
+      "points": 19938,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "agentview",
+      "source_step": 394,
+      "points": 19938,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "agentview",
+      "source_step": 1035,
+      "points": 19938,
+      "role": "current_surfaces"
+    },
+    {
+      "observation_id": "obs_00006",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1035,
+      "points": 14743,
+      "role": "current_surfaces"
+    }
+  ],
+  "component_group_id": 1,
+  "points": 47799,
+  "anchor_world_xyz_m": [
+    0.09942676872015,
+    -0.18109223246574402,
+    0.45528584718704224
+  ],
+  "rigid_attachment_verified": false,
+  "reference_scope": "initial_observed_component",
+  "reference_id": "463a18e1659355ed5ac3c197d8ad4d0af1086ee0a6957c481baf3bdb34b50bd9",
+  "grasp_epoch": 1,
+  "relation_revision": 0,
+  "validity": "active",
+  "wall_s": 0.025259898975491524
+}

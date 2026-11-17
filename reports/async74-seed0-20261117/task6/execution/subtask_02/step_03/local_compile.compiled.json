@@ -1,0 +1,49 @@
+{
+  "binding": {
+    "anchor": {
+      "kind": "current_eef"
+    },
+    "offset_frame": "world",
+    "offset_m": [
+      0,
+      0,
+      0.12
+    ],
+    "orientation": "preserve",
+    "reference": "eef"
+  },
+  "anchor_world_xyz_m": [
+    -0.039282934728377565,
+    0.11340775749599581,
+    0.45273382370071524
+  ],
+  "offset_world_m": [
+    0.0,
+    0.0,
+    0.12
+  ],
+  "reference_offset_world_m": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "compiled_pose": {
+    "position": [
+      -0.039282934728377565,
+      0.11340775749599581,
+      0.5727338237007152
+    ],
+    "quaternion_xyzw": [
+      0.7070897972043206,
+      0.7071237365682408,
+      -6.80629720798947e-05,
+      -0.00018771988082829963
+    ]
+  },
+  "source_step": 2093,
+  "executed": false,
+  "reference_is_complete_object_geometry": false,
+  "grounding_source_step": 1749,
+  "execution_source_step": 2093,
+  "execution_observation_id": "obs_00017"
+}

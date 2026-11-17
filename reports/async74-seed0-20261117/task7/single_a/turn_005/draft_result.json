@@ -1,0 +1,260 @@
+{
+  "turn": 5,
+  "executing_batch": 3,
+  "request_wall_s": 21.096472155302763,
+  "execution_wall_s": 14.360881060361862,
+  "overlap_wall_s": 14.360439406707883,
+  "post_execution_wait_wall_s": 6.73603274859488,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "8926777d86c92ed0a2118555a3d4ed4ae3667a6411afd9728ccddaca33705540",
+  "transport": {
+    "body_bytes": 5751612,
+    "body_sha256": "a69bbb299036689ff2819d9da21432c948f156dc4973db3a07bcf83ee8368f92",
+    "image_count": 20,
+    "original_image_count": 39,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 1,
+      "boundary_source_step": 1731,
+      "source": {
+        "messages": 31,
+        "text_chars": 295496,
+        "reasoning_chars": 1255,
+        "image_occurrences": 39
+      },
+      "active": {
+        "messages": 22,
+        "text_chars": 162467,
+        "reasoning_chars": 1255,
+        "image_occurrences": 20
+      },
+      "omitted_source_messages": 9,
+      "retained_tail_messages": 15,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 20,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 5551272,
+        "encoded_image_url_bytes_after": 5551272,
+        "protected_image_ids": [
+          "history_image_070016394e0d5b991acd8684b26ca1baa286df326868120bc8445b93ecf49c57",
+          "history_image_4c48fcfd22725a7987f774539dce6d00be0f4b997b731c3eec7d2245c3684bfa",
+          "history_image_4d395b7cafc287337f068c79247b18fa7dd41833537a5449525125138f9cfc94",
+          "history_image_548635b226964a852aaa7a7c53967329a0f376b21d2b2909485b17f974c3c26e",
+          "history_image_73068fa70c9ede5cc3b0197287ed5b368299028987a97b8816f6d5ad8add20d1",
+          "history_image_7a49e46d24316ac98445e1a94bc437d7057f960b86103d3ba24ae3a021058ee7",
+          "history_image_97454748ebb22abeaf19fbb46ad1d71c98f2e9c6140d169aab51e8dac7ace5d3",
+          "history_image_9d558d35d95769e47b8ce7d1a130d3e67033f1280cd54cb91367acd15bda71bf",
+          "history_image_a083b5b484ae96197e8f069c3754320bc95e0b1ba4fbf159a7de42c2e36f139e",
+          "history_image_a0be25653f7aa95d716d92191b8f659571cc0362bbfac34957ae251193132be1",
+          "history_image_b87f526085bc9a8a3670c1abeacc6c11fe3d5953952d9d33eb8000ed1c71829d",
+          "history_image_c58fd410fedaa3464c9cbe9f76d7d0cedb6b662172e11ae72ad205619bb2dd8a",
+          "history_image_dcc40e9c766e3d208ffb9564fd0d5e2eb08e78819778faab883d90c2c10f3752",
+          "history_image_e7c3a5d354dbf589e57929c608cab018b4ed6a9b0eab8e2552f007ee32e5216f",
+          "history_image_f017aded03047877643ba79a0a6c94ec831483abbc055a4176fa7379e9451856"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_548635b226964a852aaa7a7c53967329a0f376b21d2b2909485b17f974c3c26e",
+          "current_clouds/latest/object_00_face.png": "history_image_9d558d35d95769e47b8ce7d1a130d3e67033f1280cd54cb91367acd15bda71bf",
+          "current_clouds/latest/object_01_face.png": "history_image_e7c3a5d354dbf589e57929c608cab018b4ed6a9b0eab8e2552f007ee32e5216f",
+          "current_clouds/latest/object_02_face.png": "history_image_4d395b7cafc287337f068c79247b18fa7dd41833537a5449525125138f9cfc94",
+          "current_clouds/latest/object_00_side.png": "history_image_a0be25653f7aa95d716d92191b8f659571cc0362bbfac34957ae251193132be1",
+          "current_clouds/latest/object_01_side.png": "history_image_c58fd410fedaa3464c9cbe9f76d7d0cedb6b662172e11ae72ad205619bb2dd8a",
+          "current_clouds/latest/object_02_side.png": "history_image_7a49e46d24316ac98445e1a94bc437d7057f960b86103d3ba24ae3a021058ee7",
+          "current_clouds/latest/object_00_top.png": "history_image_070016394e0d5b991acd8684b26ca1baa286df326868120bc8445b93ecf49c57",
+          "current_clouds/latest/object_01_top.png": "history_image_4c48fcfd22725a7987f774539dce6d00be0f4b997b731c3eec7d2245c3684bfa",
+          "current_clouds/latest/object_02_top.png": "history_image_a083b5b484ae96197e8f069c3754320bc95e0b1ba4fbf159a7de42c2e36f139e"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 1255,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.9112446513026953,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Cross from above the basket at safe height to above the box, then descend to straddle its narrow sides.",
+        "primitive": "move",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  535
+                ],
+                "view_id": "cream_cheese_box_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.2
+              ],
+              "orientation": {
+                "closing_axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "pad_midpoint"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  535
+                ],
+                "view_id": "cream_cheese_box_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.06
+              ],
+              "orientation": "preserve",
+              "reference": "pad_midpoint"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  510,
+                  535
+                ],
+                "view_id": "cream_cheese_box_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                -0.008
+              ],
+              "orientation": "preserve",
+              "reference": "pad_midpoint"
+            }
+          ]
+        },
+        "target_id": "cream_cheese_box"
+      },
+      {
+        "intent": "Close the pads onto the two narrow opposing sides of the box.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "close",
+          "steps": 100
+        },
+        "target_id": "cream_cheese_box"
+      },
+      {
+        "intent": "Lift the box above the table and basket rim for grasp review and subsequent transport.",
+        "primitive": "move",
+        "reference_target_id": "cream_cheese_box",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.2
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "cream_cheese_box"
+      }
+    ],
+    "intent": "Approach and grasp the cream cheese box across its narrow sides, then lift for transport.",
+    "preconditions": "The recovery segment completes its release and vertical withdrawal normally. The cream cheese box remains at its observed table location, and the gripper is open. Its narrow width is along world Y, allowing a vertical grasp with closing axis along Y.",
+    "reason": "Prepare the immediate cream-cheese grasp using its still-static observed upper face; release and withdrawal of the soup can remain future outcomes.",
+    "status": "ready",
+    "prepared_from_step": 1731,
+    "after_batch": 3,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task7",
+      "source_step": 1731,
+      "request_turn": 5,
+      "grasp_epoch": 1,
+      "reference": {
+        "reference_id": "47c601227767874f737ad623c218d7e95f0c1320fadea9d65a0915692ffe4f01",
+        "grasp_epoch": 1,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "alphabet_soup"
+      ]
+    },
+    "candidate_id": "8926777d86c92ed0a2118555a3d4ed4ae3667a6411afd9728ccddaca33705540",
+    "executed": false
+  }
+}

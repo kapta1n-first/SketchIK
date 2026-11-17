@@ -1,0 +1,117 @@
+{
+  "actions": [
+    {
+      "intent": "Approach the raised control ridge from above with jaws across its narrow dimension",
+      "primitive": "move",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                230,
+                533
+              ],
+              "view_id": "stove_control_knob_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.09
+            ],
+            "orientation": {
+              "closing_axis": [
+                0,
+                1,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                230,
+                533
+              ],
+              "view_id": "stove_control_knob_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.009
+            ],
+            "orientation": "preserve",
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "stove_control_knob",
+      "reference_target_id": "stove_control_knob"
+    },
+    {
+      "intent": "Pinch the raised ridge of the stove control",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 30
+      },
+      "target_id": "stove_control_knob"
+    },
+    {
+      "intent": "Turn the control away from its initial off position",
+      "primitive": "rotate_yaw",
+      "reference_target_id": "stove_control_knob",
+      "selection": {
+        "angle_rad": 1.2
+      },
+      "target_id": "stove_control_knob"
+    },
+    {
+      "intent": "Release the rotated stove control",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 20
+      },
+      "target_id": "stove_control_knob"
+    },
+    {
+      "intent": "Withdraw vertically for a clear view of the control and burner",
+      "primitive": "move",
+      "reference_target_id": "stove_control_knob",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.13
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "stove_control_knob"
+    }
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "visible_evidence": "The black stove control has a raised ridge running approximately along world X, distinct from the circular burner. The pot is upright on the table and the hand is open and above the scene.",
+  "source_step": 875
+}

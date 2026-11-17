@@ -1,0 +1,51 @@
+{
+  "intent": "Release the floor-supported mug and withdraw the hand clear of its handle and the microwave entrance.",
+  "actions": [
+    {
+      "intent": "Release the mug after its base has obtained interior-floor support.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 30
+      },
+      "target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Withdraw horizontally away from the handle and entrance before raising the hand outside the roof edge.",
+      "primitive": "move",
+      "reference_target_id": "microwave",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.11,
+              0
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.12
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    }
+  ],
+  "source_step": 3505
+}

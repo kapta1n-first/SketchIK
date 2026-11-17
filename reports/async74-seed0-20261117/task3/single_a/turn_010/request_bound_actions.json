@@ -1,0 +1,150 @@
+{
+  "actions": [
+    {
+      "intent": "Withdraw from the stalled pushing contact before changing orientation.",
+      "primitive": "move",
+      "reference_target_id": "cabinet",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.05,
+              0.015
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cabinet"
+    },
+    {
+      "intent": "Tilt the fingers inward and downward with the palm behind the drawer contact.",
+      "primitive": "move",
+      "reference_target_id": "cabinet",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0.70710678,
+                -0.70710678
+              ]
+            },
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cabinet"
+    },
+    {
+      "intent": "Reapproach the bottom drawer contact at a slightly lower height.",
+      "primitive": "move",
+      "reference_target_id": "cabinet",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0.04,
+              -0.024
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cabinet"
+    },
+    {
+      "intent": "Push the remaining drawer extension inward with the inclined fingers.",
+      "primitive": "move",
+      "reference_target_id": "cabinet",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0.085,
+              0
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cabinet"
+    },
+    {
+      "intent": "Withdraw outward and lift to expose the drawer for actual closure review.",
+      "primitive": "move",
+      "reference_target_id": "cabinet",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.07,
+              0
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          },
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.15
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "cabinet"
+    }
+  ],
+  "changed_objects": [
+    "cabinet"
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "visible_evidence": "The actual agent view and current cabinet local point image show that the bottom drawer moved inward but still projects beyond the cabinet, with the bowl upright on its interior support. The downward hand stopped during the push. I will withdraw from this contact and tilt the fingers inward so that the palm remains outside the upper handles during the remaining closure attempt.",
+  "source_step": 2393
+}

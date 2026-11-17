@@ -1,0 +1,148 @@
+{
+  "object_id": "moka_pot_2",
+  "source_kind": "scan_cloud",
+  "status": "predicted_rigid",
+  "identity_source": "Agent grasp target and selected contact point; not holding certification",
+  "source_step": 1739,
+  "source_world_to_eef_rotation": [
+    [
+      0.9999998782154934,
+      -0.000342996213866922,
+      -0.0003548557395269416
+    ],
+    [
+      -0.0003428914110565077,
+      -0.9999998975945917,
+      0.0002953578959944961
+    ],
+    [
+      -0.00035495700982785645,
+      -0.0002952361830392325,
+      -0.9999998934205531
+    ]
+  ],
+  "source_cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task8/single_a_geometry/object_02/historical_surfaces.npz",
+  "source_observations": [
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "agentview",
+      "source_step": 199,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00001",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 199,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "agentview",
+      "source_step": 268,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00002",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 268,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "agentview",
+      "source_step": 351,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00003",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 351,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "agentview",
+      "source_step": 451,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00004",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 451,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "agentview",
+      "source_step": 632,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 632,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "agentview",
+      "source_step": 30,
+      "points": 40884,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00000",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 30,
+      "points": 79585,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 632,
+      "points": 80166,
+      "role": "historical_shape"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "agentview",
+      "source_step": 632,
+      "points": 40884,
+      "role": "current_surfaces"
+    },
+    {
+      "observation_id": "obs_00005",
+      "camera": "robot0_eye_in_hand",
+      "source_step": 632,
+      "points": 80166,
+      "role": "current_surfaces"
+    }
+  ],
+  "component_group_id": 1,
+  "points": 145206,
+  "anchor_world_xyz_m": [
+    0.04090748354792595,
+    -0.02112692967057228,
+    1.034440517425537
+  ],
+  "rigid_attachment_verified": false,
+  "reference_scope": "initial_observed_component",
+  "reference_id": "d64ee7c2b04db978ccc104b434b11e11f32606cdf76b83ec0022e9786d644d31",
+  "grasp_epoch": 3,
+  "relation_revision": 0,
+  "validity": "active",
+  "wall_s": 0.06668650358915329
+}

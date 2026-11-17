@@ -1,0 +1,10 @@
+{
+  "request_wall_s": 22.969436256214976,
+  "execution_wall_s": 11.127900199964643,
+  "overlap_wall_s": 11.127477992326021,
+  "post_execution_wait_wall_s": 11.841958263888955,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time."
+}

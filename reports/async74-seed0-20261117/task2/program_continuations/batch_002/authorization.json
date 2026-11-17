@@ -1,0 +1,48 @@
+{
+  "candidate_id": "2484721af9812b6078d63fc257155c54b49c87f97aa949f12ce873f21607ed23",
+  "continuation_check": {
+    "candidate_id": "2484721af9812b6078d63fc257155c54b49c87f97aa949f12ce873f21607ed23",
+    "source_step": 1308,
+    "status": "pass",
+    "checks": [
+      {
+        "check": "candidate_identity",
+        "status": "pass"
+      },
+      {
+        "check": "actual_boundary",
+        "status": "pass",
+        "source_step": 1308,
+        "batch": 1
+      },
+      {
+        "check": "execution",
+        "status": "pass"
+      },
+      {
+        "check": "contact_warning",
+        "status": "pass"
+      },
+      {
+        "check": "current_depth_contradiction",
+        "status": "pass",
+        "measured_support": {}
+      },
+      {
+        "check": "retained_depth_contradiction",
+        "status": "pass",
+        "suspended_reference": null
+      }
+    ],
+    "grasp_epoch_transition": {
+      "prepared": 0,
+      "actual": 2,
+      "semantic_certification_required_for_dispatch": false
+    },
+    "holding_certified": false,
+    "task_success_certified": false,
+    "collision_checked": false,
+    "scope": "Normal continuation without A approval; actual used bindings and real IK are still checked."
+  },
+  "model_request_issued_for_dispatch": false
+}

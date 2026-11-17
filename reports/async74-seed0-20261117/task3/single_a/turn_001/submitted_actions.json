@@ -1,0 +1,120 @@
+{
+  "actions": [
+    {
+      "intent": "Approach the positive-world-X rim from above, then lower pads astride its wall.",
+      "primitive": "move",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                849,
+                530
+              ],
+              "view_id": "black_bowl_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.09
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                849,
+                530
+              ],
+              "view_id": "black_bowl_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              -0.002,
+              0,
+              -0.008
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "black_bowl"
+    },
+    {
+      "intent": "Pinch the bowl rim between inner and outer pads.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 70
+      },
+      "target_id": "black_bowl"
+    },
+    {
+      "intent": "Short lift to verify that the bowl follows the pads before transport.",
+      "primitive": "move",
+      "reference_target_id": "black_bowl",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.09
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "black_bowl"
+    }
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "task_referents": [
+    {
+      "image_paths": [
+        "geometry/object_01/cabinet_historical_right.png",
+        "observations/obs_00006/agentview.png"
+      ],
+      "interpretation": "The lowest of the three stacked drawers, currently extended beneath the two closed upper drawer fronts; the visible light interior belongs to this extended drawer.",
+      "object_id": "cabinet",
+      "status": "selected",
+      "task_phrase": "bottom drawer"
+    }
+  ],
+  "visible_evidence": "The patterned bowl with black exterior is resting on the table. Its rim is wider than the open jaws, so I will pinch one rim wall rather than span the whole bowl. The lowest of three drawer fronts is extended, exposing its internal support."
+}

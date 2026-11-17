@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": " \n",
+    "tool_calls": [
+      {
+        "id": "call_d8c98aec-65f",
+        "type": "function",
+        "function": {
+          "name": "read_image",
+          "arguments": "{\"path\":\"current_clouds/latest/object_01_side.png\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

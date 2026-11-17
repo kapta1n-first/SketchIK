@@ -1,0 +1,4414 @@
+{
+  "semantic_plan": {
+    "source_step": 2264,
+    "subtask": null,
+    "steps": [
+      {
+        "intent": "Approach the outer yellow handle from outside with horizontal fingers, keeping the palm behind the handle for subsequent cavity insertion.",
+        "primitive": "move",
+        "target_id": "yellow_white_mug",
+        "reference_target_id": "yellow_white_mug",
+        "camera": "agentview"
+      },
+      {
+        "intent": "Pinch the narrow outer handle bar across its width.",
+        "primitive": "set_gripper",
+        "target_id": "yellow_white_mug",
+        "camera": "agentview",
+        "command": "close"
+      },
+      {
+        "intent": "Short vertical lift to test whether the mug follows the handle grasp.",
+        "primitive": "move",
+        "reference_target_id": "yellow_white_mug",
+        "target_id": "yellow_white_mug",
+        "camera": "agentview"
+      }
+    ],
+    "hard_constraints": [],
+    "preferences": [],
+    "expected_effects": [],
+    "object_goals": []
+  },
+  "plan": {
+    "source_step": 2264,
+    "subtask": null,
+    "steps": [
+      {
+        "intent": "Approach the outer yellow handle from outside with horizontal fingers, keeping the palm behind the handle for subsequent cavity insertion.",
+        "primitive": "move",
+        "target_id": "yellow_white_mug",
+        "reference_target_id": "yellow_white_mug",
+        "camera": "agentview"
+      },
+      {
+        "intent": "Approach the outer yellow handle from outside with horizontal fingers, keeping the palm behind the handle for subsequent cavity insertion.",
+        "primitive": "move",
+        "target_id": "yellow_white_mug",
+        "reference_target_id": "yellow_white_mug",
+        "camera": "agentview"
+      },
+      {
+        "intent": "Pinch the narrow outer handle bar across its width.",
+        "primitive": "set_gripper",
+        "target_id": "yellow_white_mug",
+        "camera": "agentview",
+        "command": "close"
+      },
+      {
+        "intent": "Short vertical lift to test whether the mug follows the handle grasp.",
+        "primitive": "move",
+        "reference_target_id": "yellow_white_mug",
+        "target_id": "yellow_white_mug",
+        "camera": "agentview"
+      }
+    ],
+    "hard_constraints": [],
+    "preferences": [],
+    "expected_effects": [],
+    "object_goals": []
+  },
+  "source_step": 2264,
+  "observation_id": "obs_00008",
+  "selections": [
+    {
+      "anchor": {
+        "group_id": 1,
+        "kind": "cloud_point",
+        "pixel_xy": [
+          511,
+          875
+        ],
+        "view_id": "yellow_white_mug_historical_focus_gravity_top"
+      },
+      "offset_frame": "world",
+      "offset_m": [
+        0,
+        -0.085,
+        -0.021
+      ],
+      "orientation": {
+        "closing_axis": [
+          1,
+          0,
+          0
+        ],
+        "finger_direction": [
+          0,
+          1,
+          0
+        ]
+      },
+      "reference": "pad_midpoint"
+    },
+    {
+      "anchor": {
+        "group_id": 1,
+        "kind": "cloud_point",
+        "pixel_xy": [
+          511,
+          875
+        ],
+        "view_id": "yellow_white_mug_historical_focus_gravity_top"
+      },
+      "offset_frame": "world",
+      "offset_m": [
+        0,
+        0,
+        -0.021
+      ],
+      "orientation": {
+        "closing_axis": [
+          1,
+          0,
+          0
+        ],
+        "finger_direction": [
+          0,
+          1,
+          0
+        ]
+      },
+      "reference": "pad_midpoint"
+    },
+    {
+      "command": "close",
+      "steps": 100
+    },
+    {
+      "anchor": {
+        "kind": "current_eef"
+      },
+      "offset_frame": "world",
+      "offset_m": [
+        0,
+        0,
+        0.065
+      ],
+      "orientation": "preserve",
+      "reference": "eef"
+    }
+  ],
+  "conditions": [
+    {
+      "kind": "always"
+    },
+    {
+      "kind": "previous_motion_converged"
+    },
+    {
+      "kind": "always"
+    },
+    {
+      "kind": "always"
+    }
+  ],
+  "frozen_packets": [
+    {
+      "source_step": 2264,
+      "observation_id": "obs_00008",
+      "eef": {
+        "position": [
+          -0.21248076123645102,
+          -0.0075465225558999285,
+          1.1610255042146815
+        ],
+        "quaternion_xyzw": [
+          0.7057154475291036,
+          0.7068849340994955,
+          -0.0326969057797796,
+          -0.034789501496529714
+        ]
+      },
+      "operation_reference_target_id": "yellow_white_mug",
+      "cloud_views": [
+        {
+          "view_id": "yellow_white_mug_historical_focus",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007740104762408823,
+          "pixels_per_metre": 5167.888707949667,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                210,
+                204,
+                231,
+                220
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_focus_gravity_top",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007439058241063515,
+          "pixels_per_metre": 5377.024712510041,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                298,
+                235,
+                319,
+                251
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_right",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0006986149675153738,
+          "pixels_per_metre": 5725.614517286986,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                244,
+                142,
+                265,
+                158
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        }
+      ],
+      "image_references": [
+        {
+          "observation_id": "obs_00007",
+          "camera": "robot0_eye_in_hand"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "agentview"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "robot0_eye_in_hand"
+        }
+      ],
+      "observed_opening_frames": [],
+      "motion_check_mode": "ik_only"
+    },
+    {
+      "source_step": 2264,
+      "observation_id": "obs_00008",
+      "eef": {
+        "position": [
+          -0.21248076123645102,
+          -0.0075465225558999285,
+          1.1610255042146815
+        ],
+        "quaternion_xyzw": [
+          0.7057154475291036,
+          0.7068849340994955,
+          -0.0326969057797796,
+          -0.034789501496529714
+        ]
+      },
+      "operation_reference_target_id": "yellow_white_mug",
+      "cloud_views": [
+        {
+          "view_id": "yellow_white_mug_historical_focus",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007740104762408823,
+          "pixels_per_metre": 5167.888707949667,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                210,
+                204,
+                231,
+                220
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_focus_gravity_top",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007439058241063515,
+          "pixels_per_metre": 5377.024712510041,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                298,
+                235,
+                319,
+                251
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_right",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0006986149675153738,
+          "pixels_per_metre": 5725.614517286986,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                244,
+                142,
+                265,
+                158
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        }
+      ],
+      "image_references": [
+        {
+          "observation_id": "obs_00007",
+          "camera": "robot0_eye_in_hand"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "agentview"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "robot0_eye_in_hand"
+        }
+      ],
+      "observed_opening_frames": [],
+      "motion_check_mode": "ik_only"
+    },
+    {
+      "source_step": 2264,
+      "observation_id": "obs_00008",
+      "eef": {
+        "position": [
+          -0.21248076123645102,
+          -0.0075465225558999285,
+          1.1610255042146815
+        ],
+        "quaternion_xyzw": [
+          0.7057154475291036,
+          0.7068849340994955,
+          -0.0326969057797796,
+          -0.034789501496529714
+        ]
+      },
+      "operation_reference_target_id": "yellow_white_mug",
+      "cloud_views": [
+        {
+          "view_id": "yellow_white_mug_historical_focus",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007740104762408823,
+          "pixels_per_metre": 5167.888707949667,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                210,
+                204,
+                231,
+                220
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_focus_gravity_top",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007439058241063515,
+          "pixels_per_metre": 5377.024712510041,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                298,
+                235,
+                319,
+                251
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_right",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0006986149675153738,
+          "pixels_per_metre": 5725.614517286986,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                244,
+                142,
+                265,
+                158
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        }
+      ],
+      "image_references": [
+        {
+          "observation_id": "obs_00007",
+          "camera": "robot0_eye_in_hand"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "agentview"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "robot0_eye_in_hand"
+        }
+      ],
+      "observed_opening_frames": [],
+      "motion_check_mode": "ik_only"
+    },
+    {
+      "source_step": 2264,
+      "observation_id": "obs_00008",
+      "eef": {
+        "position": [
+          -0.21248076123645102,
+          -0.0075465225558999285,
+          1.1610255042146815
+        ],
+        "quaternion_xyzw": [
+          0.7057154475291036,
+          0.7068849340994955,
+          -0.0326969057797796,
+          -0.034789501496529714
+        ]
+      },
+      "operation_reference_target_id": "yellow_white_mug",
+      "cloud_views": [
+        {
+          "view_id": "yellow_white_mug_historical_focus",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007740104762408823,
+          "pixels_per_metre": 5167.888707949667,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                210,
+                204,
+                231,
+                220
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_focus_gravity_top",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0007439058241063515,
+          "pixels_per_metre": 5377.024712510041,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                298,
+                235,
+                319,
+                251
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        },
+        {
+          "view_id": "yellow_white_mug_historical_right",
+          "role": "historical multiview surfaces",
+          "selectable": true,
+          "width": 1024,
+          "height": 1024,
+          "point_count": 348346,
+          "mode": "rgb",
+          "point_footprint_pixels": 9,
+          "point_footprint_half_width_m": 0.0006986149675153738,
+          "pixels_per_metre": 5725.614517286986,
+          "component_label_bounds_xyxy": [
+            {
+              "group_id": 1,
+              "bounds_xyxy": [
+                244,
+                142,
+                265,
+                158
+              ]
+            }
+          ],
+          "group_ids": [
+            0,
+            1
+          ],
+          "source_observations": [
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00001",
+              "source_step": 207,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00002",
+              "source_step": 287,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00003",
+              "source_step": 610,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00004",
+              "source_step": 993,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00005",
+              "source_step": 1371,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00007",
+              "source_step": 2010,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00000",
+              "source_step": 30,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00006",
+              "source_step": 1625,
+              "camera": "robot0_eye_in_hand"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "agentview"
+            },
+            {
+              "observation_id": "obs_00008",
+              "source_step": 2264,
+              "camera": "robot0_eye_in_hand"
+            }
+          ],
+          "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+        }
+      ],
+      "image_references": [
+        {
+          "observation_id": "obs_00007",
+          "camera": "robot0_eye_in_hand"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "agentview"
+        },
+        {
+          "observation_id": "obs_00008",
+          "camera": "robot0_eye_in_hand"
+        }
+      ],
+      "observed_opening_frames": [],
+      "motion_check_mode": "ik_only"
+    }
+  ],
+  "cloud_views": [
+    [
+      {
+        "view_id": "yellow_white_mug_historical_focus",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.394331355910824,
+          0.023581961320673545,
+          0.9186657024433869
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 608170,
+        "point_footprint_half_width_m": 0.0007740104762408823,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.05969574910875847,
+            -0.9170273710658124
+          ],
+          "Y": [
+            -0.9982166185444641,
+            0.05484043728788178
+          ],
+          "Z": [
+            0.0,
+            -0.3950358555298477
+          ]
+        },
+        "pixels_per_metre": 5167.888707949667,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          10,
+          50,
+          230,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              210,
+              204,
+              231,
+              220
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      },
+      {
+        "view_id": "yellow_white_mug_historical_focus_gravity_top",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 655897,
+        "point_footprint_half_width_m": 0.0007439058241063515,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            1.0,
+            0.0
+          ],
+          "Y": [
+            0.0,
+            -1.0
+          ],
+          "Z": [
+            0.0,
+            0.0
+          ]
+        },
+        "pixels_per_metre": 5377.024712510041,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              298,
+              235,
+              319,
+              251
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ]
+      },
+      {
+        "view_id": "yellow_white_mug_historical_right",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.14546764272928497,
+          0.8762719307996433,
+          0.45933285122169354
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 540739,
+        "point_footprint_half_width_m": 0.0006986149675153738,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.9864991823831718,
+            -0.07522318842031858
+          ],
+          "Y": [
+            -0.16376618441343024,
+            0.4531314821719318
+          ],
+          "Z": [
+            0.0,
+            -0.8882642240845625
+          ]
+        },
+        "pixels_per_metre": 5725.614517286986,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              244,
+              142,
+              265,
+              158
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      }
+    ],
+    [
+      {
+        "view_id": "yellow_white_mug_historical_focus",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.394331355910824,
+          0.023581961320673545,
+          0.9186657024433869
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 608170,
+        "point_footprint_half_width_m": 0.0007740104762408823,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.05969574910875847,
+            -0.9170273710658124
+          ],
+          "Y": [
+            -0.9982166185444641,
+            0.05484043728788178
+          ],
+          "Z": [
+            0.0,
+            -0.3950358555298477
+          ]
+        },
+        "pixels_per_metre": 5167.888707949667,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          10,
+          50,
+          230,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              210,
+              204,
+              231,
+              220
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      },
+      {
+        "view_id": "yellow_white_mug_historical_focus_gravity_top",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 655897,
+        "point_footprint_half_width_m": 0.0007439058241063515,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            1.0,
+            0.0
+          ],
+          "Y": [
+            0.0,
+            -1.0
+          ],
+          "Z": [
+            0.0,
+            0.0
+          ]
+        },
+        "pixels_per_metre": 5377.024712510041,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              298,
+              235,
+              319,
+              251
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ]
+      },
+      {
+        "view_id": "yellow_white_mug_historical_right",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.14546764272928497,
+          0.8762719307996433,
+          0.45933285122169354
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 540739,
+        "point_footprint_half_width_m": 0.0006986149675153738,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.9864991823831718,
+            -0.07522318842031858
+          ],
+          "Y": [
+            -0.16376618441343024,
+            0.4531314821719318
+          ],
+          "Z": [
+            0.0,
+            -0.8882642240845625
+          ]
+        },
+        "pixels_per_metre": 5725.614517286986,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              244,
+              142,
+              265,
+              158
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      }
+    ],
+    [
+      {
+        "view_id": "yellow_white_mug_historical_focus",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.394331355910824,
+          0.023581961320673545,
+          0.9186657024433869
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 608170,
+        "point_footprint_half_width_m": 0.0007740104762408823,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.05969574910875847,
+            -0.9170273710658124
+          ],
+          "Y": [
+            -0.9982166185444641,
+            0.05484043728788178
+          ],
+          "Z": [
+            0.0,
+            -0.3950358555298477
+          ]
+        },
+        "pixels_per_metre": 5167.888707949667,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          10,
+          50,
+          230,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              210,
+              204,
+              231,
+              220
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      },
+      {
+        "view_id": "yellow_white_mug_historical_focus_gravity_top",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 655897,
+        "point_footprint_half_width_m": 0.0007439058241063515,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            1.0,
+            0.0
+          ],
+          "Y": [
+            0.0,
+            -1.0
+          ],
+          "Z": [
+            0.0,
+            0.0
+          ]
+        },
+        "pixels_per_metre": 5377.024712510041,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              298,
+              235,
+              319,
+              251
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ]
+      },
+      {
+        "view_id": "yellow_white_mug_historical_right",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.14546764272928497,
+          0.8762719307996433,
+          0.45933285122169354
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 540739,
+        "point_footprint_half_width_m": 0.0006986149675153738,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.9864991823831718,
+            -0.07522318842031858
+          ],
+          "Y": [
+            -0.16376618441343024,
+            0.4531314821719318
+          ],
+          "Z": [
+            0.0,
+            -0.8882642240845625
+          ]
+        },
+        "pixels_per_metre": 5725.614517286986,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              244,
+              142,
+              265,
+              158
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      }
+    ],
+    [
+      {
+        "view_id": "yellow_white_mug_historical_focus",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.394331355910824,
+          0.023581961320673545,
+          0.9186657024433869
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 608170,
+        "point_footprint_half_width_m": 0.0007740104762408823,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.05969574910875847,
+            -0.9170273710658124
+          ],
+          "Y": [
+            -0.9982166185444641,
+            0.05484043728788178
+          ],
+          "Z": [
+            0.0,
+            -0.3950358555298477
+          ]
+        },
+        "pixels_per_metre": 5167.888707949667,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          10,
+          50,
+          230,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              210,
+              204,
+              231,
+              220
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      },
+      {
+        "view_id": "yellow_white_mug_historical_focus_gravity_top",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_top.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          0,
+          0,
+          1
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 655897,
+        "point_footprint_half_width_m": 0.0007439058241063515,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            1.0,
+            0.0
+          ],
+          "Y": [
+            0.0,
+            -1.0
+          ],
+          "Z": [
+            0.0,
+            0.0
+          ]
+        },
+        "pixels_per_metre": 5377.024712510041,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              298,
+              235,
+              319,
+              251
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_focus_gravity_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ]
+      },
+      {
+        "view_id": "yellow_white_mug_historical_right",
+        "image_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.png",
+        "index_map_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_right.npz",
+        "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/historical_surfaces.npz",
+        "sources": [
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "agentview",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00001",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 207,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "agentview",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00002",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 287,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "agentview",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00003",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 610,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "agentview",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00004",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 993,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "agentview",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00005",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1371,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "agentview",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "agentview",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00007",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2010,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "agentview",
+            "source_step": 30,
+            "points": 37321,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00000",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 30,
+            "points": 104574,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00006",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1625,
+            "points": 104172,
+            "role": "historical_shape"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "agentview",
+            "source_step": 2264,
+            "points": 37321,
+            "role": "current_surfaces"
+          },
+          {
+            "observation_id": "obs_00008",
+            "camera": "robot0_eye_in_hand",
+            "source_step": 2264,
+            "points": 104985,
+            "role": "current_surfaces"
+          }
+        ],
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 348346,
+        "mode": "rgb",
+        "virtual_camera_eye_direction": [
+          -0.14546764272928497,
+          0.8762719307996433,
+          0.45933285122169354
+        ],
+        "projection": "orthographic",
+        "point_footprint_pixels": 9,
+        "painted_pixel_count": 540739,
+        "point_footprint_half_width_m": 0.0006986149675153738,
+        "viewport": "all input points",
+        "hidden_surface_completion": false,
+        "per_pixel_point_index_saved": true,
+        "world_positive_axes_screen_xy": {
+          "X": [
+            -0.9864991823831718,
+            -0.07522318842031858
+          ],
+          "Y": [
+            -0.16376618441343024,
+            0.4531314821719318
+          ],
+          "Z": [
+            0.0,
+            -0.8882642240845625
+          ]
+        },
+        "pixels_per_metre": 5725.614517286986,
+        "scale_bar_m": 0.02,
+        "legend_pixel_bounds": [
+          794,
+          50,
+          1014,
+          205
+        ],
+        "annotation_pixels_selectable": false,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              244,
+              142,
+              265,
+              158
+            ]
+          }
+        ],
+        "point_group_ids_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_00/yellow_white_mug_historical_groups.npz",
+        "group_ids": [
+          0,
+          1
+        ],
+        "focus_reference": {
+          "observation_id": "obs_00006",
+          "camera": "robot0_eye_in_hand",
+          "bounds_xyxy": [
+            342,
+            0,
+            706,
+            256
+          ],
+          "surface_role": "overall_shape"
+        },
+        "projection_direction_source": "real labelled source bearing"
+      }
+    ]
+  ],
+  "locations": [
+    {
+      "semantic_step_index": 0,
+      "waypoint_index": 0,
+      "grounding_source_step": 30
+    },
+    {
+      "semantic_step_index": 0,
+      "waypoint_index": 1,
+      "grounding_source_step": 30
+    },
+    {
+      "semantic_step_index": 1,
+      "waypoint_index": 0,
+      "grounding_source_step": 2264
+    },
+    {
+      "semantic_step_index": 2,
+      "waypoint_index": 0,
+      "grounding_source_step": 2264
+    }
+  ],
+  "execution_receipts": [],
+  "needs_observation": false
+}

@@ -1,0 +1,236 @@
+{
+  "turn": 4,
+  "executing_batch": 3,
+  "request_wall_s": 24.999648742377758,
+  "execution_wall_s": 30.594360379502177,
+  "overlap_wall_s": 24.999648742377758,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "e1f5a364a5f301f7e3100afd9f51c99b774efae3374cd986e5edb6ebecc5ab31",
+  "transport": {
+    "body_bytes": 6422151,
+    "body_sha256": "866b87561fe4c8263f1dd79a3ac5d1f8f854fc3cc877a032ad4cd9f03e5e7bd8",
+    "image_count": 20,
+    "original_image_count": 39,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 1,
+      "boundary_source_step": 1994,
+      "source": {
+        "messages": 33,
+        "text_chars": 291832,
+        "reasoning_chars": 2808,
+        "image_occurrences": 39
+      },
+      "active": {
+        "messages": 22,
+        "text_chars": 153812,
+        "reasoning_chars": 1975,
+        "image_occurrences": 20
+      },
+      "omitted_source_messages": 11,
+      "retained_tail_messages": 17,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        13,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 20,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 6230516,
+        "encoded_image_url_bytes_after": 6230516,
+        "protected_image_ids": [
+          "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a",
+          "history_image_280c45a16fdedbe6548afb4e486a6ec7801a200a42562eb8dbea2dc42a8159c1",
+          "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "history_image_a7e45a395fa85f428843b538e4660311b11d5a343193cc608f472f8a47f1cc5b",
+          "history_image_b439f3aee6835ba36bcb92055170d2d349d2d3722804b62fe0eb16f94caf2181",
+          "history_image_c6fd804895a5fc4e34d17496a9edd4be2e14bd6c0bc85a1edecd1b69c5da975b",
+          "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "history_image_ef935b68fa0fcbf5fab14030fd896fafdc3c5537c47178afe0eecafbebc06c25",
+          "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "current_clouds/latest/object_00_face.png": "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "current_clouds/latest/object_01_face.png": "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "current_clouds/latest/object_02_face.png": "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb",
+          "current_clouds/latest/object_00_side.png": "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "current_clouds/latest/object_01_side.png": "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "current_clouds/latest/object_02_side.png": "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "current_clouds/latest/object_00_top.png": "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "current_clouds/latest/object_01_top.png": "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "current_clouds/latest/object_02_top.png": "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 1975,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.3064222987741232,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Transport above the basket rim, then lower into the remaining space beside the soup while keeping the palm above the rim.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  490,
+                  700
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                -0.006,
+                0.22
+              ],
+              "orientation": {
+                "closing_axis": [
+                  1,
+                  0,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "held_bottom"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  490,
+                  700
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                -0.006,
+                0.05
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            }
+          ]
+        },
+        "target_id": "tomato_sauce"
+      },
+      {
+        "intent": "Release the tomato sauce inside the opening for a short descent onto the liner beside the soup.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "open",
+          "steps": 60
+        },
+        "target_id": "tomato_sauce"
+      },
+      {
+        "intent": "Withdraw vertically to clear the basket and expose both cans for outcome review.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.18
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "tomato_sauce"
+      }
+    ],
+    "intent": "Place the tomato sauce beside the alphabet soup within the basket, then withdraw for actual outcome review.",
+    "preconditions": "The executing tomato-sauce grasp and lift complete normally with the can retained and a usable held-bottom reference. The basket remains stationary and the soup can remains in its observed higher-world-Y position. These are planning premises, not claims about future results.",
+    "reason": "Prepare placement of the tomato sauce in the lower-world-Y space beside the soup can, which is visible inside the basket in the latest actual wrist image. The executing grasp outcome remains unknown.",
+    "status": "ready",
+    "prepared_from_step": 1994,
+    "after_batch": 3,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task0",
+      "source_step": 1994,
+      "request_turn": 4,
+      "grasp_epoch": 2,
+      "reference": null,
+      "executing_targets": [
+        "tomato_sauce"
+      ]
+    },
+    "candidate_id": "e1f5a364a5f301f7e3100afd9f51c99b774efae3374cd986e5edb6ebecc5ab31",
+    "executed": false
+  }
+}

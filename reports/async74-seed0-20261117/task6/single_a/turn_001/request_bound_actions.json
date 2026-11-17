@@ -1,0 +1,110 @@
+{
+  "actions": [
+    {
+      "intent": "Approach the top of the mug handle with fingers straddling its narrow width",
+      "primitive": "move",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                516,
+                225
+              ],
+              "view_id": "white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.1
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                516,
+                225
+              ],
+              "view_id": "white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.008
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "white_mug",
+      "reference_target_id": "white_mug"
+    },
+    {
+      "intent": "Grip the upper handle bridge",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 70
+      },
+      "target_id": "white_mug"
+    },
+    {
+      "intent": "Lift the mug for actual visual grasp verification before transport",
+      "primitive": "move",
+      "reference_target_id": "white_mug",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.1
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "white_mug"
+    }
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "visible_evidence": "The white textured mug is upright left of the plate in the current front image. Its loop handle extends along +Y in the registered top view; the upper handle bridge is visible near pixel (516,225), clear of the cup rim. The gripper is open and above the scene.",
+  "source_step": 1011
+}

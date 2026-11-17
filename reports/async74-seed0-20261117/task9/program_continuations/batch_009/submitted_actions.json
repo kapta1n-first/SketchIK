@@ -1,0 +1,74 @@
+{
+  "intent": "Approach the exterior side of the open door near its free upper corner with closed fingers, ready to push it toward closure.",
+  "actions": [
+    {
+      "intent": "Configure closed fingers as a compact pushing contact after withdrawing from the mug.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 20
+      },
+      "target_id": null
+    },
+    {
+      "intent": "Approach above the free door edge, then lower beside its exterior face without yet sweeping the door.",
+      "primitive": "move",
+      "reference_target_id": "microwave_door",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                225,
+                880
+              ],
+              "view_id": "microwave_door_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              -0.04,
+              0,
+              0.06
+            ],
+            "orientation": {
+              "closing_axis": [
+                0,
+                1,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                225,
+                880
+              ],
+              "view_id": "microwave_door_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              -0.035,
+              0,
+              -0.045
+            ],
+            "orientation": "preserve",
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "microwave_door"
+    }
+  ],
+  "source_step": 3639
+}

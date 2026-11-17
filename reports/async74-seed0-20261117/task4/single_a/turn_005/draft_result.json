@@ -1,0 +1,153 @@
+{
+  "turn": 5,
+  "executing_batch": 4,
+  "request_wall_s": 15.574025755748153,
+  "execution_wall_s": 23.31385654769838,
+  "overlap_wall_s": 15.574025755748153,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "45a2563ea002c77c38149a5a688756fc958373a69fb9be16f4df8ead67a8381f",
+  "transport": {
+    "body_bytes": 5531268,
+    "body_sha256": "3e02e2ffe516be0d8fb0a994e894c2882c93b61bb31b88e51ae201be3d7eeb9d",
+    "image_count": 21,
+    "original_image_count": 45,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 2,
+      "boundary_source_step": 2075,
+      "source": {
+        "messages": 43,
+        "text_chars": 411696,
+        "reasoning_chars": 983,
+        "image_occurrences": 45
+      },
+      "active": {
+        "messages": 24,
+        "text_chars": 171910,
+        "reasoning_chars": 473,
+        "image_occurrences": 21
+      },
+      "omitted_source_messages": 19,
+      "retained_tail_messages": 19,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        27,
+        28,
+        29,
+        30,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 21,
+        "images_after": 21,
+        "encoded_image_url_bytes_before": 5321451,
+        "encoded_image_url_bytes_after": 5321451,
+        "protected_image_ids": [
+          "history_image_0d74117aed59bc9a9128e4eb09ed7ccf1899eb268258302f46e15e2cde21bdb9",
+          "history_image_2dbd5d92dc8ef08adaee87cd3b32ada246bd1bf9e81913cf364436ed6a1f1352",
+          "history_image_37a2992ee502bf73f82e241a57a0d2b2ade20715d86840f973026013cd8a2d56",
+          "history_image_529f0c70d505d601d14da052d241b83bde129a0ef3e3ba64922e7683ba371eec",
+          "history_image_5f5b25c59fb8fd72c3d68c32a54fa9cd7e6f53878477521488b8a6e057fa5fe8",
+          "history_image_67c270843b6408c14cac0ae79298dd5f4d4c292a2a5ac3e5deec997949f016a4",
+          "history_image_74fcacb9a611960a9c8a623fdefd264d2f562abf6c76205d177c9c4102792de8",
+          "history_image_7ba679259d7f63e33ec42f5e1322dbbab93d94eb2e5c63104be1ee5074c29058",
+          "history_image_7e958bbb5289a96923e206db39f01603740a1cbf64860b79b6b33f8f4450e5d4",
+          "history_image_856ca401a706b8e7d6fd11b5bf9955ed36f1a13ca1ee8cd11131c33d4e757eaa",
+          "history_image_a9ba5f14a3a4e99a505ee8eb0896b98f5f0c0ded31303fd5f0b90d58ca1433a4",
+          "history_image_b03d1637d94cf198ba4f894ad81412a7a4c3b7faa0b66513ae913f010bea28ca",
+          "history_image_c0cc2cd75352ef5c02a375a218f27c18309ed56e4877d664ea229d551e109810",
+          "history_image_c99bad5aa0275555f9cc6c950c4bd1eff7abbe5c9492a68e63db17b9f504e046",
+          "history_image_d2ebe3f06a7deae116a4e1a8040d677f649835e763bf16ec7ccdfd5c8ad41f60",
+          "history_image_db02515eed7640a4e7cf83ae323553ce8ae86da5fcf2df2d46bcf7a8b53d5d62",
+          "history_image_e46048ecf7c3ee39f4a506b7100ac7d2b9c329849fcfee72ef247b3b7bd6d289",
+          "history_image_ec65b481c408949458f0487c87aeae7ad485c7931a64ef8132faba0447d61142"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_5f5b25c59fb8fd72c3d68c32a54fa9cd7e6f53878477521488b8a6e057fa5fe8",
+          "current_clouds/latest/object_00_face.png": "history_image_74fcacb9a611960a9c8a623fdefd264d2f562abf6c76205d177c9c4102792de8",
+          "current_clouds/latest/object_01_face.png": "history_image_b03d1637d94cf198ba4f894ad81412a7a4c3b7faa0b66513ae913f010bea28ca",
+          "current_clouds/latest/object_02_face.png": "history_image_ec65b481c408949458f0487c87aeae7ad485c7931a64ef8132faba0447d61142",
+          "current_clouds/latest/object_03_face.png": "history_image_d2ebe3f06a7deae116a4e1a8040d677f649835e763bf16ec7ccdfd5c8ad41f60",
+          "current_clouds/latest/object_00_side.png": "history_image_67c270843b6408c14cac0ae79298dd5f4d4c292a2a5ac3e5deec997949f016a4",
+          "current_clouds/latest/object_01_side.png": "history_image_e46048ecf7c3ee39f4a506b7100ac7d2b9c329849fcfee72ef247b3b7bd6d289",
+          "current_clouds/latest/object_02_side.png": "history_image_529f0c70d505d601d14da052d241b83bde129a0ef3e3ba64922e7683ba371eec",
+          "current_clouds/latest/object_03_side.png": "history_image_37a2992ee502bf73f82e241a57a0d2b2ade20715d86840f973026013cd8a2d56",
+          "current_clouds/latest/object_00_top.png": "history_image_2dbd5d92dc8ef08adaee87cd3b32ada246bd1bf9e81913cf364436ed6a1f1352",
+          "current_clouds/latest/object_01_top.png": "history_image_c99bad5aa0275555f9cc6c950c4bd1eff7abbe5c9492a68e63db17b9f504e046"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 473,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.3902641367167234,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing sketch is expected to complete the remaining yellow-and-white mug placement on the right plate and withdraw the hand. Review its actual final images before finishing or planning recovery; placement and release outcomes are still unknown. Earlier actual images showed the white mug upright on the left plate. Final review must verify both mug-to-plate support relationships rather than infer success from completed commands.",
+    "status": "finish_review",
+    "prepared_from_step": 2075,
+    "after_batch": 4,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task4",
+      "source_step": 2075,
+      "request_turn": 5,
+      "grasp_epoch": 3,
+      "reference": {
+        "reference_id": "a1af1fa9391dd2b6f82ec6e547c6ac29f6a4a4f31ce1c6bfb5e47f5ebffbcd8b",
+        "grasp_epoch": 3,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "yellow_white_mug"
+      ]
+    },
+    "candidate_id": "45a2563ea002c77c38149a5a688756fc958373a69fb9be16f4df8ead67a8381f",
+    "executed": false
+  }
+}

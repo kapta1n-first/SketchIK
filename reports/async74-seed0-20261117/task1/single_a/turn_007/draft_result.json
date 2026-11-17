@@ -1,0 +1,250 @@
+{
+  "turn": 7,
+  "executing_batch": 4,
+  "request_wall_s": 21.32653340883553,
+  "execution_wall_s": 21.77090094052255,
+  "overlap_wall_s": 21.32653340883553,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "d776a0c2864d6c55ec2f5449975741dbcee7d5c4f72e77492681fd9043476832",
+  "transport": {
+    "body_bytes": 6619226,
+    "body_sha256": "0fa243c75ff9b9b82a65d03d4e3a8cf200cffd5a2e41659b25fb5013dcd21c46",
+    "image_count": 23,
+    "original_image_count": 42,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 2,
+      "boundary_source_step": 1929,
+      "source": {
+        "messages": 44,
+        "text_chars": 364707,
+        "reasoning_chars": 1225,
+        "image_occurrences": 42
+      },
+      "active": {
+        "messages": 25,
+        "text_chars": 146347,
+        "reasoning_chars": 393,
+        "image_occurrences": 23
+      },
+      "omitted_source_messages": 19,
+      "retained_tail_messages": 20,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        28,
+        29,
+        30,
+        31,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 23,
+        "images_after": 23,
+        "encoded_image_url_bytes_before": 6435209,
+        "encoded_image_url_bytes_after": 6435209,
+        "protected_image_ids": [
+          "history_image_02f1801059bf0302e8c93e01ef8e2547439c3f59cb69f21d97d273046f3c4f07",
+          "history_image_19c88a3a31826dbe1b41f1b6f4701f7d013a1a563d7ba6eafdff2db601c0b10d",
+          "history_image_315f9d7856d20af0c93b850014cdadbcbdc38dfa7294c40f65c21b0639faf7d6",
+          "history_image_44f362a96d73104ccf53d817fe462890bbd036c3641ffbece27a635b2b858027",
+          "history_image_455f65fd383d2ba4d9b10663c46b80deb1e65b61edf01506d3e8aceab2718cfe",
+          "history_image_57f4ddae67dd8081d0d2338e1eb9f7156aedba6f350682e241e7b0bb040de718",
+          "history_image_7234f5937fcf3718a2a352824caf1bd82c20044b45b39d162ae31b5c2e020bf9",
+          "history_image_78d38e3409c98a4d027eaeb275725bf475b28375757aa37511f0b3944c2b6090",
+          "history_image_83c7345eef099168ec505ad291218b6c55b1dcaff67b77f8ab69ac25aaffde02",
+          "history_image_899ba30e8982184ddbf294cfff2c21b8649584e714357fb913075c114a6e5e6c",
+          "history_image_8d315d43b36e1a6fe10d65cd5ce4de0001b3076b2cd527cf5562452c6a9e3000",
+          "history_image_c383f8a48b289fbe2744c3a8c1db4b0eaa6118281365cd05098772c02c3b4861",
+          "history_image_d24041e6d37adaf0a41cfae084978c32aeb89fec569c9d81d003b91525952161",
+          "history_image_e93d99cfa5620e411cdc034314160cc72939f08bea7221f15e3436100170de8b",
+          "history_image_f949db18ab7fafe980b65d660f6e4ba4342537a2ff27f0037253913506dbc557"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_8d315d43b36e1a6fe10d65cd5ce4de0001b3076b2cd527cf5562452c6a9e3000",
+          "current_clouds/latest/object_00_face.png": "history_image_315f9d7856d20af0c93b850014cdadbcbdc38dfa7294c40f65c21b0639faf7d6",
+          "current_clouds/latest/object_01_face.png": "history_image_d24041e6d37adaf0a41cfae084978c32aeb89fec569c9d81d003b91525952161",
+          "current_clouds/latest/object_02_face.png": "history_image_57f4ddae67dd8081d0d2338e1eb9f7156aedba6f350682e241e7b0bb040de718",
+          "current_clouds/latest/object_00_side.png": "history_image_19c88a3a31826dbe1b41f1b6f4701f7d013a1a563d7ba6eafdff2db601c0b10d",
+          "current_clouds/latest/object_01_side.png": "history_image_f949db18ab7fafe980b65d660f6e4ba4342537a2ff27f0037253913506dbc557",
+          "current_clouds/latest/object_02_side.png": "history_image_78d38e3409c98a4d027eaeb275725bf475b28375757aa37511f0b3944c2b6090",
+          "current_clouds/latest/object_00_top.png": "history_image_455f65fd383d2ba4d9b10663c46b80deb1e65b61edf01506d3e8aceab2718cfe",
+          "current_clouds/latest/object_01_top.png": "history_image_c383f8a48b289fbe2744c3a8c1db4b0eaa6118281365cd05098772c02c3b4861",
+          "current_clouds/latest/object_02_top.png": "history_image_7234f5937fcf3718a2a352824caf1bd82c20044b45b39d162ae31b5c2e020bf9"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 393,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.181919226422906,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Transport above the basket rim and align the butter over the visible interior support before lowering to the release height.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  475,
+                  500
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.21
+              ],
+              "orientation": {
+                "closing_axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "pad_midpoint"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  475,
+                  500
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.17
+              ],
+              "orientation": {
+                "closing_axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "pad_midpoint"
+            }
+          ]
+        },
+        "target_id": "butter"
+      },
+      {
+        "intent": "Release the butter centrally into the basket while keeping the hand above its rim.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "open",
+          "steps": 100
+        },
+        "target_id": "butter"
+      },
+      {
+        "intent": "Withdraw vertically to expose both packages and the basket interior for actual outcome review.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.1
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "butter"
+      }
+    ],
+    "intent": "Carry the butter over the basket interior, release above the rim, and withdraw for verification of both packages.",
+    "preconditions": "The ongoing butter approach, close and lift complete normally with the package retained between the pads. The basket remains stationary and open. Retention is a planning assumption, not a future observation.",
+    "reason": "Prepare butter placement after the ongoing grasp and lift. The latest wrist image already shows the cream cheese box resting inside the basket; the butter grasp outcome is still unknown.",
+    "status": "ready",
+    "prepared_from_step": 1929,
+    "after_batch": 4,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task1",
+      "source_step": 1929,
+      "request_turn": 7,
+      "grasp_epoch": 2,
+      "reference": null,
+      "executing_targets": [
+        "butter"
+      ]
+    },
+    "candidate_id": "d776a0c2864d6c55ec2f5449975741dbcee7d5c4f72e77492681fd9043476832",
+    "executed": false
+  }
+}

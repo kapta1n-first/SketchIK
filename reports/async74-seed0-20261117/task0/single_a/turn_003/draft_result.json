@@ -1,0 +1,237 @@
+{
+  "turn": 3,
+  "executing_batch": 2,
+  "request_wall_s": 24.82856360450387,
+  "execution_wall_s": 28.489458383992314,
+  "overlap_wall_s": 24.82856360450387,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "4a9ca04b111401546363ab8510aeeeb51a66f0c92f97b39dd09db10b7145dea7",
+  "transport": {
+    "body_bytes": 6447695,
+    "body_sha256": "61854b267ee663b3f94eed41946d95e84b4e702b95d514eab5a1912df59eb90f",
+    "image_count": 20,
+    "original_image_count": 36,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 0,
+      "source": {
+        "messages": 23,
+        "text_chars": 207312,
+        "reasoning_chars": 2335,
+        "image_occurrences": 36
+      },
+      "active": {
+        "messages": 19,
+        "text_chars": 131447,
+        "reasoning_chars": 2335,
+        "image_occurrences": 20
+      },
+      "omitted_source_messages": 4,
+      "active_source_indices": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22
+      ],
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 20,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 6276100,
+        "encoded_image_url_bytes_after": 6276100,
+        "protected_image_ids": [
+          "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "history_image_1fd7cf9552650268770459f79293d28753d0769cfb3882bbd6643635b2bb4cc4",
+          "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a",
+          "history_image_280c45a16fdedbe6548afb4e486a6ec7801a200a42562eb8dbea2dc42a8159c1",
+          "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "history_image_b439f3aee6835ba36bcb92055170d2d349d2d3722804b62fe0eb16f94caf2181",
+          "history_image_bfee8c3b6fc161ec93f712a13b84b646344a4d29a7f6fb639337bfbafe213d2b",
+          "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "history_image_d9bdd7ee5ea3206989fc170ba1e21b0f1ef376cffb5a714b235a6b212124b857",
+          "history_image_edd66055e83a93d8ec9de7cd7878c653b3b1811b353251f32b484e60c3455174",
+          "history_image_f1552b418f0f9bc2d76d559794eba3993b91d8f25cd044ff05f7b347766d4e09",
+          "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "current_clouds/latest/object_00_face.png": "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "current_clouds/latest/object_01_face.png": "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "current_clouds/latest/object_02_face.png": "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb",
+          "current_clouds/latest/object_00_side.png": "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "current_clouds/latest/object_01_side.png": "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "current_clouds/latest/object_02_side.png": "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "current_clouds/latest/object_00_top.png": "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "current_clouds/latest/object_01_top.png": "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "current_clouds/latest/object_02_top.png": "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 2335,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.2677481025457382,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Approach the tomato sauce lid from above, first staying high enough to clear the basket rim during the transfer.",
+        "primitive": "move",
+        "reference_target_id": "tomato_sauce",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  515,
+                  550
+                ],
+                "view_id": "tomato_sauce_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.17
+              ],
+              "orientation": {
+                "closing_axis": [
+                  0,
+                  1,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "pad_midpoint"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  515,
+                  550
+                ],
+                "view_id": "tomato_sauce_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                -0.012
+              ],
+              "orientation": "preserve",
+              "reference": "pad_midpoint"
+            }
+          ]
+        },
+        "target_id": "tomato_sauce"
+      },
+      {
+        "intent": "Close the pads on opposing sides of the tomato sauce can just below its rim.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "close",
+          "steps": 70
+        },
+        "target_id": "tomato_sauce"
+      },
+      {
+        "intent": "Lift vertically clear of the table and basket rim, allowing actual images to reveal whether the can follows the pads.",
+        "primitive": "move",
+        "reference_target_id": "tomato_sauce",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.18
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "tomato_sauce"
+      }
+    ],
+    "intent": "Grasp and lift the tomato sauce can for subsequent placement in the remaining basket space.",
+    "preconditions": "The executing release and vertical withdrawal complete normally, leaving the gripper open and clear of the basket rim. The tomato sauce can remains at its observed static location. The latest actual soup images show the blue can lifted with its lid and body maintaining their relationship to the pads, but do not establish the outcome of the executing placement.",
+    "reason": "Prepare the tomato-sauce grasp after the executing soup placement and withdrawal; actual placement remains to be checked from the resulting images.",
+    "status": "ready",
+    "prepared_from_step": 1383,
+    "after_batch": 2,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task0",
+      "source_step": 1383,
+      "request_turn": 3,
+      "grasp_epoch": 1,
+      "reference": {
+        "reference_id": "206f33f5a83a21ac1d5b6b9415be82513c232a1a84860fc1eebc94ddcb6cb251",
+        "grasp_epoch": 1,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "alphabet_soup"
+      ]
+    },
+    "candidate_id": "4a9ca04b111401546363ab8510aeeeb51a66f0c92f97b39dd09db10b7145dea7",
+    "executed": false
+  }
+}

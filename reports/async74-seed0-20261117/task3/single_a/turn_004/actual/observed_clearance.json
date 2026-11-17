@@ -1,0 +1,21 @@
+{
+  "obstacle_points": 45898,
+  "margin_m": 0.004,
+  "sources": [
+    {
+      "camera": "agentview",
+      "source_step": 1637,
+      "sampled_points": 65536,
+      "robot_points_removed": 10452
+    },
+    {
+      "camera": "robot0_eye_in_hand",
+      "source_step": 1637,
+      "sampled_points": 65536,
+      "robot_points_removed": 12201
+    }
+  ],
+  "sampling": "4-pixel native grid then 4mm voxel",
+  "hidden_obstacles_checked": false,
+  "robot_geometry": "robot-only known convex hulls/primitives"
+}

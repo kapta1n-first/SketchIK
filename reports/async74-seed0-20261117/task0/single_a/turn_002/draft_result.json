@@ -1,0 +1,221 @@
+{
+  "turn": 2,
+  "executing_batch": 1,
+  "request_wall_s": 28.729093035683036,
+  "execution_wall_s": 21.13157418370247,
+  "overlap_wall_s": 21.131044251844287,
+  "post_execution_wait_wall_s": 7.598048783838749,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "2217f14ece77b6b63df1c97974ce555d622c6bc32f80e0578e560d17a6852a0c",
+  "transport": {
+    "body_bytes": 4882023,
+    "body_sha256": "6ddcfe3b745d09aa475286365be28814302ca18fe6c32ecd9b34bd298f32cab8",
+    "image_count": 15,
+    "original_image_count": 31,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 0,
+      "source": {
+        "messages": 14,
+        "text_chars": 123457,
+        "reasoning_chars": 833,
+        "image_occurrences": 31
+      },
+      "active": {
+        "messages": 11,
+        "text_chars": 76528,
+        "reasoning_chars": 833,
+        "image_occurrences": 15
+      },
+      "omitted_source_messages": 3,
+      "active_source_indices": [
+        0,
+        1,
+        3,
+        5,
+        6,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 15,
+        "images_after": 15,
+        "encoded_image_url_bytes_before": 4767157,
+        "encoded_image_url_bytes_after": 4767157,
+        "protected_image_ids": [
+          "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a",
+          "history_image_280c45a16fdedbe6548afb4e486a6ec7801a200a42562eb8dbea2dc42a8159c1",
+          "history_image_39d99ee1ff56e894b80b062632595c461a8b70951398a4143e620d07b2f3a927",
+          "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "history_image_7ce95dca3b622f51a0c393f2525fdc7a81710b8e8b794a4dbcfec0f735158275",
+          "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "history_image_9c7401bbd18b30007607e6987d32d620963b5cd811064c7ec28d501ed2701df5",
+          "history_image_b439f3aee6835ba36bcb92055170d2d349d2d3722804b62fe0eb16f94caf2181",
+          "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_d5e70bed712659be9519adb051aff6f0eb6cef0d9dac00084316314e5181e540",
+          "current_clouds/latest/object_00_face.png": "history_image_95881e2c7bcfcf2ad88a4b32d562b589d0a8f9fd3ffb740ceb7b2f220b056f93",
+          "current_clouds/latest/object_01_face.png": "history_image_1bb9b74807ad4dca75043fcfeff802eb0b5832c2c8f5bac307d40fab5d6372d2",
+          "current_clouds/latest/object_02_face.png": "history_image_f7125edbf43bd7caa378fcd26bbde0dc2ce93bc8dc0b32355d2b58c7e64570cb",
+          "current_clouds/latest/object_00_side.png": "history_image_956e1ad67db56e20c2f4699976111d1a5106b8dc5cdd310dc0f785c621d43b7f",
+          "current_clouds/latest/object_01_side.png": "history_image_c740a11c3b7bade4d3dd723074088a0f0e17048e61e54abea7ed307b82f6e8f1",
+          "current_clouds/latest/object_02_side.png": "history_image_59c343f40fe92c2947d46e78a4efb8623952261f4a38116779b93b0dca1d85c1",
+          "current_clouds/latest/object_00_top.png": "history_image_665037921fa41e702c91ab3e2959b0cb1405e89bdcfbf36328a7092c0d165407",
+          "current_clouds/latest/object_01_top.png": "history_image_5d7bab84482082a56f87864e4aca5f9b30c9907d123dd7eaa3a8c321b84aa782",
+          "current_clouds/latest/object_02_top.png": "history_image_2434c15cd12af529bf212e925bda2ae3bcdfae02fe14610a06c1dbfab75a7e1a"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 833,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.5794930253177881,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Carry above the basket rim, orienting the jaw separation along world X to leave room along the two-can arrangement.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  490,
+                  410
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.22
+              ],
+              "orientation": {
+                "closing_axis": [
+                  1,
+                  0,
+                  0
+                ],
+                "finger_direction": [
+                  0,
+                  0,
+                  -1
+                ]
+              },
+              "reference": "held_bottom"
+            },
+            {
+              "anchor": {
+                "group_id": 1,
+                "kind": "cloud_point",
+                "pixel_xy": [
+                  490,
+                  410
+                ],
+                "view_id": "basket_historical_focus_gravity_top"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.05
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            }
+          ]
+        },
+        "target_id": "alphabet_soup"
+      },
+      {
+        "intent": "Release within the basket opening for a short descent onto the visible liner support.",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "open",
+          "steps": 60
+        },
+        "target_id": "alphabet_soup"
+      },
+      {
+        "intent": "Withdraw vertically from the basket to expose the placement and clear the rim.",
+        "primitive": "move",
+        "reference_target_id": "basket",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.18
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "alphabet_soup"
+      }
+    ],
+    "intent": "Place alphabet soup inside the basket toward its higher-world-Y half, leaving space for the second can.",
+    "preconditions": "The executing grasp and lift completes normally, with the soup can retained and a usable held-bottom reference. Basket support coordinates remain static. This sketch does not certify grasp success.",
+    "reason": "Prepare the soup-can transfer into one half of the basket while leaving the other half for tomato sauce; the current grasp outcome remains unknown.",
+    "status": "ready",
+    "prepared_from_step": 1059,
+    "after_batch": 1,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task0",
+      "source_step": 1059,
+      "request_turn": 2,
+      "grasp_epoch": 0,
+      "reference": null,
+      "executing_targets": [
+        "alphabet_soup"
+      ]
+    },
+    "candidate_id": "2217f14ece77b6b63df1c97974ce555d622c6bc32f80e0578e560d17a6852a0c",
+    "executed": false
+  }
+}

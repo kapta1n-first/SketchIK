@@ -1,0 +1,86 @@
+{
+  "intent": "Place the white mug upright in the centre of the plate, then withdraw vertically to leave room for the subsequent pudding transfer.",
+  "actions": [
+    {
+      "intent": "Carry the mug above the plate with its bottom clear of the rim, then lower onto the central support",
+      "primitive": "move",
+      "reference_target_id": "plate",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                533
+              ],
+              "view_id": "plate_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.14
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                533
+              ],
+              "view_id": "plate_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.012
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          }
+        ]
+      },
+      "target_id": "white_mug"
+    },
+    {
+      "intent": "Release the mug at the central plate support",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 60
+      },
+      "target_id": "white_mug"
+    },
+    {
+      "intent": "Withdraw above the released mug without lateral dragging",
+      "primitive": "move",
+      "reference_target_id": "white_mug",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.14
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "white_mug"
+    }
+  ],
+  "source_step": 1388
+}

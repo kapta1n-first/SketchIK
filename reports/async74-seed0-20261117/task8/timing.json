@@ -1,0 +1,108 @@
+{
+  "total_wall_s": 394.7465397659689,
+  "phases": {
+    "rgbd_camera_render": {
+      "calls": 24,
+      "inclusive_wall_s": 0.62775301001966,
+      "exclusive_wall_s": 0.62775301001966
+    },
+    "rgbd_file_write": {
+      "calls": 48,
+      "inclusive_wall_s": 12.333562653511763,
+      "exclusive_wall_s": 12.333562653511763
+    },
+    "rgb_display_annotation": {
+      "calls": 48,
+      "inclusive_wall_s": 14.062144573777914,
+      "exclusive_wall_s": 14.062144573777914
+    },
+    "observation_acquisition": {
+      "calls": 77,
+      "inclusive_wall_s": 27.143838992342353,
+      "exclusive_wall_s": 0.1203787550330162
+    },
+    "whole_scene_point_cloud_and_views": {
+      "calls": 6,
+      "inclusive_wall_s": 14.727170938625932,
+      "exclusive_wall_s": 14.727170938625932
+    },
+    "hand_geometry_views": {
+      "calls": 7,
+      "inclusive_wall_s": 12.429070020094514,
+      "exclusive_wall_s": 12.429070020094514
+    },
+    "api_request": {
+      "calls": 4,
+      "inclusive_wall_s": 65.58881801366806,
+      "exclusive_wall_s": 65.58881801366806
+    },
+    "initial_scan_and_acquisition": {
+      "calls": 1,
+      "inclusive_wall_s": 90.64294879510999,
+      "exclusive_wall_s": 53.58446556702256
+    },
+    "initial_geometry_handoff": {
+      "calls": 1,
+      "inclusive_wall_s": 1.4323052074760199,
+      "exclusive_wall_s": 1.4323052074760199
+    },
+    "initial_object_artifacts": {
+      "calls": 1,
+      "inclusive_wall_s": 27.02281764149666,
+      "exclusive_wall_s": 27.0216852016747
+    },
+    "runtime_point_cloud_and_dimensions": {
+      "calls": 38,
+      "inclusive_wall_s": 36.18823974020779,
+      "exclusive_wall_s": 36.18823974020779
+    },
+    "current_cloud_files": {
+      "calls": 6,
+      "inclusive_wall_s": 1.130043437704444,
+      "exclusive_wall_s": 1.130043437704444
+    },
+    "current_state_packet": {
+      "calls": 6,
+      "inclusive_wall_s": 16.981246177107096,
+      "exclusive_wall_s": 0.3559966292232275
+    },
+    "current_cloud_local_view": {
+      "calls": 10,
+      "inclusive_wall_s": 0.035915814340114594,
+      "exclusive_wall_s": 0.035915814340114594
+    },
+    "model_reference_packaging": {
+      "calls": 1,
+      "inclusive_wall_s": 0.1693337094038725,
+      "exclusive_wall_s": 0.1334178950637579
+    },
+    "model_feedback_packaging": {
+      "calls": 6,
+      "inclusive_wall_s": 0.7129037268459797,
+      "exclusive_wall_s": 0.7129037268459797
+    },
+    "model_context_preparation": {
+      "calls": 8,
+      "inclusive_wall_s": 2.185706578195095,
+      "exclusive_wall_s": 2.185706578195095
+    },
+    "numerical_motion_compilation": {
+      "calls": 14,
+      "inclusive_wall_s": 7.783339966088533,
+      "exclusive_wall_s": 7.783339966088533
+    },
+    "controller_IK_and_physics": {
+      "calls": 18,
+      "inclusive_wall_s": 41.594595255330205,
+      "exclusive_wall_s": 41.594595255330205
+    },
+    "history_archive_write": {
+      "calls": 6,
+      "inclusive_wall_s": 0.7901794593781233,
+      "exclusive_wall_s": 0.7901794593781233
+    }
+  },
+  "measured_exclusive_wall_s": 292.8376924432814,
+  "outside_instrumented_phases_wall_s": 101.9088473226875,
+  "scope": "Nested inclusive times overlap. Sum exclusive times only. API timing includes request encoding and any explicitly recorded operator pause."
+}

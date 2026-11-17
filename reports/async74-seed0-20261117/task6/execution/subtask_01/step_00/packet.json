@@ -1,0 +1,698 @@
+{
+  "context": {
+    "source_step": 1388,
+    "observation_id": "obs_00010",
+    "eef": {
+      "position": [
+        -0.09375957171536005,
+        -0.08153655746788482,
+        0.6084557293216265
+      ],
+      "quaternion_xyzw": [
+        0.9999999281770569,
+        0.00035710939190775076,
+        -9.576134270111874e-05,
+        -8.335783579689802e-05
+      ],
+      "tool_axes_world": {
+        "finger_direction": [
+          -0.00019158220737861863,
+          0.00016664726507006506,
+          -0.9999999677624712
+        ],
+        "closing_axis": [
+          0.9999997266052932,
+          0.0007142346974347666,
+          -0.00019146313591440991
+        ]
+      }
+    },
+    "operation_reference_target_id": "plate",
+    "cloud_views": [
+      {
+        "view_id": "plate_historical_focus",
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 387899,
+        "mode": "rgb",
+        "point_footprint_pixels": 9,
+        "point_footprint_half_width_m": 0.0008333443075493207,
+        "pixels_per_metre": 4799.936789348338,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              263,
+              251,
+              284,
+              267
+            ]
+          }
+        ],
+        "group_ids": [
+          0,
+          1
+        ],
+        "source_observations": [
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          }
+        ],
+        "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+      },
+      {
+        "view_id": "plate_historical_focus_gravity_top",
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 387899,
+        "mode": "rgb",
+        "point_footprint_pixels": 9,
+        "point_footprint_half_width_m": 0.0007419726292116452,
+        "pixels_per_metre": 5391.034443211265,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              233,
+              262,
+              254,
+              278
+            ]
+          }
+        ],
+        "group_ids": [
+          0,
+          1
+        ],
+        "source_observations": [
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          }
+        ],
+        "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+      },
+      {
+        "view_id": "plate_historical_right",
+        "role": "historical multiview surfaces",
+        "selectable": true,
+        "width": 1024,
+        "height": 1024,
+        "point_count": 387899,
+        "mode": "rgb",
+        "point_footprint_pixels": 9,
+        "point_footprint_half_width_m": 0.0009497195452636975,
+        "pixels_per_metre": 4211.769695536135,
+        "component_label_bounds_xyxy": [
+          {
+            "group_id": 1,
+            "bounds_xyxy": [
+              253,
+              355,
+              274,
+              371
+            ]
+          }
+        ],
+        "group_ids": [
+          0,
+          1
+        ],
+        "source_observations": [
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00001",
+            "source_step": 306,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00002",
+            "source_step": 378,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00003",
+            "source_step": 519,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00004",
+            "source_step": 609,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00005",
+            "source_step": 734,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00000",
+            "source_step": 30,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "agentview"
+          },
+          {
+            "observation_id": "obs_00006",
+            "source_step": 1011,
+            "camera": "robot0_eye_in_hand"
+          }
+        ],
+        "group_scope": "Frozen point table of this view only; G numbers are not persistent object identities across repackaging or source steps."
+      }
+    ],
+    "image_references": [
+      {
+        "observation_id": "obs_00006",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00006",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00009",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00009",
+        "camera": "robot0_eye_in_hand"
+      },
+      {
+        "observation_id": "obs_00010",
+        "camera": "agentview"
+      },
+      {
+        "observation_id": "obs_00010",
+        "camera": "robot0_eye_in_hand"
+      }
+    ],
+    "observed_opening_frames": [],
+    "motion_check_mode": "ik_only",
+    "grounding_source_step": 30,
+    "robot_gripper_geometry": {
+      "source": "known robot collision model and actual finger joint state",
+      "source_step": 1388,
+      "coordinate_frame": "eef_tool",
+      "unit": "m",
+      "axis_meaning": {
+        "x": "finger closing/separation",
+        "y": "transverse thickness",
+        "z": "finger forward direction"
+      },
+      "hand_bounds_in_eef_tool_m": [
+        [
+          -0.10042587867547335,
+          -0.0316359166834456,
+          -0.12292480131995949
+        ],
+        [
+          0.10398971979103312,
+          0.03161578415064445,
+          0.009249034596525051
+        ]
+      ],
+      "hand_span_xyz_m": [
+        0.20441559846650648,
+        0.06325170083409004,
+        0.13217383591648454
+      ],
+      "palm_and_fixed_hand": {
+        "bounds_in_eef_tool_m": [
+          [
+            -0.10042587867547335,
+            -0.0316359166834456,
+            -0.12292480131995949
+          ],
+          [
+            0.10398971979103312,
+            0.03161578415064445,
+            -0.031037849411409604
+          ]
+        ],
+        "span_xyz_m": [
+          0.20441559846650648,
+          0.06325170083409004,
+          0.09188695190854988
+        ]
+      },
+      "fingers": [
+        {
+          "joint_name": "gripper0_right_finger_joint1",
+          "joint_position": 0.008424005836234727,
+          "bounds_in_eef_tool_m": [
+            [
+              -0.034827387769422256,
+              -0.010479453077633127,
+              -0.04446830418239629
+            ],
+            [
+              -0.007924005836234706,
+              0.010494818215737193,
+              0.009249034596525051
+            ]
+          ],
+          "span_xyz_m": [
+            0.026903381933187552,
+            0.02097427129337032,
+            0.05371733877892135
+          ],
+          "length_along_tool_z_m": 0.05371733877892135,
+          "tip_z_relative_eef_m": 0.009249034596525051,
+          "pads": [
+            {
+              "bounds_in_eef_tool_m": [
+                [
+                  -0.015924005836234684,
+                  -0.007999999999999993,
+                  -0.0116
+                ],
+                [
+                  -0.007924005836234706,
+                  0.007999999999999959,
+                  0.004399999999999948
+                ]
+              ],
+              "span_xyz_m": [
+                0.007999999999999978,
+                0.015999999999999952,
+                0.01599999999999995
+              ]
+            }
+          ]
+        },
+        {
+          "joint_name": "gripper0_right_finger_joint2",
+          "joint_position": -0.00842216855669428,
+          "bounds_in_eef_tool_m": [
+            [
+              0.007922168556694245,
+              -0.01049481821573717,
+              -0.0444683041823963
+            ],
+            [
+              0.03482555048988181,
+              0.010479453077633144,
+              0.009249034596525046
+            ]
+          ],
+          "span_xyz_m": [
+            0.026903381933187566,
+            0.020974271293370317,
+            0.05371733877892135
+          ],
+          "length_along_tool_z_m": 0.05371733877892135,
+          "tip_z_relative_eef_m": 0.009249034596525046,
+          "pads": [
+            {
+              "bounds_in_eef_tool_m": [
+                [
+                  0.007922168556694245,
+                  -0.007999999999999952,
+                  -0.011599999999999984
+                ],
+                [
+                  0.015922168556694222,
+                  0.008,
+                  0.004399999999999965
+                ]
+              ],
+              "span_xyz_m": [
+                0.007999999999999978,
+                0.015999999999999952,
+                0.01599999999999995
+              ]
+            }
+          ]
+        }
+      ],
+      "finger_joint_positions_rad_or_m": [
+        0.008424005836234727,
+        -0.00842216855669428
+      ],
+      "meaning": "Robot mechanical envelope at this opening; not object dimensions, a grasp proposal or collision-free certification. EEF is not the fingertip or object centre.",
+      "current_inner_jaw_gap_m": 0.01584617439292895,
+      "pad_centres_in_eef_tool_m": [
+        [
+          -0.011924005836234696,
+          -1.6820130563625493e-17,
+          -0.0036000000000000255
+        ],
+        [
+          0.011922168556694234,
+          2.366333344766552e-17,
+          -0.0036000000000000094
+        ]
+      ],
+      "pad_midpoint_in_eef_tool_m": [
+        -9.18639770230642e-07,
+        3.4216014420200135e-18,
+        -0.0036000000000000172
+      ]
+    },
+    "observed_surface_clearance": {
+      "checked_by_program": false,
+      "geometry_extracted": true,
+      "complete_collision_planning": false
+    },
+    "carried_observed_geometry": {
+      "object_id": "white_mug",
+      "reference_available": true,
+      "method": "rigid_reference_prediction",
+      "source_step": 1388,
+      "reference_step": 1324,
+      "reference_visible_fraction": 0.9293652753766362,
+      "observed_points": 2937,
+      "visible_support": {
+        "method": "current_depth_with_self_and_foreground_occlusion",
+        "testable_points": 171336,
+        "supported_points": 166877,
+        "support_fraction": 0.9739751132278097,
+        "status": "supported",
+        "depth_tolerance_m": 0.012,
+        "min_testable_points": 25,
+        "min_support_fraction": 0.25,
+        "is_grasp_or_identity_probability": false,
+        "cameras": [
+          {
+            "camera": "agentview",
+            "source_step": 1388,
+            "testable_points": 100635,
+            "supported_points": 96417
+          },
+          {
+            "camera": "robot0_eye_in_hand",
+            "source_step": 1388,
+            "testable_points": 130375,
+            "supported_points": 125815
+          }
+        ]
+      },
+      "predicted_points": 190293,
+      "complete_object_dimensions_known": false,
+      "rigid_attachment_verified": false,
+      "geometry_status": "observed_reference_predicted_by_eef",
+      "observed_bounds_in_eef_tool_m": [
+        [
+          -0.04931149398687513,
+          -0.011294455549508454,
+          -0.03853135576481776
+        ],
+        [
+          0.04631087188398419,
+          0.11895210309019566,
+          0.0749050611796652
+        ]
+      ],
+      "carried_volume_proxy": {
+        "available": true,
+        "status": "available",
+        "reason": null,
+        "kind": "conservative_convex_hull_of_observed_carried_points",
+        "coordinate_frame": "eef_tool",
+        "length_unit": "m",
+        "fills_concavities_and_hollow_interiors": true,
+        "true_object_shape": false,
+        "hidden_surface_reconstruction": false,
+        "rigid_attachment_verified": false,
+        "observed_points": 190293,
+        "vertices": 2364,
+        "obstacle_point_rejection_threshold": 3
+      },
+      "reference_id": "4d333ed154c50d4792929c1c720df0621fb84d695c64d3670737d2aa93565043",
+      "grasp_epoch": 1,
+      "relation_revision": 0,
+      "validity": "active",
+      "reference_scope": "initial_observed_component",
+      "reference_source_kind": "scan_cloud",
+      "held_surface_collision_checked": false
+    },
+    "current_vertical_envelope": {
+      "current_eef_world_z_m": 0.6084557293216265,
+      "hand_z_relative_eef_m": [
+        -0.009274217504869493,
+        0.1229493015772679
+      ],
+      "hand_and_observed_z_relative_eef_m": [
+        -0.07492323817606156,
+        0.1229493015772679
+      ],
+      "carried_observed_point_count": 190293,
+      "carried_geometry_status": "observed_points",
+      "holding_status_from_geometry": "not_assessed",
+      "orientation_scope": "current_orientation_only",
+      "complete_held_shape_known": false,
+      "carried_observed_z_relative_eef_m": [
+        -0.07492323817606156,
+        0.03851472921578042
+      ],
+      "height_above_observed_carried_min_m": 0.19787253975332947
+    }
+  },
+  "grounding_observation_id": "obs_00010",
+  "execution_observation_id": "obs_00010"
+}

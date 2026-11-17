@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_f64310e8-dc4",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing recovery segment releases pot 2 at the actual placement height and withdraws, and is expected to complete the task. Review the resulting actual dual-camera images for both pots standing independently on the stove. Finish only if support and placement are confirmed; otherwise plan recovery from the actual stopped state. Future release and placement outcomes remain unknown.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

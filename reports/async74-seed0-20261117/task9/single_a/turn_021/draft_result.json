@@ -1,0 +1,199 @@
+{
+  "turn": 21,
+  "executing_batch": 12,
+  "request_wall_s": 16.590306356549263,
+  "execution_wall_s": 18.4427886698395,
+  "overlap_wall_s": 16.590306356549263,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": true,
+  "cancellation_reason": "execution_failed",
+  "cancellation_cleanup_wall_s": 0.0,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "ff03ea2e744293afb0cae74e9fa7a0a383837b3d20c3940b57000ff1b50c3647",
+  "discarded": "Execution failed or episode ended; review actual stop and replan with same A",
+  "transport": {
+    "body_bytes": 5268966,
+    "body_sha256": "9cb83455a39d61d2e661325a068a3bc717fc00426d55d6c415cc93be175e4b6c",
+    "image_count": 20,
+    "original_image_count": 88,
+    "image_references": [
+      {
+        "image_id": "image_ref_0012",
+        "original_position": [
+          12,
+          2
+        ],
+        "canonical_position": [
+          4,
+          2
+        ]
+      },
+      {
+        "image_id": "image_ref_0013",
+        "original_position": [
+          12,
+          4
+        ],
+        "canonical_position": [
+          4,
+          4
+        ]
+      },
+      {
+        "image_id": "image_ref_0020",
+        "original_position": [
+          16,
+          3
+        ],
+        "canonical_position": [
+          16,
+          1
+        ]
+      }
+    ],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 12,
+      "boundary_source_step": 4184,
+      "source": {
+        "messages": 126,
+        "text_chars": 1184161,
+        "reasoning_chars": 4575,
+        "image_occurrences": 88
+      },
+      "active": {
+        "messages": 21,
+        "text_chars": 174621,
+        "reasoning_chars": 392,
+        "image_occurrences": 25
+      },
+      "omitted_source_messages": 105,
+      "retained_tail_messages": 14,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        67,
+        107,
+        108,
+        109,
+        110,
+        112,
+        113,
+        114,
+        115,
+        116,
+        118,
+        119,
+        120,
+        121,
+        122,
+        123,
+        124,
+        125
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 22,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 5436794,
+        "encoded_image_url_bytes_after": 5058160,
+        "protected_image_ids": [
+          "history_image_1808eba2b871021cf5022c6903f0d4b4e9952c7d30543fd0ce5c3025f8490937",
+          "history_image_20bbc338e961fd43f89693dbecc76b637ef7b8a71142fff471450b386eb2e5f2",
+          "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "history_image_3c51005dc054317ac7db7b28fa7535273647d0ca3672abdadb6e6456e857957d",
+          "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "history_image_77dfa5f3d4a1eae85197699e03ae43db76217aeabb0bd4e6cea70702b40ceede",
+          "history_image_87e4aa13be740f81d17907b3687d1db9b3592f20b7c14dc517b6b79baa915185",
+          "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "history_image_c51e65a280685baaae55a28aa9bb9804d75b52eb62f8e96f030c2c97b64b3907",
+          "history_image_dc0f4e1c2e7b01f7030f14f7a86201a47be4df51b9ffac396bfba42fd0a89ba9",
+          "history_image_f5d34b36555ef443ed5bf56423853ca8defa7a0112a8903d3cd3c9c7888a2d8b"
+        ],
+        "omitted_images": [
+          {
+            "history_image_id": "history_image_ce1e3052bad30dd16988f77ff71718d09b366e00fab77cc19384b579c168d132",
+            "original_positions": [
+              [
+                2,
+                12
+              ]
+            ],
+            "encoded_url_bytes": 217855,
+            "reason": "superseded_logical_slot"
+          },
+          {
+            "history_image_id": "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2",
+            "original_positions": [
+              [
+                2,
+                20
+              ]
+            ],
+            "encoded_url_bytes": 160779,
+            "reason": "superseded_logical_slot"
+          }
+        ],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "current_clouds/latest/object_00_face.png": "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "current_clouds/latest/object_01_face.png": "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "current_clouds/latest/object_02_face.png": "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "current_clouds/latest/object_00_side.png": "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "current_clouds/latest/object_01_side.png": "history_image_abadc03cfdbec3d775dfae4a99e93f353c565e3aa2f3634ff1ad0c0c66025f2c",
+          "current_clouds/latest/object_02_side.png": "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "current_clouds/latest/object_00_top.png": "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "current_clouds/latest/object_01_top.png": "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "current_clouds/latest/object_02_top.png": "history_image_c51e65a280685baaae55a28aa9bb9804d75b52eb62f8e96f030c2c97b64b3907"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 392,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.3045653644949198,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing recovery segment withdraws from the stalled pose, reorients the fingers horizontally, and pushes the exterior handle toward the housing; it is intended to complete the remaining door closure. Closure and mug placement are not yet confirmed. Review the actual outcome and the latest local door point image together with both actual RGB views before finishing; plan a repair if the door remains ajar or placement cannot be verified.",
+    "status": "finish_review",
+    "prepared_from_step": 4184,
+    "after_batch": 12,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9",
+      "source_step": 4184,
+      "request_turn": 21,
+      "grasp_epoch": 3,
+      "reference": null,
+      "executing_targets": [
+        "microwave_door"
+      ]
+    },
+    "candidate_id": "ff03ea2e744293afb0cae74e9fa7a0a383837b3d20c3940b57000ff1b50c3647",
+    "executed": false
+  }
+}

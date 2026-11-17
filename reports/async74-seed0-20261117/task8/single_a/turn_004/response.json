@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_32cdca4e-b61",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"actions\":[{\"intent\":\"Raise the carried pot above the height of the first pot before lateral transport\",\"primitive\":\"move\",\"reference_target_id\":\"moka_pot_2\",\"selection\":{\"waypoints\":[{\"anchor\":{\"kind\":\"current_eef\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.14],\"orientation\":\"preserve\",\"reference\":\"eef\"}]},\"target_id\":\"moka_pot_2\"},{\"intent\":\"Carry the second pot above the separate stove support location and lower it upright\",\"primitive\":\"move\",\"reference_target_id\":\"stove\",\"selection\":{\"waypoints\":[{\"anchor\":{\"group_id\":1,\"kind\":\"cloud_point\",\"pixel_xy\":[760,630],\"view_id\":\"stove_historical_focus_gravity_top\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.2],\"orientation\":\"preserve\",\"reference\":\"held_bottom\"},{\"anchor\":{\"group_id\":1,\"kind\":\"cloud_point\",\"pixel_xy\":[760,630],\"view_id\":\"stove_historical_focus_gravity_top\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.004],\"orientation\":\"preserve\",\"reference\":\"held_bottom\"}]},\"target_id\":\"moka_pot_2\"},{\"intent\":\"Release the second pot at the stove surface\",\"primitive\":\"set_gripper\",\"selection\":{\"command\":\"open\",\"steps\":60},\"target_id\":\"moka_pot_2\"},{\"intent\":\"Withdraw vertically clear of the released pot for actual placement review\",\"primitive\":\"move\",\"reference_target_id\":\"stove\",\"selection\":{\"waypoints\":[{\"anchor\":{\"kind\":\"current_eef\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.18],\"orientation\":\"preserve\",\"reference\":\"eef\"}]},\"target_id\":\"moka_pot_2\"}],\"intent\":\"Place pot 2 on the unoccupied side of the stove and withdraw, leaving both placement results for actual review.\",\"preconditions\":\"The executing handle grasp and short lift complete normally, with pot 2 carried and its held-bottom reference supported by current depth. The stove remains stationary and pot 1 remains at the first placement location shown in obs_00014. These are continuation premises, not future outcome claims.\",\"reason\":\"Prepare placement of the remaining pot at a separate measured stove support point, followed by release and withdrawal for final actual-image review.\",\"status\":\"ready\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

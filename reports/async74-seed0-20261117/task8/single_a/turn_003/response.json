@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_2124c126-cb3",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"actions\":[{\"intent\":\"Travel above the remaining pot's handle before descending to the pinch position\",\"primitive\":\"move\",\"reference_target_id\":\"moka_pot_2\",\"selection\":{\"waypoints\":[{\"anchor\":{\"group_id\":1,\"kind\":\"cloud_point\",\"pixel_xy\":[510,805],\"view_id\":\"moka_pot_2_historical_focus_gravity_top\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.18],\"orientation\":{\"closing_axis\":[1,0,0],\"finger_direction\":[0,0,-1]},\"reference\":\"pad_midpoint\"},{\"anchor\":{\"group_id\":1,\"kind\":\"cloud_point\",\"pixel_xy\":[510,805],\"view_id\":\"moka_pot_2_historical_focus_gravity_top\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,-0.008],\"orientation\":{\"closing_axis\":[1,0,0],\"finger_direction\":[0,0,-1]},\"reference\":\"pad_midpoint\"}]},\"target_id\":\"moka_pot_2\"},{\"intent\":\"Pinch the second pot's black handle\",\"primitive\":\"set_gripper\",\"selection\":{\"command\":\"close\",\"steps\":80},\"target_id\":\"moka_pot_2\"},{\"intent\":\"Short-lift the second pot to compare actual body and pad motion\",\"primitive\":\"move\",\"reference_target_id\":\"moka_pot_2\",\"selection\":{\"waypoints\":[{\"anchor\":{\"kind\":\"current_eef\"},\"offset_frame\":\"world\",\"offset_m\":[0,0,0.1],\"orientation\":\"preserve\",\"reference\":\"eef\"}]},\"target_id\":\"moka_pot_2\"}],\"intent\":\"Approach pot 2's exposed handle, pinch it, and short-lift for actual outcome review.\",\"preconditions\":\"The executing placement and release finish normally, leaving the gripper open above the stove. Pot 2 remains upright at its measured table location. No future placement or grasp result is asserted.\",\"reason\":\"Prepare to grasp the remaining stationary pot after the first placement and upward withdrawal.\",\"status\":\"ready\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

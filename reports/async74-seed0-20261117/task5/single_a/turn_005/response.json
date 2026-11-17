@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_bbf83e11-ecb",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing recovery segment is intended to complete the task by releasing the book low inside the rear half of the central divided pair and withdrawing vertically. Its outcome is not yet known. Review the actual post-release dual-camera images to verify that the book rests inside that pocket rather than remaining with the fingers, bridging a divider, or falling outside; use normal tools to finish or recover from the measured result.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

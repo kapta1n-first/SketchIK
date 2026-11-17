@@ -1,0 +1,86 @@
+{
+  "intent": "Carry the soup can over the basket and release it within the opening, leaving the other side available for the cream cheese box.",
+  "actions": [
+    {
+      "intent": "Translate above the basket with the carried can bottom well above the rim, then lower within the opening while retaining palm clearance.",
+      "primitive": "move",
+      "reference_target_id": "basket",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                500,
+                400
+              ],
+              "view_id": "basket_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.22
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                500,
+                400
+              ],
+              "view_id": "basket_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.07
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          }
+        ]
+      },
+      "target_id": "alphabet_soup"
+    },
+    {
+      "intent": "Release the can inside the basket opening to settle on its lined support.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 100
+      },
+      "target_id": "alphabet_soup"
+    },
+    {
+      "intent": "Withdraw the open hand vertically clear of the basket rim.",
+      "primitive": "move",
+      "reference_target_id": "basket",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.16
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "alphabet_soup"
+    }
+  ],
+  "source_step": 1387
+}

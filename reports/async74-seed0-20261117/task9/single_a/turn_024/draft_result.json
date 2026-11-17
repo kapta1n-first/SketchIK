@@ -1,0 +1,180 @@
+{
+  "turn": 24,
+  "executing_batch": 13,
+  "request_wall_s": 16.744317185133696,
+  "execution_wall_s": 6.67254575714469,
+  "overlap_wall_s": 6.6722019743174314,
+  "post_execution_wait_wall_s": 10.072115210816264,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "e4e2f9984688aedbb8fa16a974d8dc7caa757498faff913dce0862148c81c377",
+  "transport": {
+    "body_bytes": 4247525,
+    "body_sha256": "4ffcafc4ae3deaf7c28d43eaf5de850d226d98948ab19b50edca18b38a394908",
+    "image_count": 15,
+    "original_image_count": 92,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 15,
+      "boundary_source_step": 4590,
+      "source": {
+        "messages": 141,
+        "text_chars": 1318668,
+        "reasoning_chars": 5903,
+        "image_occurrences": 92
+      },
+      "active": {
+        "messages": 24,
+        "text_chars": 188535,
+        "reasoning_chars": 1720,
+        "image_occurrences": 19
+      },
+      "omitted_source_messages": 117,
+      "retained_tail_messages": 19,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        67,
+        118,
+        119,
+        120,
+        121,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        133,
+        134,
+        135,
+        137,
+        138,
+        139,
+        140
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 18,
+        "images_after": 15,
+        "encoded_image_url_bytes_before": 4900590,
+        "encoded_image_url_bytes_after": 4021805,
+        "protected_image_ids": [
+          "history_image_1a8f0e39ee9e07447bc5142f76287e7e9a96efdbcbd228de967cf87f83a2b2b6",
+          "history_image_2894ffc2848a9d371665594135968aa03b58b0599b6a4a4e24724fbe7849d493",
+          "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "history_image_3c51005dc054317ac7db7b28fa7535273647d0ca3672abdadb6e6456e857957d",
+          "history_image_548c066b705ba9e1d415a1bdcd848b54655b4c593a752b9c017cd1c150e669c3",
+          "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "history_image_66943eee9b6685f6f147b46960aa3a33be9b00bef7f157fc5a1e1b56d0846bae",
+          "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "history_image_77dfa5f3d4a1eae85197699e03ae43db76217aeabb0bd4e6cea70702b40ceede",
+          "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f"
+        ],
+        "omitted_images": [
+          {
+            "history_image_id": "history_image_ce1e3052bad30dd16988f77ff71718d09b366e00fab77cc19384b579c168d132",
+            "original_positions": [
+              [
+                2,
+                12
+              ]
+            ],
+            "encoded_url_bytes": 217855,
+            "reason": "superseded_logical_slot"
+          },
+          {
+            "history_image_id": "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2",
+            "original_positions": [
+              [
+                2,
+                20
+              ]
+            ],
+            "encoded_url_bytes": 160779,
+            "reason": "superseded_logical_slot"
+          },
+          {
+            "history_image_id": "history_image_c51e65a280685baaae55a28aa9bb9804d75b52eb62f8e96f030c2c97b64b3907",
+            "original_positions": [
+              [
+                7,
+                1
+              ],
+              [
+                7,
+                3
+              ]
+            ],
+            "encoded_url_bytes": 500151,
+            "reason": "superseded_logical_slot"
+          }
+        ],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "current_clouds/latest/object_00_face.png": "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "current_clouds/latest/object_01_face.png": "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "current_clouds/latest/object_02_face.png": "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "current_clouds/latest/object_00_side.png": "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "current_clouds/latest/object_01_side.png": "history_image_abadc03cfdbec3d775dfae4a99e93f353c565e3aa2f3634ff1ad0c0c66025f2c",
+          "current_clouds/latest/object_02_side.png": "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "current_clouds/latest/object_00_top.png": "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "current_clouds/latest/object_01_top.png": "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "current_clouds/latest/object_02_top.png": "history_image_2894ffc2848a9d371665594135968aa03b58b0599b6a4a4e24724fbe7849d493"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 1720,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.3202034123241901,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing withdrawal is expected to leave the task ready for final review: the most recent measured top view shows the door aligned with the housing front, and the actual wrist RGB shows the yellow mug behind the door window. These observations do not yet certify full closure. After actual withdrawal feedback, inspect the latest local door point image and both actual RGB views to verify the door-to-housing seam and mug placement; finish only if supported, otherwise plan recovery from the actual stop.",
+    "status": "finish_review",
+    "prepared_from_step": 4590,
+    "after_batch": 13,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9",
+      "source_step": 4590,
+      "request_turn": 24,
+      "grasp_epoch": 3,
+      "reference": null,
+      "executing_targets": [
+        "microwave_door"
+      ]
+    },
+    "candidate_id": "e4e2f9984688aedbb8fa16a974d8dc7caa757498faff913dce0862148c81c377",
+    "executed": false
+  }
+}

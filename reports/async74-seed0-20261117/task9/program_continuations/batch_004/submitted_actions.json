@@ -1,0 +1,35 @@
+{
+  "intent": "Carry the mug to the front of the microwave opening while keeping its bottom above the visible interior floor and avoiding travel over the roof.",
+  "actions": [
+    {
+      "intent": "Stage the upright carried mug outside the cavity entrance, aligned with a visible interior support point and slightly above its height.",
+      "primitive": "move",
+      "reference_target_id": "microwave",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                510,
+                555
+              ],
+              "view_id": "microwave_historical_right"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.24,
+              0.025
+            ],
+            "orientation": "preserve",
+            "reference": "held_bottom"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    }
+  ],
+  "source_step": 3142
+}

@@ -1,0 +1,25 @@
+{
+  "binding": {
+    "angle_rad": 1.2
+  },
+  "rotation_tool": "rotate_yaw",
+  "compiled_pose": {
+    "position": [
+      -0.20581725724677877,
+      0.20581213025448167,
+      0.950329709138153
+    ],
+    "quaternion_xyzw": [
+      0.18301381518843374,
+      0.983110312613401,
+      7.411379564146251e-06,
+      -0.00023796727963275576
+    ]
+  },
+  "source_step": 1083,
+  "executed": false,
+  "reference_is_complete_object_geometry": false,
+  "grounding_source_step": 875,
+  "execution_source_step": 1083,
+  "execution_observation_id": "obs_00008"
+}

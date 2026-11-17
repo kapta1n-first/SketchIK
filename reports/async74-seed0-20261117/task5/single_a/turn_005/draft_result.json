@@ -1,0 +1,140 @@
+{
+  "turn": 5,
+  "executing_batch": 3,
+  "request_wall_s": 13.049758495762944,
+  "execution_wall_s": 12.099569026380777,
+  "overlap_wall_s": 12.09920459613204,
+  "post_execution_wait_wall_s": 0.9505538996309042,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "763768626a4a74fcf2c52decfbe464e7aa3d3ebed0d0f0f8269d952235474739",
+  "transport": {
+    "body_bytes": 4026347,
+    "body_sha256": "cfd73f463b91041561933e8d81164b7c9136808df8a0cc725a549978696ae7ed",
+    "image_count": 17,
+    "original_image_count": 34,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 2,
+      "boundary_source_step": 1613,
+      "source": {
+        "messages": 34,
+        "text_chars": 269874,
+        "reasoning_chars": 0,
+        "image_occurrences": 34
+      },
+      "active": {
+        "messages": 21,
+        "text_chars": 151742,
+        "reasoning_chars": 0,
+        "image_occurrences": 17
+      },
+      "omitted_source_messages": 13,
+      "retained_tail_messages": 16,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        30,
+        31,
+        32,
+        33
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 17,
+        "images_after": 17,
+        "encoded_image_url_bytes_before": 3838939,
+        "encoded_image_url_bytes_after": 3838939,
+        "protected_image_ids": [
+          "history_image_055018d27dada6a74b72afe09421bc43bdc233b82b52d05fe833a8cf1f319ed0",
+          "history_image_0be90cded17403597318363ad4ce1ac6bb032686b3961152cb5999779a824872",
+          "history_image_19d3c830f699f90eca81a9820977e914ff499a7d1f18549cdd6a48871ef06b88",
+          "history_image_3acda79159673960183b642236373df5d44a2ac3640fa5e138ea88ef2082eadf",
+          "history_image_5f578b38012a8ef2561036c2e155a07142abeb4d13d365f79dfe99b312f03b87",
+          "history_image_60304158372c12332ac52e26634a5ae3e48cf21957ae79fd129fd2505d669487",
+          "history_image_6719d17d97023fa1e53f46419b9f6f561b871de49ad2d0fdddbe95db82609bbd",
+          "history_image_75639c22ff378a2728a7695eb3f55fdeb277124c941e1696604da5793903fc0b",
+          "history_image_7624b32ad40c722df436a34923a987aea4f2a815ad9140a7096fce0430c58c31",
+          "history_image_920e0926c3b9eda748130aa786cf5881c699ea17384028f2e8526b7c83356f22",
+          "history_image_a30e4bcef2bd3b6ab1c1c187854ffc53d531e079a358ef048741833663d85117",
+          "history_image_bdda3a5b8d22650b1996d3300d66e5c9bc07679eca56de1776c99537d7d46f3a"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_055018d27dada6a74b72afe09421bc43bdc233b82b52d05fe833a8cf1f319ed0",
+          "current_clouds/latest/object_00_face.png": "history_image_3acda79159673960183b642236373df5d44a2ac3640fa5e138ea88ef2082eadf",
+          "current_clouds/latest/object_01_face.png": "history_image_a30e4bcef2bd3b6ab1c1c187854ffc53d531e079a358ef048741833663d85117",
+          "current_clouds/latest/object_00_side.png": "history_image_0be90cded17403597318363ad4ce1ac6bb032686b3961152cb5999779a824872",
+          "current_clouds/latest/object_01_side.png": "history_image_19d3c830f699f90eca81a9820977e914ff499a7d1f18549cdd6a48871ef06b88",
+          "current_clouds/latest/object_00_top.png": "history_image_6719d17d97023fa1e53f46419b9f6f561b871de49ad2d0fdddbe95db82609bbd",
+          "current_clouds/latest/object_01_top.png": "history_image_bdda3a5b8d22650b1996d3300d66e5c9bc07679eca56de1776c99537d7d46f3a"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 0,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.6410646643489599,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing recovery segment is intended to complete the task by releasing the book low inside the rear half of the central divided pair and withdrawing vertically. Its outcome is not yet known. Review the actual post-release dual-camera images to verify that the book rests inside that pocket rather than remaining with the fingers, bridging a divider, or falling outside; use normal tools to finish or recover from the measured result.",
+    "status": "finish_review",
+    "prepared_from_step": 1613,
+    "after_batch": 3,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task5",
+      "source_step": 1613,
+      "request_turn": 5,
+      "grasp_epoch": 1,
+      "reference": {
+        "reference_id": "05b0c3715189923c7dc34640755c0c3ce50e41b267e4324190e9b521b7dc4d7c",
+        "grasp_epoch": 1,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "book"
+      ]
+    },
+    "candidate_id": "763768626a4a74fcf2c52decfbe464e7aa3d3ebed0d0f0f8269d952235474739",
+    "executed": false
+  }
+}

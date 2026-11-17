@@ -1,0 +1,40 @@
+{
+  "actions": [
+    {
+      "intent": "Release the tilted can within the basket opening without forcing the stalled descent.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "open",
+        "steps": 60
+      },
+      "target_id": "tomato_sauce"
+    },
+    {
+      "intent": "Withdraw vertically from the actual stopped position to free the can and expose the basket contents.",
+      "primitive": "move",
+      "reference_target_id": "basket",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.18
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "tomato_sauce"
+    }
+  ],
+  "held_object_id": "tomato_sauce",
+  "held_pose_relation": "unknown",
+  "visible_evidence": "Current dual RGB at step 2948 shows the tomato sauce can tilted within the lined basket opening and still between the fingers. Its body is below the rim on the near side; the soup lid is visible beside it in the front view. The lowering stalled, so I will not repeat that target or force further descent. The relative can-to-hand pose is uncertain.",
+  "source_step": 2948
+}

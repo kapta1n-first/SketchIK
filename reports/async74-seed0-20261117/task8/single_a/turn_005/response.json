@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_53deeb3a-efd",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing segment is intended to complete the remaining placement, release pot 2, and withdraw. Review the actual resulting dual-camera images to verify that both pots are upright and supported on the stove before finishing; if either placement is unsupported or uncertain, plan recovery from the actual stopped state. No future success is asserted.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

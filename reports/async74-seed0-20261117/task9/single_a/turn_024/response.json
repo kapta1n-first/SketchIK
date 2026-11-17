@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_a2ff3762-ead",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing withdrawal is expected to leave the task ready for final review: the most recent measured top view shows the door aligned with the housing front, and the actual wrist RGB shows the yellow mug behind the door window. These observations do not yet certify full closure. After actual withdrawal feedback, inspect the latest local door point image and both actual RGB views to verify the door-to-housing seam and mug placement; finish only if supported, otherwise plan recovery from the actual stop.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

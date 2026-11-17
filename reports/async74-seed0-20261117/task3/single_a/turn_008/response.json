@@ -1,0 +1,18 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "",
+    "tool_calls": [
+      {
+        "id": "call_dc0ac722-f83",
+        "type": "function",
+        "function": {
+          "name": "draft_next_sketch",
+          "arguments": "{\"reason\":\"The executing recovery attempts the remaining bottom-drawer closure and withdraws the hand, so it may complete the task. Its outcome is not yet known. After actual feedback, read the cabinet’s latest local point image and compare the current dual RGB to verify that the lowest drawer front is closed against the cabinet frame. Combine that outcome with the actual images at steps 1637 and 1944 showing the released bowl resting upright inside that drawer. Finish only if placement and closure are supported; otherwise plan recovery from the actual stop.\",\"status\":\"finish_review\"}"
+        }
+      }
+    ]
+  },
+  "usage": null,
+  "finish_reason": "tool_calls"
+}

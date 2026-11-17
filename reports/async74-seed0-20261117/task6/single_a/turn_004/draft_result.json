@@ -1,0 +1,229 @@
+{
+  "turn": 4,
+  "executing_batch": 3,
+  "request_wall_s": 22.81879460066557,
+  "execution_wall_s": 25.088825419545174,
+  "overlap_wall_s": 22.81879460066557,
+  "post_execution_wait_wall_s": 0.0,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "863117d44e1abe09fb25147c8aaf10353530f49168f6e95dff680be6488bb11d",
+  "transport": {
+    "body_bytes": 5638164,
+    "body_sha256": "d7e9423c5502a98e4d857778026a0c9f5214ac3478c48730a1afd592db177d80",
+    "image_count": 21,
+    "original_image_count": 40,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 1,
+      "boundary_source_step": 1749,
+      "source": {
+        "messages": 33,
+        "text_chars": 307594,
+        "reasoning_chars": 444,
+        "image_occurrences": 40
+      },
+      "active": {
+        "messages": 24,
+        "text_chars": 163060,
+        "reasoning_chars": 0,
+        "image_occurrences": 21
+      },
+      "omitted_source_messages": 9,
+      "retained_tail_messages": 19,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 21,
+        "images_after": 21,
+        "encoded_image_url_bytes_before": 5437207,
+        "encoded_image_url_bytes_after": 5437207,
+        "protected_image_ids": [
+          "history_image_00585b583233940e01d3cd265f3896c6564976a5d65e5d1d19384ce9a5b12371",
+          "history_image_040a0fb591d2fe5e35e49bbd9c9b38e18184902c1cf01d32cfced8e1fae5eb29",
+          "history_image_06514b9321e73917b98e0b9b58d549f0882d03b317c5929814efd319a2830d5b",
+          "history_image_1aabdee8c1ca013f1744210ac5ffc667838d541cb0b8af501ed925e0f6e5c186",
+          "history_image_219c9dadd93c584a84f8e995317dd194fed8f796a2bae06c66900001b1acc31f",
+          "history_image_466c5f0fa4763234c68d02b5478e6873ca66968c3cee36226f4618ee3a68c94e",
+          "history_image_512374466eaec85f38d78596e9eb2b51dfa8c3573ab82385791c9e4fb113975a",
+          "history_image_66f89ee0528d9ed9719535a1f02cefed4dd36df5294ceda12f3f2689d0d2543a",
+          "history_image_8f792858d8d4b5f1d06f10fce5b0dd6c28a0d1fcc0ef3f17c6ae6c2766ac428c",
+          "history_image_909d0b1d4d954778d1815a7330ed76635912c0b6b2b1fffd4142ae9ae1d1c417",
+          "history_image_90cec7245bdb52685e540c4a39578108c66a604941586d194e1733f1deb497f4",
+          "history_image_9e7975e1444fc065062304fc92a810adeeb34bba3c4485214e63c1b207e3b9b0",
+          "history_image_a7f07a92371e40987f505e454365c37628ba3369f89ac7ba25bbeb7e54d628e9",
+          "history_image_a9bc9dae03bc7da933c2b2fc35a8813381abd70c693adb7e7abdf70db0240444",
+          "history_image_a9f05ebc4512e978cc1e0a0f890b58203da4428e198251bff880fcb33190ce8e",
+          "history_image_ee886b02edecf4a2b16202adb5f92c542e136aebfefc829fd5b9332a5b2af4a3"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_1aabdee8c1ca013f1744210ac5ffc667838d541cb0b8af501ed925e0f6e5c186",
+          "current_clouds/latest/object_00_face.png": "history_image_ee886b02edecf4a2b16202adb5f92c542e136aebfefc829fd5b9332a5b2af4a3",
+          "current_clouds/latest/object_01_face.png": "history_image_a9bc9dae03bc7da933c2b2fc35a8813381abd70c693adb7e7abdf70db0240444",
+          "current_clouds/latest/object_02_face.png": "history_image_a9f05ebc4512e978cc1e0a0f890b58203da4428e198251bff880fcb33190ce8e",
+          "current_clouds/latest/object_03_face.png": "history_image_040a0fb591d2fe5e35e49bbd9c9b38e18184902c1cf01d32cfced8e1fae5eb29",
+          "current_clouds/latest/object_00_side.png": "history_image_a7f07a92371e40987f505e454365c37628ba3369f89ac7ba25bbeb7e54d628e9",
+          "current_clouds/latest/object_01_side.png": "history_image_466c5f0fa4763234c68d02b5478e6873ca66968c3cee36226f4618ee3a68c94e",
+          "current_clouds/latest/object_02_side.png": "history_image_06514b9321e73917b98e0b9b58d549f0882d03b317c5929814efd319a2830d5b",
+          "current_clouds/latest/object_03_side.png": "history_image_219c9dadd93c584a84f8e995317dd194fed8f796a2bae06c66900001b1acc31f",
+          "current_clouds/latest/object_00_top.png": "history_image_909d0b1d4d954778d1815a7330ed76635912c0b6b2b1fffd4142ae9ae1d1c417",
+          "current_clouds/latest/object_01_top.png": "history_image_90cec7245bdb52685e540c4a39578108c66a604941586d194e1733f1deb497f4"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 0,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.0895440112799406,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "actions": [
+      {
+        "intent": "Carry the pudding above the clear tabletop beyond the plate's right rim, then lower to the wooden support",
+        "primitive": "move",
+        "reference_target_id": "tabletop",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "camera": "agentview",
+                "kind": "image_point",
+                "observation_id": "obs_00014",
+                "pixel_xy": [
+                  800,
+                  865
+                ]
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.16
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            },
+            {
+              "anchor": {
+                "camera": "agentview",
+                "kind": "image_point",
+                "observation_id": "obs_00014",
+                "pixel_xy": [
+                  800,
+                  865
+                ]
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.004
+              ],
+              "orientation": "preserve",
+              "reference": "held_bottom"
+            }
+          ]
+        },
+        "target_id": "chocolate_pudding"
+      },
+      {
+        "intent": "Release the pudding onto the tabletop beside the plate",
+        "primitive": "set_gripper",
+        "selection": {
+          "command": "open",
+          "steps": 60
+        },
+        "target_id": "chocolate_pudding"
+      },
+      {
+        "intent": "Withdraw vertically clear of the placed package for outcome verification",
+        "primitive": "move",
+        "reference_target_id": "tabletop",
+        "selection": {
+          "waypoints": [
+            {
+              "anchor": {
+                "kind": "current_eef"
+              },
+              "offset_frame": "world",
+              "offset_m": [
+                0,
+                0,
+                0.15
+              ],
+              "orientation": "preserve",
+              "reference": "eef"
+            }
+          ]
+        },
+        "target_id": "chocolate_pudding"
+      }
+    ],
+    "intent": "Place the chocolate pudding on the tabletop to the right of the plate without disturbing the mug.",
+    "preconditions": "The executing pudding grasp and lift complete normally with an available supported held_bottom reference. The tabletop support remains stationary. At step 1749 the dual actual images show the released white mug upright and centred on the plate with the gripper withdrawn. Interpret the plate's right as the front camera's right, corresponding to world +Y according to the recorded camera axes; the selected wooden support pixel lies beyond the plate's right rim. Package retention and the upcoming placement are not yet observed.",
+    "reason": "After the package lift, place it on the visible tabletop to the right of the plate, then withdraw for final actual-image review.",
+    "status": "ready",
+    "prepared_from_step": 1749,
+    "after_batch": 3,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task6",
+      "source_step": 1749,
+      "request_turn": 4,
+      "grasp_epoch": 2,
+      "reference": null,
+      "executing_targets": [
+        "chocolate_pudding"
+      ]
+    },
+    "candidate_id": "863117d44e1abe09fb25147c8aaf10353530f49168f6e95dff680be6488bb11d",
+    "executed": false
+  }
+}

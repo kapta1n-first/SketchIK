@@ -1,0 +1,146 @@
+{
+  "turn": 7,
+  "executing_batch": 5,
+  "request_wall_s": 17.09183694794774,
+  "execution_wall_s": 9.3606828879565,
+  "overlap_wall_s": 9.360353032127023,
+  "post_execution_wait_wall_s": 7.731483915820718,
+  "cancellation_requested": false,
+  "cancellation_reason": null,
+  "cancellation_cleanup_wall_s": null,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": true,
+  "candidate_id": "ff5c57ed5b4324440a1a258a719214f2f1467af1803a673b57e601711008b749",
+  "transport": {
+    "body_bytes": 4735646,
+    "body_sha256": "91d3e73f1bf0247bdf5b1440023946333491902f23e5ff1ca75325ff8ad4f3ff",
+    "image_count": 20,
+    "original_image_count": 45,
+    "image_references": [],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 4,
+      "boundary_source_step": 2146,
+      "source": {
+        "messages": 54,
+        "text_chars": 485848,
+        "reasoning_chars": 2236,
+        "image_occurrences": 45
+      },
+      "active": {
+        "messages": 21,
+        "text_chars": 166323,
+        "reasoning_chars": 440,
+        "image_occurrences": 20
+      },
+      "omitted_source_messages": 33,
+      "retained_tail_messages": 16,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        33,
+        34,
+        35,
+        37,
+        38,
+        39,
+        40,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        50,
+        51,
+        52,
+        53
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 20,
+        "images_after": 20,
+        "encoded_image_url_bytes_before": 4533580,
+        "encoded_image_url_bytes_after": 4533580,
+        "protected_image_ids": [
+          "history_image_08b1afede1f232e8ac87ec36988eb7b7d8ecaf2a6dc42ac64c65b36ab7c7786d",
+          "history_image_29bb750363ef2146861654f60713d0fd1a4b640aa3288e9ac1958d8ebae7ae37",
+          "history_image_3d06fef390fed20ef5195ed7a8cc1a3400ee2bb01ab146239d0726c37db56fe6",
+          "history_image_409cb9bdfc5a0ee216ffcd3c50d2ed9a697c97f42552fa2b458201d160a69b50",
+          "history_image_752ebcbdc9336afe5caf7a67e379d5cf15803481a37b0ce7b96adeafc6b471a7",
+          "history_image_875a4b7212bee53b04f56f0e820b74d69e9c3f2523f6096f6c29241516ff0861",
+          "history_image_ae71d9d4bc0811c06172f1a5fd576a5d960033277c428b8c28c62c566779aa0f",
+          "history_image_c5e10aa550934f1baf313f5e0876eb66eb964151555e330c2c69a0b6b2e9a434",
+          "history_image_c7f6465a9bb1fe79d40377932cc27115f6573919229d5369d230088232f3307b",
+          "history_image_cc4f2aca10b28499531f241c5c42347fff1a6961126ff257d7995541645c3230",
+          "history_image_e7bfbf315fd861a29896159b931e23e39a40ce1ff907695e926e8a8102e78b36",
+          "history_image_efba6f087112312a701bcc12c739430990019389ac2937c098017257e2b410f4",
+          "history_image_f103f569668643a36ffb6638fec43659bc4f60ecea117563235bd6af23872da7",
+          "history_image_f9bde862dad9f8814a2c66519a56fc01d17d714a752ffa95d2dd98cd4f1d8775",
+          "history_image_fbecdc516ca6cfdfe3ce2b092c3bb3d272a88e3a938a4fef41c7d0aca20e93d1"
+        ],
+        "omitted_images": [],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_f9bde862dad9f8814a2c66519a56fc01d17d714a752ffa95d2dd98cd4f1d8775",
+          "current_clouds/latest/object_00_face.png": "history_image_29bb750363ef2146861654f60713d0fd1a4b640aa3288e9ac1958d8ebae7ae37",
+          "current_clouds/latest/object_01_face.png": "history_image_fbecdc516ca6cfdfe3ce2b092c3bb3d272a88e3a938a4fef41c7d0aca20e93d1",
+          "current_clouds/latest/object_02_face.png": "history_image_c5e10aa550934f1baf313f5e0876eb66eb964151555e330c2c69a0b6b2e9a434",
+          "current_clouds/latest/object_00_side.png": "history_image_875a4b7212bee53b04f56f0e820b74d69e9c3f2523f6096f6c29241516ff0861",
+          "current_clouds/latest/object_01_side.png": "history_image_ae71d9d4bc0811c06172f1a5fd576a5d960033277c428b8c28c62c566779aa0f",
+          "current_clouds/latest/object_02_side.png": "history_image_f103f569668643a36ffb6638fec43659bc4f60ecea117563235bd6af23872da7",
+          "current_clouds/latest/object_00_top.png": "history_image_efba6f087112312a701bcc12c739430990019389ac2937c098017257e2b410f4",
+          "current_clouds/latest/object_01_top.png": "history_image_409cb9bdfc5a0ee216ffcd3c50d2ed9a697c97f42552fa2b458201d160a69b50",
+          "current_clouds/latest/object_02_top.png": "history_image_cc4f2aca10b28499531f241c5c42347fff1a6961126ff257d7995541645c3230"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 440,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 0.7088989913463593,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": {
+    "reason": "The executing recovery segment releases pot 2 at the actual placement height and withdraws, and is expected to complete the task. Review the resulting actual dual-camera images for both pots standing independently on the stove. Finish only if support and placement are confirmed; otherwise plan recovery from the actual stopped state. Future release and placement outcomes remain unknown.",
+    "status": "finish_review",
+    "prepared_from_step": 2146,
+    "after_batch": 5,
+    "preparation_snapshot": {
+      "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task8",
+      "source_step": 2146,
+      "request_turn": 7,
+      "grasp_epoch": 3,
+      "reference": {
+        "reference_id": "d64ee7c2b04db978ccc104b434b11e11f32606cdf76b83ec0022e9786d644d31",
+        "grasp_epoch": 3,
+        "relation_revision": 0,
+        "validity": "active",
+        "reference_scope": "initial_observed_component"
+      },
+      "executing_targets": [
+        "moka_pot_2"
+      ]
+    },
+    "candidate_id": "ff5c57ed5b4324440a1a258a719214f2f1467af1803a673b57e601711008b749",
+    "executed": false
+  }
+}

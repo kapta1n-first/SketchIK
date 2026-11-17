@@ -1,0 +1,131 @@
+{
+  "actions": [
+    {
+      "intent": "Lift away from the stalled horizontal approach before changing orientation.",
+      "primitive": "move",
+      "reference_target_id": "yellow_white_mug",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              -0.025,
+              0.1
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Approach the outer handle vertically and straddle its narrow width.",
+      "primitive": "move",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                875
+              ],
+              "view_id": "yellow_white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.065
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          },
+          {
+            "anchor": {
+              "group_id": 1,
+              "kind": "cloud_point",
+              "pixel_xy": [
+                511,
+                875
+              ],
+              "view_id": "yellow_white_mug_historical_focus_gravity_top"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              -0.012
+            ],
+            "orientation": {
+              "closing_axis": [
+                1,
+                0,
+                0
+              ],
+              "finger_direction": [
+                0,
+                0,
+                -1
+              ]
+            },
+            "reference": "pad_midpoint"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Pinch the yellow handle from above.",
+      "primitive": "set_gripper",
+      "selection": {
+        "command": "close",
+        "steps": 70
+      },
+      "target_id": "yellow_white_mug"
+    },
+    {
+      "intent": "Short lift for visual grasp verification.",
+      "primitive": "move",
+      "reference_target_id": "yellow_white_mug",
+      "selection": {
+        "waypoints": [
+          {
+            "anchor": {
+              "kind": "current_eef"
+            },
+            "offset_frame": "world",
+            "offset_m": [
+              0,
+              0,
+              0.065
+            ],
+            "orientation": "preserve",
+            "reference": "eef"
+          }
+        ]
+      },
+      "target_id": "yellow_white_mug"
+    }
+  ],
+  "held_object_id": null,
+  "held_pose_relation": "none",
+  "visible_evidence": "The mug is still resting upright on the table. Both horizontal approaches stopped above the intended contact without closing. I am changing to a vertical approach to the narrow yellow outer handle, keeping the palm above the table rather than beside it."
+}

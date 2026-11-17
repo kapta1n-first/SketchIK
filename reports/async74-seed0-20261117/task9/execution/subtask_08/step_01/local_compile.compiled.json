@@ -1,0 +1,85 @@
+{
+  "cloud_view_id": "microwave_door_historical_focus_gravity_top",
+  "cloud_pixel_xy": [
+    225,
+    880
+  ],
+  "cloud_point_index": 243489,
+  "cloud_file": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task9/single_a_geometry/object_02/historical_surfaces.npz",
+  "cloud_role": "historical multiview surfaces",
+  "source_observation": {
+    "observation_id": "obs_00003",
+    "camera": "robot0_eye_in_hand",
+    "source_step": 610,
+    "role": "historical_shape"
+  },
+  "source_pixel_xy": [
+    330,
+    480
+  ],
+  "cloud_group_id": 1,
+  "binding": {
+    "anchor": {
+      "group_id": 1,
+      "kind": "cloud_point",
+      "pixel_xy": [
+        225,
+        880
+      ],
+      "view_id": "microwave_door_historical_focus_gravity_top"
+    },
+    "offset_frame": "world",
+    "offset_m": [
+      -0.04,
+      0,
+      0.06
+    ],
+    "orientation": {
+      "closing_axis": [
+        0,
+        1,
+        0
+      ],
+      "finger_direction": [
+        0,
+        0,
+        -1
+      ]
+    },
+    "reference": "pad_midpoint"
+  },
+  "anchor_world_xyz_m": [
+    -0.1814289391040802,
+    0.050807736814022064,
+    1.1074702739715576
+  ],
+  "offset_world_m": [
+    -0.04,
+    0.0,
+    0.06
+  ],
+  "reference_offset_world_m": [
+    -1.4048215154395138e-17,
+    2.3742215661416023e-05,
+    0.0035999999999998212
+  ],
+  "compiled_pose": {
+    "position": [
+      -0.22142893910408018,
+      0.050783994598360645,
+      1.1638702739715578
+    ],
+    "quaternion_xyzw": [
+      0.7071067811865475,
+      0.7071067811865475,
+      0.0,
+      0.0
+    ]
+  },
+  "source_step": 3659,
+  "executed": false,
+  "reference_is_complete_object_geometry": false,
+  "grounding_source_step": 610,
+  "execution_source_step": 3659,
+  "execution_observation_id": "obs_00024"
+}

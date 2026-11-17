@@ -1,0 +1,188 @@
+{
+  "turn": 18,
+  "executing_batch": 11,
+  "request_wall_s": 9.633417505770922,
+  "execution_wall_s": 9.32457921653986,
+  "overlap_wall_s": 9.324307058006525,
+  "post_execution_wait_wall_s": 0.30911044776439667,
+  "cancellation_requested": true,
+  "cancellation_reason": "execution_failed",
+  "cancellation_cleanup_wall_s": 0.3092323951423168,
+  "scope": "Request includes encoding/accounting/pause. Interval intersection is not speedup or physics-only time.",
+  "executed": false,
+  "robot_actions": 0,
+  "saved": false,
+  "error_type": "RequestCancelled",
+  "cancelled": true,
+  "transport": {
+    "body_bytes": 5652760,
+    "body_sha256": "80f09c6b3be68c0e491a061f94851d1d173847e87b1ead2946c20a549ac43d47",
+    "image_count": 23,
+    "original_image_count": 81,
+    "image_references": [
+      {
+        "image_id": "image_ref_0013",
+        "original_position": [
+          12,
+          2
+        ],
+        "canonical_position": [
+          4,
+          2
+        ]
+      },
+      {
+        "image_id": "image_ref_0014",
+        "original_position": [
+          12,
+          4
+        ],
+        "canonical_position": [
+          4,
+          4
+        ]
+      },
+      {
+        "image_id": "image_ref_0013",
+        "original_position": [
+          21,
+          2
+        ],
+        "canonical_position": [
+          4,
+          2
+        ]
+      },
+      {
+        "image_id": "image_ref_0014",
+        "original_position": [
+          21,
+          4
+        ],
+        "canonical_position": [
+          4,
+          4
+        ]
+      }
+    ],
+    "working_context": {
+      "mode": "stage_context",
+      "epoch": 10,
+      "boundary_source_step": 4025,
+      "source": {
+        "messages": 113,
+        "text_chars": 1057172,
+        "reasoning_chars": 4183,
+        "image_occurrences": 81
+      },
+      "active": {
+        "messages": 27,
+        "text_chars": 175288,
+        "reasoning_chars": 425,
+        "image_occurrences": 28
+      },
+      "omitted_source_messages": 86,
+      "retained_tail_messages": 22,
+      "active_source_indices": [
+        0,
+        1,
+        8,
+        67,
+        87,
+        88,
+        89,
+        90,
+        92,
+        93,
+        94,
+        95,
+        97,
+        98,
+        99,
+        100,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112
+      ],
+      "source_history_changed": false,
+      "retained_tool_reasoning_unchanged": true,
+      "image_window": {
+        "max_images": 24,
+        "keep_images": 18,
+        "max_bytes": 8000000,
+        "archive_reader": "read_image",
+        "mode": "bounded_images",
+        "images_before": 24,
+        "images_after": 23,
+        "encoded_image_url_bytes_before": 5657616,
+        "encoded_image_url_bytes_after": 5439761,
+        "protected_image_ids": [
+          "history_image_1808eba2b871021cf5022c6903f0d4b4e9952c7d30543fd0ce5c3025f8490937",
+          "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "history_image_29b8a9aa35050b6f00241f866cceba74eaeb2c851a88193da4366abe1503974e",
+          "history_image_3c51005dc054317ac7db7b28fa7535273647d0ca3672abdadb6e6456e857957d",
+          "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "history_image_77dfa5f3d4a1eae85197699e03ae43db76217aeabb0bd4e6cea70702b40ceede",
+          "history_image_9c4685217a06a31a2535bc220e91ac0c7fdba4e61d6eb3c8fd60ffccffc7a0ea",
+          "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "history_image_af4d78adc243b74404c55f03b2397e2578af5381ebff43d8a6ceba6aabe8ace4",
+          "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "history_image_dc0f4e1c2e7b01f7030f14f7a86201a47be4df51b9ffac396bfba42fd0a89ba9",
+          "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2"
+        ],
+        "omitted_images": [
+          {
+            "history_image_id": "history_image_ce1e3052bad30dd16988f77ff71718d09b366e00fab77cc19384b579c168d132",
+            "original_positions": [
+              [
+                2,
+                12
+              ]
+            ],
+            "encoded_url_bytes": 217855,
+            "reason": "superseded_logical_slot"
+          }
+        ],
+        "latest_logical_image_slots": {
+          "current_clouds/latest/overview.png": "history_image_a3733791915f983f6918384fda8c8f5ade41bb8db94cceeaf8e0c238cf58d6a9",
+          "current_clouds/latest/object_00_face.png": "history_image_c417b42db5b70d0641d592804565a34152b0c3b47ff9f00406bd6b9db2d11e6f",
+          "current_clouds/latest/object_01_face.png": "history_image_c0bda5fd894fd3d24505884c9a74ff2692eee2cdcffb73dbb45d48b385b50cc7",
+          "current_clouds/latest/object_02_face.png": "history_image_61c82dcb5d035773210d074efde344bf50a1f46a93e3ec2d381b5ee1f695fd30",
+          "current_clouds/latest/object_00_side.png": "history_image_9f3ce6ae500688a6ec2e3e2e50dab98326251474b3a94c9a8841f9fa52f83de4",
+          "current_clouds/latest/object_01_side.png": "history_image_abadc03cfdbec3d775dfae4a99e93f353c565e3aa2f3634ff1ad0c0c66025f2c",
+          "current_clouds/latest/object_02_side.png": "history_image_29a4eed289ad287d8756b71207f9471b1b0cb8f7a64f42527d65452309989fc6",
+          "current_clouds/latest/object_00_top.png": "history_image_76986a0625560d00c61ea89a8d47ec14e2f85edb5a7604f3adab9a333d711f91",
+          "current_clouds/latest/object_01_top.png": "history_image_c2035ed36e9d2e1dcd0b9a4fcf6aab7e5c14f13ea19415337b8999d1bf070549",
+          "current_clouds/latest/object_02_top.png": "history_image_f2a20f8d093b834187ef4da8e4a39886989ea9ac5766919da5c2898887464be2"
+        },
+        "source_history_changed": false,
+        "text_tool_history_and_reasoning_preserved": true
+      }
+    },
+    "reasoning_history_chars": 425,
+    "requested_max_tokens": 65536,
+    "stream": true,
+    "budget_field": "max_completion_tokens",
+    "image_encoding_and_serialization_s": 1.256622577086091,
+    "image_transport": {
+      "format": "jpeg",
+      "quality": 95,
+      "resize": false,
+      "source_images_unchanged": true
+    }
+  },
+  "usage": null,
+  "candidate": null
+}

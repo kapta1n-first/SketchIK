@@ -1,0 +1,33 @@
+{
+  "run": "/var/tmp/sketchik_seed0_async74_20x30_20261117_task1",
+  "task": 1,
+  "status": "a_reports_full_task_completed",
+  "official_final": true,
+  "raw_wall_s": 412.9682993609458,
+  "network_fault_excluded_s": 0,
+  "effective_task_wall_s": 412.9682993609458,
+  "network_fault_intervals": [],
+  "raw_result_retained": true,
+  "live_time_approximate": false,
+  "policy": {
+    "authorized_by": "User: 请求断流不算进耗时，然后继续请求",
+    "automatic_network_resumption_enabled": true,
+    "scope": "Only this authorized Task0-9 seed0/init0 suite, same live process and exact input. Intentional cancellation is not retried.",
+    "excluded_from_effective_task_time": "Failed network attempts and reconnect waits, including backoff.",
+    "retained_in_raw_time": true,
+    "not_retried": [
+      "HTTP/auth/quota errors",
+      "tool format or JSON errors",
+      "motion failures"
+    ],
+    "controller": "/media/wsqlab/more/kaptainiii/projects/SketchIK/.runtime/run_seed0_async74_20x30_20261117.py",
+    "backoff_s": [
+      0,
+      5,
+      15,
+      30
+    ],
+    "legacy_field_note": "Core automatic_retries=0 refers to the frozen core. External automated resumes are recorded separately here and in the suite audit."
+  },
+  "async_productive_execution_not_excluded": true
+}

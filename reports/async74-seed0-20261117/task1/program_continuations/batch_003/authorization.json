@@ -1,0 +1,72 @@
+{
+  "candidate_id": "444e3dcdf0ad4d1189a0de89d5ad4a47efece0bc8d0e5adbdbe2aa7a1122ee1d",
+  "continuation_check": {
+    "candidate_id": "444e3dcdf0ad4d1189a0de89d5ad4a47efece0bc8d0e5adbdbe2aa7a1122ee1d",
+    "source_step": 1550,
+    "status": "pass",
+    "checks": [
+      {
+        "check": "candidate_identity",
+        "status": "pass"
+      },
+      {
+        "check": "actual_boundary",
+        "status": "pass",
+        "source_step": 1550,
+        "batch": 2
+      },
+      {
+        "check": "execution",
+        "status": "pass"
+      },
+      {
+        "check": "contact_warning",
+        "status": "pass"
+      },
+      {
+        "check": "current_depth_contradiction",
+        "status": "pass",
+        "measured_support": {
+          "method": "current_depth_with_self_and_foreground_occlusion",
+          "testable_points": 36669,
+          "supported_points": 36489,
+          "support_fraction": 0.9950912214677248,
+          "status": "supported",
+          "depth_tolerance_m": 0.012,
+          "min_testable_points": 25,
+          "min_support_fraction": 0.25,
+          "is_grasp_or_identity_probability": false,
+          "cameras": [
+            {
+              "camera": "agentview",
+              "source_step": 1550,
+              "testable_points": 36669,
+              "supported_points": 36425
+            },
+            {
+              "camera": "robot0_eye_in_hand",
+              "source_step": 1550,
+              "testable_points": 23020,
+              "supported_points": 22882
+            }
+          ]
+        }
+      },
+      {
+        "check": "retained_depth_contradiction",
+        "status": "pass",
+        "suspended_reference": null
+      }
+    ],
+    "grasp_epoch_transition": {
+      "prepared": 0,
+      "actual": 1,
+      "semantic_certification_required_for_dispatch": false
+    },
+    "holding_certified": false,
+    "task_success_certified": false,
+    "collision_checked": false,
+    "scope": "Normal continuation without A approval; actual used bindings and real IK are still checked."
+  },
+  "model_request_issued_for_dispatch": false
+}

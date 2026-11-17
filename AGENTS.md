@@ -93,3 +93,29 @@
 - 用户最新重新授权HarnessVLA基线完整seed0一轮，并明确gpt-6.1-sol low；按Task0–9各一次、原生planner每任务1800秒、65536输出额度及原生100请求默认运行，覆盖此前HarnessVLA停止限制，仅限本批。沿用既有冻结原版源码、Pi0.5/SAM3与固定原生记忆，不导入SketchIK轨迹、不修改HarnessVLA或AsyncSketch项目代码、不调用Astra/其他子代理。日志/视频放/var/tmp/harnessvla_sol61_low_seed0_30m_20261117，状态.runtime/harness_sol61_low_seed0_30m_20261117.json；专用GPU0服务和大请求网关，原Mac网关不动。网络故障按原现场原输入重试并另列时间，30分钟原生规划wall上限不随重试延长；认证/额度/格式/程序异常先检查，不自动重跑任务。逐次请求记录账户余额，不能把共享账户窗口差当独占费用。全套结束停止本批专用服务，不追加试验。
 
 - 用户2026-11-17最新明确要求：后续原生HarnessVLA按旧DS方式使用每任务隔离的空local memory（零字节MEMORY.md及空global/task-family/task-specific），原生参数--memory-profile local/--memory-dir，不再沿用本次HF库。用户要求下次断流不计时：1800秒有效预算仅扣除确认的网络失败与重连退避，不扣普通推理/未确认等待。外部下一轮启动器已准备并离线验证，保留Sol low/65536与私有原始completion审计。此条授权配置修改，不新增整套付费实验或改写当前冻结现场/历史；具体任务启动遵循用户后续范围。
+
+- 用户2026-11-17最新重新授权完整初态HarnessVLA seed0复跑，但必须先只跑Task0，结束停下供用户检查，不自动进入Task1–9。沿用新空local memory、原版提示、Sol low/65536、30分钟有效预算；确认的断流/重连退避不计时，普通推理与未知等待计时。用户另明确授权少量无机器人动作的实际XML协议检查，原始输出和转换后调用都留档，最后交Astra复核；不能把检查算作任务动作或因果成功率对照，不调用其他代理扩展试验。
+- 用户随后授权使用原Bytecat同一key更新后的模型池，以gpt-6.1-sol low原生工具接口单独再跑一轮完整初态Task0；已只读确认/models包含该模型。用户最新要求先等当前Flowith Task0完成，再启动这轮，不并发共用Pi0.5/SAM3干扰速度比较。后续模型服务优先放RTX3090，运行前检查资源；当前TITAN RTX轮不迁移、不重启，不因新偏好终止2号卡旧服务或他人进程。2号卡未腾出足够显存时不得声称已可独立加载整套服务，未授权扩大到其他任务。
+
+- 本次空local memory HarnessVLA Task0 seed0/init0已结束：Sol low/65536、原Flowith XML通道，官方terminated true、A success；第二罐下降过程中触发原生官方终止，仍闭爪，不能称两物均完成释放撤手。原始进程窗口4979.580秒，有效1469.654秒，确认网络故障/重连3509.926秒；41次完成请求、81次上游尝试、79次工具调用。502份冻结原版源码哈希未变。原始completion已确认若干相同XML块重复，对应双次派发，不能归因外部网络重试动作重放；尚未证明所有重复/读指南行为由XML造成。专用模型服务及网关已停止，原18765未动，未启动Bytecat新轮。用户要求等本轮完成后Astra再复盘原生接口与3090时间收益，已按此时序提交只读复盘。起止余额查询不可用，费用未知不记零。原始结果/图片/请求/流保存/var/tmp/harnessvla_sol61_low_empty_task0_20261117_163435，审计.runtime/harness_empty_task0_20261117_review.json。
+
+- 用户单独授权6.1 Sol xhigh只生成一段SketchIK草图计时、不跑整轮：已完成一次Bytecat原生接口请求，65536上限，复用协议74 Task0首段请求2原资料/15张真实JPEG，不改变提示与工具、不启动仿真或派发工具。71.286秒完整返回单次execute_actions/4动作；首个服务端生成内容33.294秒（包含推理输出，不等于草图首token），usage输入43389/输出2661含reasoning2146，无重试。仅冻结输入生成，不认证格式/几何/IK或动作成功，不是和旧low同通道配对速度对照。输出/var/tmp/sketchik_sol61_xhigh_one_sketch_20261117_181900；无追加请求/整轮启动。
+
+- 用户随后授权用原18765 Flowith网关再测同一xhigh草图：同一真实请求体哈希（原生与网关完全相同）共3次实际尝试，前两次unexpected EOF 98.617秒、TLS handshake timeout 10.239秒，运行控制重发同输入2次；第3次34.409秒完整返回一次execute_actions/3动作，首生成28.327秒，未派发工具/仿真。成功尝试比Bytecat单次71.286秒短36.877秒，但供应商、输出和单次波动不同，不能归因纯XML；两次故障108.856秒另列，三次API尝试耗时合计143.265秒，不把控制间隙计作网络故障。网关未改/重启，原始失败与完整流留档，汇总.runtime/sol61_xhigh_native_gateway_single_sketch_comparison_20261117.json；未启动新整任务。
+
+- 用户再次明确仅用网关测Astra high与Sol xhigh各一段、相同冻结Task0请求/15图/65536、不执行：Astra首次connection reset 116.095秒，重发后79.863秒完整一次execute_actions/3动作，首可见内容73.872秒；Sol本次4次连续网络失败（TLS/EOF/EOF/TLS），10.172/183.134/155.820/10.189秒，共359.314秒，没有完整草图，不以之前34.409秒替代。所有原输入/部分流/失败保留，同模型重发体哈希一致；控制层实际重发Astra1次/Sol3次，不因单调用client automatic_retries=0冒称没重试。已停止追加，无仿真/工具派发/整任务或模型服务启动。汇总.runtime/gateway_astra_high_sol_xhigh_repeat_20261117.json。
+
+- 用户“再试下”追加Sol xhigh网关同输入草图尝试：本次2次实际请求均TLS handshake timeout，10.184/10.197秒，未收到首生成内容/完整草图，零工具与机器人动作；控制层重发1次，失败流及哈希留档.runtime/gateway_sol_xhigh_retry_20261117_1849.json。未启动整任务或更改网关配置。
+
+- 用户明确再试5次：Sol xhigh经原18765网关串行5次实际请求，同一请求体哈希，额外自动重试0、工具/机器人派发0。第1TLS失败10.153秒、第2EOF失败104.330秒、第3EOF失败186.325秒、第4成功87.518秒（首生成75.414秒/3动作）、第5成功25.949秒（首生成20.214秒/3动作）。完成2/5，成功耗时均值56.734秒，失败网络共300.808秒；五次结束即停，不据小样本认证长期成功率。完整.runtime/sol_xhigh_gateway_five_20261117_185731/batch.json及各原始流保留，无新整任务。
+
+- 用户最新要求检查当前是否断连，稳定后再重跑HarnessVLA并监控接口延迟；按仅一轮Task0理解，尚未启动新整任务。21:12原18765真实Sol low/65536同冻结草图输入检查一次成功，首生成16.345秒、完整23.210秒/3动作，0派发/0重试；单次成功不认证整轮稳定。两张3090仍显存不足，已向用户询问等待3090或临时TITAN，未授权终止旧服务/其他进程。XML净延迟未知；后续记录请求首生成/完整返回、断流与退避、未知等待并分列，不能把失败扣时当免扣费。输出/var/tmp/sketchik_sol61_low_gateway_connection_check_20261117_211214。
+
+- 用户最新“还有多少积分，跑完接着跑”授权当前HarnessVLA Task0结束后串行继续Task1–9，覆盖此前只跑Task0后停的范围；延续Sol low/65536、空local memory、原版提示/XML网关、每任务30分钟有效预算、同现场网络重试，quota/认证/格式/程序异常停止检查，不把余额耗尽当网络重试。当前Task0原仿真不动；外部接续监督已启动（PID 1928940），状态/media/wsqlab/more/kaptainiii/projects/SketchIK/.runtime/harness_followon_after_task0_20261118_001352.json，等当前Task0正常结束且专用服务清理后，复查TITAN显存与冻结启动器哈希，再启动/media/wsqlab/more/kaptainiii/projects/SketchIK/.runtime/harness_sol61_low_empty_tasks1to9_20261118_001352.json，不并发/重放Task0、不动3090旧服务。用户本轮明确允许TITAN临时使用。余额查询目前unavailable，最近可核实18716.21为11-17 21:10，不当作当前余额。
+
+- 本次监控HarnessVLA Task0已因基础设施恢复上限停止，未完成：原始10973.010秒、确认网络及退避9782.925秒、余项有效1190.085秒；27次完成模型回复、50次记录network失败。最后请求28等待7200.274秒/24次尝试，触发单请求2小时transport上限，含EOF和等待上游响应头超时；未知取消等待保留计时，不冒称所有等待均网络扣除。原生仿真/专用模型/网关已退出，不能原现场续跑，不用GT重建。Task0最后仅一次pi0_pick红绿罐返回false，尚未搬入篮子；official_success未知，不混作任务能力失败。已授权后续Task1–9队列按异常策略停止（stopped_parent_requires_inspection），零后续任务启动。余额查询11-18 00:22仍unavailable，不能称已耗尽；详.runtime/harness_task0_monitor_20261117_stop_review.json，原始流/动作/网络证据保留。
+
+- 用户澄清积分页N/A：实际/api/credits/simple details返回Flowith401 token_expired，顶部总初始/剩余0是查询失败默认值，不认证额度用尽。已使用原RefreshToken刷新同账号AT/RT，通过JWT subject与邮箱核对；旧配置私有备份，经既有admin API加入已验证新凭证并退役过期凭证，保持一个账号、客户端API key及admin token不变，不重启18765、不发模型请求。恢复后积分14422.70、初始600000，查询成功；审计.runtime/flowith_probe/credit_restore_audit_20261118.json。原停止Task0现场已退出，不因重新登录冒称恢复/重放；队列仍停止待检查。
+
+- 用户2026-11-18重新明确继续HarnessVLA Task1：单独新完整初态、Sol low/65536、空local memory、30分钟有效预算。资源队列待TITAN空闲后已启动，状态.runtime/harness_sol61_low_empty_task1_20261118_004505.json，原生进程1935665；旧异常接续队列仍停止，不从旧Task0重建或重放。
+- 用户随后授权把SketchIK及官方最新版HarnessVLA部署到新V100服务器，今后优先该机；外部memory保持每任务空目录，不复制旧经验。先克隆/独立环境/资产同步/离线验证，不追加付费整轮或探针，不搬运运行中的仿真。服务器凭据只放私有运行配置，不纳入Git。原本运行的本机Task1保持，禁止两边重复启动同一轮。官方新版本与旧对照冻结版本分别记录。

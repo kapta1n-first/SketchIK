@@ -2,7 +2,7 @@ import sys,tempfile,unittest
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'tools/harness_eval'))
-from empty_memory import configure_empty_local_memory
+from empty_memory import configure_empty_local_memory,selected_tasks
 class Tests(unittest.TestCase):
  def test_native_local_flags_and_zero_byte_index(self):
   with tempfile.TemporaryDirectory() as d:
@@ -24,4 +24,8 @@ class Tests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    target=Path(d)/'target';target.mkdir();run=Path(d)/'task';run.mkdir();(run/'memory').symlink_to(target,target_is_directory=True)
    with self.assertRaises(ValueError):configure_empty_local_memory([],run)
+ def test_task0_gate_and_explicit_task_selection(self):
+  self.assertEqual(selected_tasks(),[0]);self.assertEqual(selected_tasks('0,1,2'),[0,1,2])
+  for value in ['0,0','-1','10','','abc']:
+   with self.assertRaises(ValueError):selected_tasks(value)
 if __name__=='__main__':unittest.main()

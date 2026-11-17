@@ -8,7 +8,7 @@ COMPLETE=b'data: {"choices":[{"delta":{"content":"ok"},"finish_reason":"stop"}]}
 NETWORK=b'data: {"error":"unexpected EOF"}\n\n'
 AUTH=b'data: {"error":"authentication invalid"}\n\n'
 class Tests(unittest.TestCase):
- def run_case(self,sequence,budget=2,clock=time.monotonic,before=None):
+ def run_case(self,sequence,budget=2,clock=time.monotonic,before=None,adapt_schema=True,payload=b'{"model":"offline-test","messages":[]}'):
   calls=[]
   class H(BaseHTTPRequestHandler):
    def log_message(self,*a):pass
@@ -17,11 +17,11 @@ class Tests(unittest.TestCase):
   upstream=ThreadingHTTPServer(('127.0.0.1',0),H)
   threading.Thread(target=upstream.serve_forever,daemon=True).start()
   with tempfile.TemporaryDirectory() as td:
-   proxy=make_server(f'http://127.0.0.1:{upstream.server_port}',td,retry_delay=.02,heartbeat=.01,effective_budget_s=budget,budget_clock=clock)
+   proxy=make_server(f'http://127.0.0.1:{upstream.server_port}',td,retry_delay=.02,heartbeat=.01,effective_budget_s=budget,budget_clock=clock,adapt_schema=adapt_schema)
    threading.Thread(target=proxy.serve_forever,daemon=True).start()
    try:
     if before:before()
-    req=urllib.request.Request(f'http://127.0.0.1:{proxy.server_port}/chat/completions',data=b'{"model":"offline-test","messages":[]}',headers={'Content-Type':'application/json'})
+    req=urllib.request.Request(f'http://127.0.0.1:{proxy.server_port}/chat/completions',data=payload,headers={'Content-Type':'application/json'})
     with urllib.request.urlopen(req,timeout=3) as response:body=response.read()
     p=Path(td)/'0001/summary.json'
     for _ in range(100):
@@ -41,4 +41,8 @@ class Tests(unittest.TestCase):
  def test_already_expired_budget_sends_no_upstream_request(self):
   tick=[0.];calls,body,s=self.run_case([(0,COMPLETE)],budget=2,clock=lambda:tick[0],before=lambda:tick.__setitem__(0,3.))
   self.assertEqual(calls,[]);self.assertEqual(s['state'],'effective_budget_exhausted')
+ def test_native_endpoint_preserves_request_bytes_including_union_schema(self):
+  payload=b'{ "model":"offline-test", "messages":[], "tools":[{"type":"function","function":{"name":"echo","parameters":{"type":"object","properties":{"value":{"type":["string","null"]}}}}}] }'
+  calls,body,s=self.run_case([(0,COMPLETE)],adapt_schema=False,payload=payload)
+  self.assertEqual(calls,[payload]);self.assertEqual(s['state'],'complete')
 if __name__=='__main__':unittest.main()

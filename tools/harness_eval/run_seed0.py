@@ -6,8 +6,8 @@ from pathlib import Path
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 ROOT=Path(__file__).resolve().parents[2]
 BASE=ROOT/'.runtime/harness_original_control_v168'
-OUT=Path('/var/tmp/harnessvla_sol61_low_seed0_effective30m_next')
-STATE=ROOT/'.runtime/harness_sol61_low_seed0_effective30m_next.json'
+OUT=Path(os.environ.get('HARNESS_OUTPUT_DIR','/var/tmp/harnessvla_sol61_low_seed0_effective30m_next'))
+STATE=Path(os.environ.get('HARNESS_STATE_FILE',str(ROOT/'.runtime/harness_sol61_low_seed0_effective30m_next.json')))
 PYTHON=os.environ.get('HARNESS_PYTHON',str(ROOT.parent/'AsyncSketch/.venv-rpent/bin/python'))
 GPU=os.environ.get('HARNESS_GPU_UUID','GPU-963d3440-dfe0-be7d-7fc2-69cc6d7acf00')
 sys.path.insert(0,str(ROOT/'src'))
@@ -15,7 +15,7 @@ sys.path.insert(0,str(BASE))
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from sketchik.usage_accounting import credit_snapshot
 from network_recovery import make_server
-from empty_memory import configure_empty_local_memory
+from empty_memory import configure_empty_local_memory,selected_tasks
 CREDITS=ROOT/'.runtime/flowith_probe/private/data/config.json'
 OPENER=urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
@@ -33,20 +33,33 @@ def health(endpoint):
 def hashes():
  return {str(p.relative_to(BASE/'source')):hashlib.sha256(p.read_bytes()).hexdigest() for p in (BASE/'source').rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix in ('.py','.md','.yaml','.yml','.toml')}
 
+def selected_gpu_index(gpu_rows, gpu_uuid, minimum_free_mib=18000):
+ for row in gpu_rows.splitlines():
+  fields=[item.strip() for item in row.split(',')]
+  if len(fields)>=5 and fields[1]==gpu_uuid:
+   if int(fields[3].split()[0])<minimum_free_mib:
+    raise RuntimeError('Selected GPU has insufficient free memory; no model service started')
+   return fields[0]
+ raise RuntimeError('Selected GPU UUID not found; refusing fallback to another GPU')
+
 def main():
+ tasks=selected_tasks(os.environ.get('HARNESS_TASKS','0'))
  if OUT.exists() or STATE.exists():raise RuntimeError('Refusing overwrite of previous run')
  OUT.mkdir(mode=0o700);(OUT/'private/data').mkdir(parents=True,mode=0o700)
  cfg=read(BASE/'prepared_command.json');source_hash=hashes();write(OUT/'source_hashes.json',source_hash)
  env=os.environ.copy();env.update(cfg['environment']);env.update(CUDA_DEVICE_ORDER='PCI_BUS_ID',MUJOCO_EGL_DEVICE_ID='0',MUJOCO_GL='egl',PYOPENGL_PLATFORM='egl',PYTHONUNBUFFERED='1',PYTHONDONTWRITEBYTECODE='1',OPENBLAS_NUM_THREADS='1',OMP_NUM_THREADS='1',NO_PROXY='127.0.0.1,localhost',no_proxy='127.0.0.1,localhost',HF_HUB_OFFLINE='1')
- state={'status':'starting_services','pid':os.getpid(),'started_at_unix':time.time(),'source_commit':cfg['source_commit'],'scope':'New separately authorized full-initial-state experiment only; 1800s effective budget excludes confirmed network failures and retry backoff. No old process continuation or action replay. Empty per-task local memory as explicitly requested, matching the earlier DS setup; Sol low/65536 retained.','model':'gpt-6.1-sol','reasoning_effort':'low','max_tokens':65536,'planner_timeout_s':1800,'native_max_turns':100,'memory_profile':'local','evaluation_label':'native-local-prompt-empty-external-memory','strict_zero_shot':False,'built_in_task_priors_retained':True,'tool_protocol':'flowith_xml_bridge','memory_initial_files':'zero-byte MEMORY.md only; empty global/task-family/task-specific','native_wall_watchdog_s':1000000000,'budget_policy':'1800s effective at model-response boundary; confirmed failed network attempts and retry backoff excluded; pending/unknown model wait counted','gpu_uuid':GPU,'services':{},'jobs':[],'output':str(OUT)};write(STATE,state)
+ state={'status':'starting_services','pid':os.getpid(),'started_at_unix':time.time(),'source_commit':cfg['source_commit'],'scope':'New separately authorized full-initial-state experiment only; 1800s effective budget excludes confirmed network failures and retry backoff. No old process continuation or action replay. Empty per-task local memory as explicitly requested, matching the earlier DS setup; Sol low/65536 retained.','model':'gpt-6.1-sol','reasoning_effort':'low','max_tokens':65536,'planner_timeout_s':1800,'native_max_turns':100,'authorized_tasks':tasks,'stop_after_selected_tasks':True,'memory_profile':'local','evaluation_label':'native-local-prompt-empty-external-memory','strict_zero_shot':False,'built_in_task_priors_retained':True,'tool_protocol':'flowith_xml_bridge','memory_initial_files':'zero-byte MEMORY.md only; empty global/task-family/task-specific','native_wall_watchdog_s':1000000000,'budget_policy':'1800s effective at model-response boundary; confirmed failed network attempts and retry backoff excluded; pending/unknown model wait counted','gpu_uuid':GPU,'services':{},'jobs':[],'output':str(OUT)};write(STATE,state)
  processes=[];child=None;servers=[]
  def save():write(STATE,state)
  try:
   gpu=subprocess.check_output(['nvidia-smi','--query-gpu=index,uuid,memory.used,memory.free,utilization.gpu','--format=csv,noheader'],text=True)
   apps=subprocess.check_output(['nvidia-smi','--query-compute-apps=gpu_uuid,pid,used_memory','--format=csv,noheader'],text=True)
   write(OUT/'gpu_before.json',{'gpus':gpu.splitlines(),'processes':apps.splitlines()})
+  gpu_index=selected_gpu_index(gpu,GPU)
+  env['MUJOCO_EGL_DEVICE_ID']=gpu_index
+  state['gpu_physical_index']=gpu_index;save()
   for name,rel,extra in [('vla','rpent/robots/components/pi05_vla_server.py',['--embodiment','libero']),('sam3','rpent/robots/components/sam3_server.py',[])]:
-   server_port=port();command=[PYTHON,str(BASE/'source'/rel),'--transport','http','--host','127.0.0.1','--port',str(server_port),'--cuda-device','0',*extra]
+   server_port=port();command=[PYTHON,str(BASE/'source'/rel),'--transport','http','--host','127.0.0.1','--port',str(server_port),'--cuda-device',gpu_index,*extra]
    with (OUT/f'{name}.log').open('xb') as log:p=subprocess.Popen(command,cwd=BASE/'source',env=env,stdin=subprocess.DEVNULL,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
    processes.append(p);state['services'][name]={'pid':p.pid,'endpoint':f'http://127.0.0.1:{server_port}','command':command};save()
   deadline=time.monotonic()+600
@@ -76,7 +89,7 @@ def main():
     k,v=line.split('=',1);private[k.strip().removeprefix('export ')]=v.strip().strip('\"\'')
   state.update(status='running',balance_before=credit_snapshot(CREDITS));save()
   results=[]
-  for task in range(0,10):
+  for task in tasks:
    if hashes()!=source_hash:raise RuntimeError('Frozen native source changed')
    if any(p.poll() is not None for p in processes):raise RuntimeError('Dedicated service exited')
    if shutil.disk_usage(OUT).free<10*1024**3:raise RuntimeError('Less than 10GiB on output filesystem')
@@ -93,22 +106,41 @@ def main():
       assert data.get('max_completion_tokens',data.get('max_tokens'))==65536
      except (ValueError,KeyError,AssertionError):
       self.send_error(400,'Configured model/reasoning/token-budget mismatch');return
-     before=credit_snapshot(CREDITS);start=time.time();status=None;failure=None
+     balance_started=time.monotonic();before=credit_snapshot(CREDITS);balance_before_s=time.monotonic()-balance_started
+     start=time.time();stream_started=time.monotonic();status=None;failure=None
+     timing={'headers_s':None,'first_response_byte_s':None,'first_generation_s':None,'stream_complete_s':None};pending=b'';event_count=0
      try:
       request=urllib.request.Request(f'http://127.0.0.1:{gateway_port}'+self.path,data=body,headers={k:v for k,v in self.headers.items() if k.lower() not in ['host','connection','content-length']},method='POST')
       try:response=OPENER.open(request,timeout=360)
       except urllib.error.HTTPError as e:response=e
+      timing['headers_s']=time.monotonic()-stream_started
       status=response.status;self.send_response(status);self.send_header('Content-Type',response.headers.get('Content-Type','text/event-stream'));self.send_header('Transfer-Encoding','chunked');self.end_headers()
       with response:
        while True:
         block=response.read1(65536)
         if not block:break
+        elapsed=time.monotonic()-stream_started
+        if timing['first_response_byte_s'] is None:timing['first_response_byte_s']=elapsed
+        pending+=block
+        while b'\n' in pending:
+         line,pending=pending.split(b'\n',1)
+         if not line.startswith(b'data:'):continue
+         raw=line[5:].strip()
+         if raw==b'[DONE]':timing['stream_complete_s']=elapsed;continue
+         try:event=json.loads(raw)
+         except (ValueError,UnicodeError):continue
+         event_count+=1
+         if timing['first_generation_s'] is None and isinstance(event,dict) and any(any(c.get('delta',{}).get(k) for k in ('content','reasoning_content','tool_calls')) for c in event.get('choices',[]) if isinstance(c,dict)):
+          timing['first_generation_s']=elapsed
+          with (run/'usage_stream_progress.jsonl').open('a') as progress:progress.write(json.dumps({'task':task,'started_at_unix':start,'request_sha256':hashlib.sha256(body).hexdigest(),'first_generation_s':elapsed})+'\n')
         self.wfile.write(f'{len(block):X}\r\n'.encode()+block+b'\r\n');self.wfile.flush()
       self.wfile.write(b'0\r\n\r\n');self.wfile.flush()
      except Exception as exc:
       failure=type(exc).__name__;self.close_connection=True
      finally:
-      after=credit_snapshot(CREDITS);record={'task':task,'started_at_unix':start,'ended_at_unix':time.time(),'model':data.get('model'),'reasoning_effort':data.get('reasoning_effort'),'request_sha256':hashlib.sha256(body).hexdigest(),'request_bytes':len(body),'http_status':status,'failure_type':failure,'balance_before':before,'balance_after':after,'scope':'Account-wide balance snapshots, not exclusive per-request billing.'}
+      stream_wall_s=time.monotonic()-stream_started
+      balance_started=time.monotonic();after=credit_snapshot(CREDITS);balance_after_s=time.monotonic()-balance_started
+      record={'task':task,'started_at_unix':start,'ended_at_unix':time.time(),'model':data.get('model'),'reasoning_effort':data.get('reasoning_effort'),'request_sha256':hashlib.sha256(body).hexdigest(),'request_bytes':len(body),'http_status':status,'failure_type':failure,'balance_before':before,'balance_after':after,'balance_query_before_s':balance_before_s,'balance_query_after_s':balance_after_s,'upstream_stream_wall_s':stream_wall_s,'stream_timing':timing,'sse_event_count':event_count,'scope':'Account-wide balance snapshots, not exclusive per-request billing. First-generation timing is gateway-visible content/reasoning/tool delta; not the provider internal first reasoning token.'}
       with ledger_lock:
        attempts.append(record)
        with (run/'usage_attempts.jsonl').open('a') as f:f.write(json.dumps(record)+'\n')
@@ -117,7 +149,7 @@ def main():
    proxy.daemon_threads=False;servers.append(proxy);threading.Thread(target=proxy.serve_forever,daemon=True).start()
    runenv=env.copy();runenv.update(OPENAI_API_KEY=private['SKETCHIK_API_KEY'],OPENAI_BASE_URL=f'http://127.0.0.1:{proxy.server_port}')
    config_dir=run/'libero_config';config_dir.mkdir();shutil.copy2(ROOT/'.runtime/libero_pro/config.yaml',config_dir/'config.yaml');runenv['LIBERO_CONFIG_PATH']=str(config_dir)
-   command=list(cfg['command']);command[command.index('--task')+1]=str(task);command[command.index('--cuda-device')+1]='0';command[-1]=str(run)
+   command=list(cfg['command']);command[command.index('--task')+1]=str(task);command[command.index('--cuda-device')+1]=gpu_index;command[-1]=str(run)
    command+=['--planner-timeout-s','1000000000']
    command=configure_empty_local_memory(command,run)
    for name,service in state['services'].items():command.extend([f'--{name}-endpoint',service['endpoint']])

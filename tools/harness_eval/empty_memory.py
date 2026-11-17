@@ -31,3 +31,14 @@ def configure_empty_local_memory(command, run):
     if skip:
         raise ValueError('Missing value for existing memory option')
     return result + ['--memory-profile', 'local', '--memory-dir', str(memory)]
+
+
+def selected_tasks(value="0"):
+    """An explicit task list; default to one gated Task0, never an implicit suite."""
+    try:
+        tasks = [int(item.strip()) for item in value.split(',')]
+    except (ValueError, AttributeError):
+        raise ValueError('HARNESS_TASKS must be comma-separated integers') from None
+    if not tasks or len(set(tasks)) != len(tasks) or any(task < 0 or task > 9 for task in tasks):
+        raise ValueError('HARNESS_TASKS must contain unique Task0-9 IDs')
+    return tasks

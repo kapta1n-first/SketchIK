@@ -45,7 +45,7 @@ def inspect_sse(status, body):
     return 'terminal_format'
 
 
-def make_server(upstream, archive_root, retry_delay=None, heartbeat=.5, timeout=1200., max_attempts=128, network_budget_s=7200., effective_budget_s=1200., budget_clock=time.monotonic):
+def make_server(upstream, archive_root, retry_delay=None, heartbeat=.5, timeout=1200., max_attempts=128, network_budget_s=7200., effective_budget_s=1200., budget_clock=time.monotonic, adapt_schema=True):
     parsed=urllib.parse.urlsplit(upstream)
     if parsed.scheme!='http' or parsed.hostname not in ('127.0.0.1','localhost','::1') or parsed.username or parsed.password:
         raise ValueError('Upstream must be an explicit local HTTP gateway')
@@ -67,9 +67,10 @@ def make_server(upstream, archive_root, retry_delay=None, heartbeat=.5, timeout=
             with lock:counter+=1;index=counter
             directory=root/f'{index:04d}';directory.mkdir()
             original_body=self.rfile.read(int(self.headers.get('Content-Length','0')))
-            body=json.dumps(adapt_request(json.loads(original_body)),ensure_ascii=False,separators=(',',':')).encode()
+            body=(json.dumps(adapt_request(json.loads(original_body)),ensure_ascii=False,separators=(',',':')).encode()
+                  if adapt_schema else original_body)
             (directory/'original_client_request.json').write_bytes(original_body)
-            (directory/'schema_adapter.json').write_text(json.dumps({'change':'schema union type array to equivalent anyOf only','original_sha256':hashlib.sha256(original_body).hexdigest(),'forwarded_sha256':hashlib.sha256(body).hexdigest(),'arguments_modified':False},indent=2))
+            (directory/'schema_adapter.json').write_text(json.dumps({'change':'schema union type array to equivalent anyOf only' if adapt_schema else 'none; native request bytes preserved','original_sha256':hashlib.sha256(original_body).hexdigest(),'forwarded_sha256':hashlib.sha256(body).hexdigest(),'arguments_modified':False},indent=2))
             digest=hashlib.sha256(body).hexdigest()
             (directory/'request.json').write_bytes(body)
             original_headers={k:v for k,v in self.headers.items()
@@ -83,14 +84,17 @@ def make_server(upstream, archive_root, retry_delay=None, heartbeat=.5, timeout=
                 self.wfile.write(f'{len(data):X}\r\n'.encode()+data+b'\r\n');self.wfile.flush()
             def summary(state):
                 elapsed=time.monotonic()-started
-                (directory/'summary.json').write_text(json.dumps({
+                snapshot=json.dumps({
                     'state':state,'request_sha256':digest,'request_bytes':len(body),
                     'started_wall':wall,'total_s':elapsed,'excluded_network_s':failed,
                     'effective_s':elapsed-failed,'attempts':attempts,
                     'unknown_cancelled_wait_s':sum(a.get('elapsed_s',0) for a in attempts if a.get('classification')=='client_cancelled_transport_wait'),
                     'limits':{'max_upstream_attempts':max_attempts,'transport_wait_budget_s':network_budget_s,'backoff_s':[0,5,15,30]},
                     'upstream_proxy':'explicit_none','redirects':'disabled',
-                    'external_transport_recovery':True,'response_buffered':True,'effective_budget':budget_state()},indent=2))
+                    'external_transport_recovery':True,'response_buffered':True,'effective_budget':budget_state()},indent=2)
+                temporary=directory/'summary.json.tmp'
+                temporary.write_text(snapshot)
+                temporary.replace(directory/'summary.json')
             def wait_alive(event, period):
                 nonlocal disconnected,exhausted
                 while not event.wait(period):

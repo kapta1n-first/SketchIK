@@ -1942,3 +1942,7 @@ Task9 v179完整初态最终官方true、A success；16段草图、18次执行A�
 - 用户最新重新授权HarnessVLA基线完整seed0一轮，并明确gpt-6.1-sol low；按Task0–9各一次、原生planner每任务1800秒、65536输出额度及原生100请求默认运行，覆盖此前HarnessVLA停止限制，仅限本批。沿用既有冻结原版源码、Pi0.5/SAM3与固定原生记忆，不导入SketchIK轨迹、不修改HarnessVLA或AsyncSketch项目代码、不调用Astra/其他子代理。日志/视频放/var/tmp/harnessvla_sol61_low_seed0_30m_20261117，状态.runtime/harness_sol61_low_seed0_30m_20261117.json；专用GPU0服务和大请求网关，原Mac网关不动。网络故障按原现场原输入重试并另列时间，30分钟原生规划wall上限不随重试延长；认证/额度/格式/程序异常先检查，不自动重跑任务。逐次请求记录账户余额，不能把共享账户窗口差当独占费用。全套结束停止本批专用服务，不追加试验。
 
 - 2026-11-17：按用户要求公开协议74异步 seed0/init0 Task0–9 实验记录，包含对话、事件、动作/执行回执、候选接续、计时、配置、源码哈希和终态图；完整视频作为 GitHub Release 附件。原始官方8/10与A十项自报success分列；不重写本地历史。公开导出排除认证/账户余额及原始HTTP，完整RGB-D/稠密点云仍本地保留，逐文件来源/导出哈希写入manifest。
+
+- 2026-11-17：按用户要求准备下一轮原生HarnessVLA启动配置，使用与旧DS相同的`--memory-profile local --memory-dir <本轮/task/memory>`；每任务仅零字节MEMORY.md及空global/task-family/task-specific，不加载HF经验库，已有非空记忆拒绝复用且不删除。Sol low/65536保留。外部代理按1800秒有效预算在请求派发/完整响应边界控制，扣除确认的网络失败与重连退避，普通推理和未确认的取消等待仍计时；原生墙上1800秒限制不再提前消耗有效预算。下一轮专用网关开启私有原始completion留档，不改XML工具语义或去重动作。空记忆5项、计时5项离线检查通过；仅准备，未追加在线试验，当前冻结批次不修改。配置与验收见.runtime/run_harness_effective30m_next.py及harness_empty_memory_next_offline_review.json。
+
+- 2026-11-17：Astra xhigh复核空local配置与工具协议：原版CLI支持local，但其提示保留PROVEN_LEVERS、按任务seed0技巧及KEY_HYPERPARAMETERS，因此标为“原版local提示＋空外部记忆”，不称严格zero-shot或官方默认模式。Flowith XML桥仍在，离线保真检查不等于模型行为等价，未静默去重或修改原版提示。按用户要求将外部启动器/空memory/计时代理/专项测试和脱敏审计纳入版本管理，原生项目和当前现场保持。

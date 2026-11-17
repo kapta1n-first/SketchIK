@@ -1,0 +1,381 @@
+{
+  "scope": "Derived timing correction only; raw results, transcripts and videos unchanged. Only confirmed network attempts and actual retry backoff excluded. Pending client-cancelled transport wait is unknown and remains counted. Historical native raw 1800s deadline cannot be retroactively extended.",
+  "tasks": [
+    {
+      "task": 0,
+      "official_success": true,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1569.6985805034637,
+      "confirmed_network_and_retry_excluded_s": 0.0,
+      "effective_wall_s": 1569.6985805034637,
+      "unknown_cancelled_wait_counted_s": 0.0,
+      "original_reported_effective_wall_s": 1569.6985805034637,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117/task_00",
+      "network_events": [],
+      "raw_native_error": null,
+      "full_effective_1800s_available": null
+    },
+    {
+      "task": 1,
+      "official_success": true,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1314.7882487773895,
+      "confirmed_network_and_retry_excluded_s": 27.019722409546375,
+      "effective_wall_s": 1287.7685263678432,
+      "unknown_cancelled_wait_counted_s": 0.0,
+      "original_reported_effective_wall_s": 1287.7685263678432,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_01",
+      "network_events": [
+        {
+          "request": "0030",
+          "attempt": 1,
+          "failed_s": 27.019192084670067,
+          "retry_backoff_s": 0.0005303248763084412,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": null,
+      "full_effective_1800s_available": null
+    },
+    {
+      "task": 2,
+      "official_success": true,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1207.9676730632782,
+      "confirmed_network_and_retry_excluded_s": 20.83155195787549,
+      "effective_wall_s": 1187.1361211054027,
+      "unknown_cancelled_wait_counted_s": 0.0,
+      "original_reported_effective_wall_s": 1187.1361211054027,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_02",
+      "network_events": [
+        {
+          "request": "0042",
+          "attempt": 1,
+          "failed_s": 20.831029990687966,
+          "retry_backoff_s": 0.0005219671875238419,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": null,
+      "full_effective_1800s_available": null
+    },
+    {
+      "task": 3,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1828.4603388309479,
+      "confirmed_network_and_retry_excluded_s": 21.32482834532857,
+      "effective_wall_s": 1807.1355104856193,
+      "unknown_cancelled_wait_counted_s": 22.51389674283564,
+      "original_reported_effective_wall_s": 1784.6216137427837,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_03",
+      "network_events": [
+        {
+          "request": "0044",
+          "attempt": 1,
+          "failed_s": 21.324354980140924,
+          "retry_backoff_s": 0.0004733651876449585,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": "planner timed out after 1800s",
+      "full_effective_1800s_available": true
+    },
+    {
+      "task": 4,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1832.0565662384033,
+      "confirmed_network_and_retry_excluded_s": 22.818031698465347,
+      "effective_wall_s": 1809.238534539938,
+      "unknown_cancelled_wait_counted_s": 20.01175582781434,
+      "original_reported_effective_wall_s": 1789.2267787121236,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_04",
+      "network_events": [
+        {
+          "request": "0070",
+          "attempt": 1,
+          "failed_s": 22.817602029070258,
+          "retry_backoff_s": 0.0004296693950891495,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": "planner timed out after 1800s",
+      "full_effective_1800s_available": true
+    },
+    {
+      "task": 5,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1829.5393874645233,
+      "confirmed_network_and_retry_excluded_s": 392.37453533895314,
+      "effective_wall_s": 1437.1648521255702,
+      "unknown_cancelled_wait_counted_s": 15.508758330717683,
+      "original_reported_effective_wall_s": 1421.6560937948525,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_05",
+      "network_events": [
+        {
+          "request": "0056",
+          "attempt": 1,
+          "failed_s": 10.428323701024055,
+          "retry_backoff_s": 0.000551711767911911,
+          "classification": "network"
+        },
+        {
+          "request": "0056",
+          "attempt": 2,
+          "failed_s": 10.319098314270377,
+          "retry_backoff_s": 5.000576255843043,
+          "classification": "network"
+        },
+        {
+          "request": "0056",
+          "attempt": 3,
+          "failed_s": 10.300744602456689,
+          "retry_backoff_s": 15.000618008896708,
+          "classification": "network"
+        },
+        {
+          "request": "0056",
+          "attempt": 4,
+          "failed_s": 10.298643795773387,
+          "retry_backoff_s": 30.000642197206616,
+          "classification": "network"
+        },
+        {
+          "request": "0068",
+          "attempt": 1,
+          "failed_s": 301.0249196905643,
+          "retry_backoff_s": 0.0004170611500740051,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": "planner timed out after 1800s",
+      "full_effective_1800s_available": false
+    },
+    {
+      "task": 6,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1818.0102996826172,
+      "confirmed_network_and_retry_excluded_s": 0.0,
+      "effective_wall_s": 1818.0102996826172,
+      "unknown_cancelled_wait_counted_s": 0.0,
+      "original_reported_effective_wall_s": 1818.0102996826172,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_06",
+      "network_events": [],
+      "raw_native_error": "ModelAPIError: Original 1200s effective budget exhausted; complete response archived but not committed",
+      "full_effective_1800s_available": true
+    },
+    {
+      "task": 7,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1833.4598641395569,
+      "confirmed_network_and_retry_excluded_s": 50.995719850063324,
+      "effective_wall_s": 1782.4641442894936,
+      "unknown_cancelled_wait_counted_s": 13.008039098232985,
+      "original_reported_effective_wall_s": 1769.4561051912606,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_07",
+      "network_events": [
+        {
+          "request": "0058",
+          "attempt": 1,
+          "failed_s": 21.139210879802704,
+          "retry_backoff_s": 0.0005011428147554398,
+          "classification": "network"
+        },
+        {
+          "request": "0059",
+          "attempt": 1,
+          "failed_s": 29.8555223159492,
+          "retry_backoff_s": 0.00048551149666309357,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": "planner timed out after 1800s",
+      "full_effective_1800s_available": false
+    },
+    {
+      "task": 8,
+      "official_success": false,
+      "official_evidence": "recorded native states[].terminated",
+      "raw_wall_s": 1826.064859867096,
+      "confirmed_network_and_retry_excluded_s": 1281.6020293682814,
+      "effective_wall_s": 544.4628304988146,
+      "unknown_cancelled_wait_counted_s": 60.037219520658255,
+      "original_reported_effective_wall_s": 484.4256109781563,
+      "source_run": "/var/tmp/harnessvla_sol61_low_seed0_30m_20261117_resume_task1/task_08",
+      "network_events": [
+        {
+          "request": "0001",
+          "attempt": 1,
+          "failed_s": 19.672460287809372,
+          "retry_backoff_s": 0.0008882805705070496,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 2,
+          "failed_s": 10.017852557823062,
+          "retry_backoff_s": 5.000622041523457,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 3,
+          "failed_s": 10.019058538600802,
+          "retry_backoff_s": 15.000682517886162,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 4,
+          "failed_s": 10.017279701307416,
+          "retry_backoff_s": 30.000544471666217,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 5,
+          "failed_s": 10.016535181552172,
+          "retry_backoff_s": 30.0006616525352,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 6,
+          "failed_s": 10.016986602917314,
+          "retry_backoff_s": 30.000617317855358,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 7,
+          "failed_s": 10.018963491544127,
+          "retry_backoff_s": 30.000645492225885,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 8,
+          "failed_s": 10.01534477993846,
+          "retry_backoff_s": 30.00108839944005,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 9,
+          "failed_s": 10.018694657832384,
+          "retry_backoff_s": 30.000561829656363,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 10,
+          "failed_s": 10.01697327569127,
+          "retry_backoff_s": 30.000663183629513,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 11,
+          "failed_s": 10.017405655235052,
+          "retry_backoff_s": 30.001119635999203,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 12,
+          "failed_s": 10.021244328469038,
+          "retry_backoff_s": 30.000723207369447,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 13,
+          "failed_s": 10.016312319785357,
+          "retry_backoff_s": 30.000593414530158,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 14,
+          "failed_s": 10.019143110141158,
+          "retry_backoff_s": 30.001128420233727,
+          "classification": "network"
+        },
+        {
+          "request": "0001",
+          "attempt": 15,
+          "failed_s": 10.01916247047484,
+          "retry_backoff_s": 30.000780628994107,
+          "classification": "network"
+        },
+        {
+          "request": "0006",
+          "attempt": 1,
+          "failed_s": 147.00071512535214,
+          "retry_backoff_s": 0.0004508793354034424,
+          "classification": "network"
+        },
+        {
+          "request": "0014",
+          "attempt": 1,
+          "failed_s": 20.183192601427436,
+          "retry_backoff_s": 0.00038574449717998505,
+          "classification": "network"
+        },
+        {
+          "request": "0017",
+          "attempt": 1,
+          "failed_s": 49.06688165105879,
+          "retry_backoff_s": 0.0004601534456014633,
+          "classification": "network"
+        },
+        {
+          "request": "0018",
+          "attempt": 1,
+          "failed_s": 112.95951382443309,
+          "retry_backoff_s": 0.0004291776567697525,
+          "classification": "network"
+        },
+        {
+          "request": "0019",
+          "attempt": 1,
+          "failed_s": 198.96977174282074,
+          "retry_backoff_s": 0.0005589574575424194,
+          "classification": "network"
+        },
+        {
+          "request": "0019",
+          "attempt": 2,
+          "failed_s": 33.00077450834215,
+          "retry_backoff_s": 5.0006669741123915,
+          "classification": "network"
+        },
+        {
+          "request": "0019",
+          "attempt": 3,
+          "failed_s": 20.290458004921675,
+          "retry_backoff_s": 15.000689379870892,
+          "classification": "network"
+        },
+        {
+          "request": "0021",
+          "attempt": 1,
+          "failed_s": 140.19178150594234,
+          "retry_backoff_s": 0.0005616843700408936,
+          "classification": "network"
+        }
+      ],
+      "raw_native_error": "planner timed out after 1800s",
+      "full_effective_1800s_available": false
+    }
+  ],
+  "raw_total_s": 15060.045818567276,
+  "confirmed_network_excluded_total_s": 1816.9664189685136,
+  "effective_total_s": 13243.079399598762,
+  "next_runner": "/media/wsqlab/more/kaptainiii/projects/SketchIK/.runtime/run_harness_effective30m_next.py",
+  "next_runner_started": false
+}

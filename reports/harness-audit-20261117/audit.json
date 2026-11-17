@@ -1,0 +1,100 @@
+{
+  "status": "astra_xhigh_review_complete",
+  "scope": "Read-only offline audit; no additional online model probes or simulation changes.",
+  "native_commit": "0e406bb96d670d0c18a4cea9a6ea047119661d19",
+  "core_source_matches_previous_DS_run": {
+    "rpent/planner/api_loop.py": true,
+    "robots/libero/tools.py": true,
+    "robots/libero/prompts/evaluate.py": true,
+    "robots/libero/prompts/user.py": true,
+    "rpent/cli/main.py": true
+  },
+  "previous_DS": {
+    "manifest": "/media/wsqlab/more/kaptainiii/projects/harnessvla/logs/20261106T022750Z_task2_task3_task8_task9_original/manifest.json",
+    "model": "deepseek-v4.1-flash",
+    "reasoning_effort": "low",
+    "planner_timeout_s": 1000000000,
+    "max_turns": 1000000,
+    "memory_initial_files": 0,
+    "max_completion_tokens": 8192,
+    "memory_profile": "local, empty"
+  },
+  "current_Sol": {
+    "state": "/media/wsqlab/more/kaptainiii/projects/SketchIK/.runtime/harness_sol61_low_seed0_30m_20261117_resume_task1.json",
+    "model": "gpt-6.1-sol",
+    "reasoning_effort": "low",
+    "planner_timeout_s": 1800,
+    "max_turns": 100,
+    "memory_repo": "RLinf/RPent-memory@a44ef58c900babb2a4f701bdff38195bab991720",
+    "selected_memory_corpus": "GPT_5.5_xhigh",
+    "max_completion_tokens": 65536,
+    "transport": "Flowith XML tool bridge; not provider-native function calling",
+    "memory_profile": "hf"
+  },
+  "facts": {
+    "Task7_duplicate_move_tools_present_in_upstream_SSE": true,
+    "this_excludes_external_retry_replay_but_not_gateway_parser_duplicates": true,
+    "tool_result_JSON_encoding_also_present_in_old_DS_requests": true,
+    "guides_present_in_request_when_reread": true,
+    "Task7_requests_with_identical_tools_in_same_reply": 34,
+    "Task7_extra_duplicate_tool_calls": 47,
+    "raw_Flowith_completion_audit_enabled": false
+  },
+  "old_tasks": [
+    {
+      "task": 2,
+      "elapsed_s": 2005.1,
+      "native_terminated_success": true,
+      "error": null
+    },
+    {
+      "task": 3,
+      "elapsed_s": 4781.2,
+      "native_terminated_success": true,
+      "error": null
+    },
+    {
+      "task": 8,
+      "elapsed_s": 5668.6,
+      "native_terminated_success": false,
+      "error": null
+    },
+    {
+      "task": 9,
+      "elapsed_s": 6142.1,
+      "native_terminated_success": false,
+      "error": "planner response truncated (length): Model token limit (8192) exceeded before any response was generated. Increase the `max_tokens` model setting, or simplify the prompt to result in a shorter response that will fit within the limit."
+    }
+  ],
+  "core_source_matches_previous_DS_run_note": "Matching prompt source does not imply matching effective prompt; local empty and HF memory profiles choose different branches.",
+  "astra_offline_checks": {
+    "evidence_directory": "/var/tmp/harness_native_adapter_offline_audit_20261117",
+    "Task7_request9_messages": 40,
+    "Task7_request9_tool_calls": 27,
+    "Task7_request9_tool_returns": 27,
+    "Task7_request9_images": 12,
+    "sequence_and_content_preserved": true,
+    "single_XML_call_not_duplicated": true,
+    "77_requests_non_schema_fields_preserved": true,
+    "sampled_image_bytes_match_saved_PNG": true,
+    "raw_completion_missing_prevents_model_vs_XML_bridge_causal_attribution": true
+  },
+  "conclusion": "Native harness engine correctly invoked; no demonstrated local payload loss or duplicated dispatch in checked paths. Current model/channel/HF-memory-profile/1800s configuration differs substantially from previous DS/local-empty-memory/uncapped run. Preserve outcomes with exact configuration; do not attribute all failures to harness or claim protocol-equivalent DS reproduction.",
+  "future_empty_memory": {
+    "profile": "local",
+    "external_memory_empty": true,
+    "native_prompt_unchanged": true,
+    "native_prompt_contains_task_specific_seed0_priors": true,
+    "strict_zero_shot": false,
+    "official_default_profile": false,
+    "tool_protocol": "Flowith XML bridge, unchanged",
+    "original_completion_trace_next_run": true,
+    "online_trial_launched": false
+  },
+  "evidence": {
+    "native_prompt": "robots/libero/prompts/evaluate.py:111-152,505-509,608-620",
+    "native_memory_cli": "rpent/cli/main.py:196-209",
+    "native_API_provider_support": "rpent/planner/base.py:172-217",
+    "gateway_XML": "gateway_large_body_source/internal/service/tool.go:66; internal/controller/openai.go:274"
+  }
+}

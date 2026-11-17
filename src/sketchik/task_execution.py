@@ -207,41 +207,140 @@ class NumericalCompiler:
             views=evidence['views']
             if not views:raise ValueError('No point cloud for the actual contact binding')
             binding=evidence.get('geometry_binding') or {}
-            if binding and not binding.get('carry_reference_eligible', False):
+            registered = evidence.get('independent_rigid_template')
+            if binding and not binding.get('carry_reference_eligible', False) and not registered:
                 raise ValueError('This current binding is localization-only or mixed. Use a clean current '
                     'object subset, or recover with current pixels and pad/EEF references.')
             selected_id=(evidence['audit'].get('binding') or {}).get('anchor',{}).get('view_id')
             selected_view=next((view for view in views if view.get('view_id')==selected_id),views[0])
-            group_file=Path(selected_view['cloud_file']).parent/'extent_groups.npz'
-            with np.load(group_file) as groups:
-                ids=groups['point_group_ids'].copy();cloud_file=Path(str(groups['cloud_file']))
-            with np.load(cloud_file) as cloud:
-                xyz=cloud['world_xyz_m'];nearest=int(np.argmin(np.linalg.norm(xyz-anchor,axis=1)))
-                if np.linalg.norm(xyz[nearest]-anchor)>.004 or ids[nearest]<=0:
-                    raise ValueError('Selected contact has no supported observed component')
-                group_id=int(ids[nearest]);mask=ids==group_id
-                points=xyz[mask].astype(float);rgb=cloud['rgb'][mask].copy()
+            if not registered and (evidence['audit'].get('carry_reference_eligible') is False or
+                    selected_view.get('view_kind') == 'current_measurement_context'):
+                # A current ROI never becomes a whole-object template. An
+                # independently bound, still-valid old component may qualify.
+                selected_view, independent = self._independent_contact_template(evidence, anchor)
+                record['independent_template_evidence'] = independent
+            if registered:
+                raw_points, points, rgb, point_ids, support = self._registered_contact_template(evidence, anchor)
+                cloud_file = Path(registered['original_cloud_file'])
+                group_id = None
+                source_rotation = np.asarray(registered['transform']['rotation'])
+                record.update(source_kind='registered_rigid_shape', registered_pose_id=registered['pose_id'],
+                    independent_template_evidence=support)
+            else:
+                group_file=Path(selected_view['cloud_file']).parent/'extent_groups.npz'
+                with np.load(group_file) as groups:
+                    ids=groups['point_group_ids'].copy();cloud_file=Path(str(groups['cloud_file']))
+                with np.load(cloud_file) as cloud:
+                    xyz=cloud['world_xyz_m'];nearest=int(np.argmin(np.linalg.norm(xyz-anchor,axis=1)))
+                    if np.linalg.norm(xyz[nearest]-anchor)>.004 or ids[nearest]<=0:
+                        raise ValueError('Selected contact has no supported observed component')
+                    group_id=int(ids[nearest]);mask=ids==group_id
+                    points=xyz[mask].astype(float);rgb=cloud['rgb'][mask].copy()
+                raw_points = points
+                point_ids = np.flatnonzero(mask)
+                source_rotation = np.eye(3)
             if len(points)<25 or np.max(np.ptp(points,axis=0))>.3:
                 raise ValueError('Selected component is not an isolated small carried shape')
             state=self.hub.robot.state()
             rotation=Rotation.from_quat(state['quaternion_xyzw']).as_matrix()
             local=(points-np.asarray(state['position']))@rotation
             record.update(status='predicted_rigid',source_step=state['step'],
+                source_world_to_eef_rotation=(rotation.T@source_rotation).tolist(),
                 source_cloud_file=str(cloud_file),source_observations=deepcopy(selected_view.get("sources", [])),
                 component_group_id=group_id,points=len(local),
                 anchor_world_xyz_m=anchor.tolist(),rigid_attachment_verified=False)
             np.savez(folder/'scan_carry_reference.npz',eef_xyz_m=local,rgb=rgb,
-                source_step=state['step'],source_cloud_file=str(cloud_file),point_ids=np.flatnonzero(mask))
+                source_step=state['step'],source_cloud_file=str(cloud_file),point_ids=point_ids)
             from .carry_reference import initialize_reference, report
             epoch=getattr(getattr(self.hub,'episode_state',None),'data',{}).get('grasp_epoch',0)
             record['reference_scope']=binding.get('selection_scope','initial_observed_component')
-            self.hub.carried_surface_reference=initialize_reference(record,local,rgb,epoch,np.flatnonzero(mask),world_xyz_m=points)
+            self.hub.carried_surface_reference=initialize_reference(record,local,rgb,epoch,point_ids,world_xyz_m=raw_points)
             record.update(report(self.hub.carried_surface_reference))
         except (ValueError,KeyError,OSError) as exc:
             record['reason']=str(exc)
         record['wall_s']=time.perf_counter()-started
         (folder/'scan_carry_reference.json').write_text(json.dumps(record,indent=2))
         self.hub.emit({'event':'scan_carry_reference_bound',**record})
+
+    def _registered_contact_template(self, evidence, anchor):
+        import numpy as np
+        from .observed_clearance import visible_reference_support
+        from .perception import saved_frame
+        binding = evidence['independent_rigid_template']
+        source = evidence.get('observed_source')
+        validity = evidence.get('world_validity_before_close', evidence.get('world_validity_at_binding')) or {}
+        changed = validity.get('invalidated_at_step')
+        if (not source or binding['owner'] != evidence['target_id']
+                or binding['source_step'] > source['source_step']
+                or changed is not None and changed > binding['source_step']):
+            raise ValueError('Registered template became invalid before the actual close')
+        with np.load(binding['members_file']) as data:
+            ids = data['original_point_ids'].copy()
+        with np.load(binding['original_cloud_file']) as data:
+            raw = data['world_xyz_m'][ids].astype(float)
+            rgb = data['rgb'][ids].copy()
+        points = raw@np.asarray(binding['transform']['rotation']).T+binding['transform']['translation_m']
+        chosen = np.flatnonzero(ids == evidence['audit']['cloud_point_index'])
+        if len(chosen) != 1 or np.linalg.norm(points[chosen[0]]-anchor) > 1e-7:
+            raise ValueError('Contact anchor differs from the exact registered template sample')
+        available = getattr(self.hub, 'observations', {}).get(source['observation_id'], {})
+        frames = [available[camera] if camera in available else saved_frame(self.hub.run,
+            source['observation_id'], camera) for camera in ('agentview', 'robot0_eye_in_hand')]
+        support = visible_reference_support(points, frames)
+        if support['status'] != 'supported':
+            raise ValueError('Current contact observation does not support the registered original shape')
+        return raw, points, rgb, ids, {'contact_snapshot': source, 'visible_support': support,
+            'original_sample_ids_preserved': True, 'context_roi_used_as_template': False}
+
+    def _independent_contact_template(self, evidence, anchor):
+        """Keep template qualification separate from the displayed context ROI."""
+        import numpy as np
+        from .observed_clearance import visible_reference_support
+        source = evidence.get('observed_source')
+        if not source:
+            raise ValueError('A context sample is localization-only; no independent contact snapshot is recorded')
+        validity = evidence.get('world_validity_before_close', evidence.get('world_validity_at_binding')) or {}
+        invalidated = validity.get('invalidated_at_step')
+        from .perception import saved_frame
+        available = getattr(self.hub, 'observations', {}).get(source['observation_id'], {})
+        frames = [available[camera] if camera in available else saved_frame(self.hub.run,
+            source['observation_id'], camera) for camera in ('agentview', 'robot0_eye_in_hand')]
+        candidates = {}
+        for view in evidence['views']:
+            if view.get('view_kind') == 'current_measurement_context' or not view.get('selectable'):
+                continue
+            times = [v.get('source_step') for v in view.get('sources', [])]
+            estimate = view.get('coordinate_estimate') or {}
+            estimated_at = estimate.get('registered_at_step',
+                estimate.get('estimated_at_source_step', estimate.get('source_step')))
+            if not times or any(t is None or t > source['source_step'] for t in times):
+                continue
+            if invalidated is not None and (estimated_at is None or estimated_at < invalidated):
+                if any(t < invalidated for t in times):
+                    continue
+            group_file = Path(view['cloud_file']).parent/'extent_groups.npz'
+            if not group_file.is_file():
+                continue
+            with np.load(group_file) as groups:
+                ids = groups['point_group_ids'].copy(); cloud_file = Path(str(groups['cloud_file']))
+            with np.load(cloud_file) as cloud:
+                xyz = cloud['world_xyz_m']; nearest = int(np.argmin(np.linalg.norm(xyz-anchor, axis=1)))
+                if np.linalg.norm(xyz[nearest]-anchor) > .004 or ids[nearest] <= 0:
+                    continue
+                identity = int(ids[nearest]); points = xyz[ids == identity].astype(float)
+            if len(points) < 25 or np.max(np.ptp(points, axis=0)) > .3:
+                continue
+            support = visible_reference_support(points, frames)
+            if support['status'] != 'supported':
+                continue
+            candidates[(str(cloud_file), identity)] = (view, support)
+        if len(candidates) != 1:
+            raise ValueError('Context ROI cannot seed carry: no unique independently bound, current-supported component')
+        (path, identity), (view, support) = next(iter(candidates.items()))
+        return view, {'source_cloud_file': path, 'component_group_id': identity,
+            'qualified_at_source_step': source['source_step'], 'contact_snapshot': source,
+            'visible_support': support, 'context_roi_used_as_template': False,
+            'scope': 'Independent prior semantic binding and current depth support, not holding certification.'}
 
     @timed('runtime_point_cloud_and_dimensions')
     def _refresh_runtime(self, packet, step, description, folder):
@@ -478,6 +577,33 @@ class NumericalCompiler:
         self._refresh_runtime(packet,{**stage['plan']['steps'][index],'primitive':'move'},description,folder)
         self._check_contact_state(packet,stage['frozen_packets'],folder=folder)
 
+    def check_initial_grasp_contact(self, target_id, before, after, folder):
+        """Local close evidence is independent of whole-object carry registration."""
+        from .grasp_contact import inspect_initial_contact
+        ik = self.hub.executor.ik
+        if not hasattr(ik, 'model'):
+            check = {'status': 'unknown', 'reason': 'Robot pad calibration is unavailable.',
+                'holding_certified': False, 'target_identity_certified': False,
+                'whole_object_reference_required': False, 'source_step': after['source_step']}
+        else:
+            observations = self.hub.observations
+            check = inspect_initial_contact(ik, before['state'],
+                list(observations[before['observation_id']].values()), after['state'],
+                list(observations[after['observation_id']].values()))
+        check.update(object_id=target_id,
+            grasp_epoch=self.hub.episode_state.data.get('grasp_epoch'), active=True,
+            evidence_scope='Actual close-event evidence at source_step, not a fresh observation of later motion.')
+        self.hub.episode_state.data['initial_grasp_contact'] = deepcopy(check)
+        self.hub.episode_state.save()
+        if check['status'] == 'contradicted':
+            reference = getattr(self.hub, 'carried_surface_reference', None)
+            if reference is not None:
+                from .carry_reference import suspend
+                suspend(reference, after['source_step'], check['reason'])
+        (Path(folder)/'initial_grasp_contact.json').write_text(json.dumps(check, indent=2))
+        self.hub.emit({'event': 'initial_grasp_contact_checked', **check})
+        return check
+
 
 def symbolic_schema_feedback(exc, schema, answer):
     """Report field paths/constraints without echoing a whole invalid plan."""
@@ -661,17 +787,49 @@ def execute_sketch(hub, grounder, plan, index, *, frozen_binding):
                 and (audit.get('binding') or {}).get('anchor',{}).get('kind') in ('cloud_point','image_point')):
             hub.last_contact_binding={'target_id':step['target_id'],'audit':audit,
                 'views':stage_binding['cloud_views'][number],
+                **({'independent_rigid_template':deepcopy(compiled['independent_rigid_template'])}
+                    if compiled.get('independent_rigid_template') else {}),
+                'world_validity_at_binding':deepcopy(hub.journal.data['objects'].get(step['target_id'],{})),
                 'geometry_binding':deepcopy(next((item.get('geometry_binding',{}) for item in grounder.handoff.get('objects',[])
                     if item['object_id']==step['target_id']),{}))}
         actual, pictures = hub.observe()
+        if (step['primitive']=='move' and getattr(hub,'last_contact_binding',None)
+                and hub.last_contact_binding.get('audit') is audit):
+            hub.last_contact_binding['observed_source'] = {
+                'observation_id':actual['observation_id'],'source_step':actual['source_step']}
+        contact_check = None
+        if (step['primitive'] == 'set_gripper' and step['command'] == 'close'
+                and step['target_id'] is not None and hasattr(grounder, 'check_initial_grasp_contact')):
+            contact_check = grounder.check_initial_grasp_contact(
+                step['target_id'], description, actual, folder)
         receipt = {'primitive': step['primitive'], 'parameters': params, 'result': output,
                    'expanded_step_index':number,'intent':step.get('intent'),
                    'source_step': actual['source_step'], 'observation_id': actual['observation_id'],
                    'recovery':outcome['recovery'],'completed':True,'location':location}
+        if contact_check is not None:
+            receipt['initial_grasp_contact'] = contact_check
+        contradicted = contact_check is not None and contact_check['status'] == 'contradicted'
+        if contradicted:
+            # The real close and its reference/epoch effects already happened.
+            # Stop its suffix without disguising it as a zero-action failure.
+            failure = {'failure_stage': 'grasp_contact', 'executed': True,
+                'physical_cause': 'not_determined', 'error': contact_check['reason'],
+                'contact_evidence': contact_check}
+            receipt['recovery_failure'] = failure
+            receipt['recovery'] = [*outcome['recovery'], {'tier': 'T2',
+                'decision': 'return_to_A', 'source_step': actual['source_step'], 'failure': failure}]
         outputs.append(receipt)
         grounder.record_execution(receipt)
-        hub.emit({'event': 'bound_step_execution_finished', 'subtask': index, 'index': number, **receipt})
+        hub.emit({'event': 'bound_step_execution_failed' if contradicted else 'bound_step_execution_finished',
+            'subtask': index, 'index': number, **receipt})
         hub.journal.sync_observations(hub.robot.steps)
+        if contradicted:
+            (folder/'recovery.json').write_text(json.dumps(receipt['recovery'], indent=2))
+            return {'subtask': plan['subtask'], 'steps': outputs, 'commands_completed': False,
+                'failure': contact_check['reason'], 'remaining_suffix_executed': False,
+                'failed_step_index': number, 'failed_location': location,
+                'recovery': receipt['recovery'], 'source_step': actual['source_step'],
+                'observation_id': actual['observation_id']}
         number+=1
     return {'subtask': plan['subtask'], 'steps': outputs, 'commands_completed': True,
             'source_step': actual['source_step'], 'observation_id': actual['observation_id']}

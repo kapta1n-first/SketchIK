@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+from contextlib import contextmanager
 from decimal import Decimal
 import fcntl
 import json
@@ -42,7 +43,8 @@ def credit_snapshot(config_file=None):
         if value.get('success') is not True or not balance.is_finite() or balance < 0:
             raise ValueError('Unknown credit balance')
         details = value.get('details', [])
-        if not isinstance(details, list) or any(isinstance(item, dict) and item.get('error') for item in details):
+        if (not isinstance(details, list) or not details or
+                any(not isinstance(item, dict) or item.get('error') for item in details)):
             raise ValueError('Incomplete account balance')
         record.update(status='available', remaining_platform_credits=float(balance))
     except Exception as exc:
@@ -146,10 +148,65 @@ class TrialUsage:
     def __init__(self, folder, ledger_dir, config_file=None):
         self.folder, self.ledger_dir, self.config_file = Path(folder), Path(ledger_dir), config_file
         self.before = credit_snapshot(config_file)
+        self.attempt_count = 0
         (self.folder/'usage_start.json').write_text(json.dumps(self.before, indent=2))
+
+    @contextmanager
+    def measure_attempt(self, client):
+        """Bracket each actual attempt, including failed/repeated requests.
+
+        Balances remain account-wide observations, never per-request invoices.
+        The observer makes balance GETs only and never changes/retries a model
+        request. It runs outside the transport pause handler.
+        """
+        self.attempt_count += 1
+        number = self.attempt_count
+        query_started = time.perf_counter()
+        before = credit_snapshot(self.config_file)
+        query_s = time.perf_counter()-query_started
+        started = time.time()
+        failure = None
+        try:
+            yield
+        except BaseException as exc:
+            failure = type(exc).__name__
+            raise
+        finally:
+            ended = time.time()
+            query_started = time.perf_counter()
+            after = credit_snapshot(self.config_file)
+            query_s += time.perf_counter()-query_started
+            delta = None
+            if before['status'] == after['status'] == 'available':
+                delta = float(Decimal(str(before['remaining_platform_credits'])) -
+                              Decimal(str(after['remaining_platform_credits'])))
+            request = client.last_request_metadata
+            response = client.last_response_metadata
+            record = {'attempt': number, 'started_at_unix': started, 'ended_at_unix': ended,
+                'request_wall_s': ended-started, 'balance_query_wall_s': query_s,
+                'balance_before': before, 'balance_after': after,
+                'account_credit_decrease': delta, 'attributed_request_cost': None,
+                'request_body_sha256': request.get('body_sha256'),
+                'request_body_bytes': request.get('body_bytes'),
+                'image_count': request.get('image_count'), 'failure_type': failure,
+                'finish_reason': response.get('finish_reason'),
+                'http_status': response.get('http_status'),
+                'scope': 'Account balance change during this attempt; shared usage/delayed '
+                    'billing may occur. Missing balances are unknown, never zero.'}
+            with (self.folder/'usage_attempts.jsonl').open('a') as stream:
+                stream.write(json.dumps(record, allow_nan=False)+'\n')
 
     def finish(self, report):
         record = usage_record(self.folder, report, self.before, credit_snapshot(self.config_file))
+        attempts = list(_records(self.folder/'usage_attempts.jsonl'))
+        record['attempt_accounting'] = {'file': 'usage_attempts.jsonl',
+            'recorded_attempts': len(attempts),
+            'failed_attempts': sum(bool(row['failure_type']) for row in attempts),
+            'unknown_balance_attempts': sum(row['account_credit_decrease'] is None for row in attempts),
+            'balance_query_wall_s': sum(row['balance_query_wall_s'] for row in attempts),
+            'account_delta_sum_known_windows': float(sum((Decimal(str(row['account_credit_decrease']))
+                for row in attempts if row['account_credit_decrease'] is not None), Decimal(0))),
+            'scope': 'Diagnostic windows only; do not add this sum to the whole-trial balance delta.'}
         save_usage(self.folder, self.ledger_dir, record)
         return {'file': 'usage.json', 'total_requests': record['total_requests'],
                 'account_credit_decrease': record['account_credit_decrease'],

@@ -17,6 +17,33 @@ def packet(step, supported, gap):
             'reason':'Current depth contradicts the rigid hypothesis' if supported is False else 'visible support'}}
 
 
+@pytest.mark.parametrize('status', ['contradicted', 'unknown', 'contact_geometry_supported'])
+def test_initial_close_check_persists_local_evidence_and_only_suspends_on_contradiction(
+        tmp_path, monkeypatch, status):
+    frames = {'before': {'front': {'marker': 'before'}}, 'after': {'front': {'marker': 'after'}}}
+    events = []
+    hub = SimpleNamespace(run=tmp_path, executor=SimpleNamespace(ik=SimpleNamespace(model=object())),
+        observations=frames, emit=events.append,
+        carried_surface_reference={'object_id': 'held', 'validity': 'active'})
+    compiler = NumericalCompiler(hub, {})
+    hub.episode_state.record_gripper_event(11, 'close', 'held')
+    before = {'state': {'step': 10}, 'source_step': 10, 'observation_id': 'before'}
+    after = {'state': {'step': 11}, 'source_step': 11, 'observation_id': 'after'}
+    def inspect(ik, before_state, before_frames, after_state, after_frames):
+        assert before_state == {'step': 10} and after_state == {'step': 11}
+        assert before_frames == [{'marker': 'before'}] and after_frames == [{'marker': 'after'}]
+        return {'status': status, 'reason': 'native local evidence', 'source_step': 11,
+            'holding_certified': False, 'target_identity_certified': False}
+    monkeypatch.setattr('sketchik.grasp_contact.inspect_initial_contact', inspect)
+    result = compiler.check_initial_grasp_contact('held', before, after, tmp_path)
+    assert result['grasp_epoch'] == 1 and result['active'] is True
+    assert result['object_id'] == 'held' and not result['holding_certified']
+    assert EpisodeState(tmp_path).data['initial_grasp_contact'] == result
+    assert json.loads((tmp_path/'initial_grasp_contact.json').read_text()) == result
+    assert events[-1]['event'] == 'initial_grasp_contact_checked'
+    assert (hub.carried_surface_reference['validity'] == 'suspended') == (status == 'contradicted')
+
+
 def test_active_stage_persists_the_structured_object_relations(tmp_path):
     state=EpisodeState(tmp_path)
     plan={'source_step':1,'subtask':'carry','object_goals':[{'target_id':'mug','relation':'held'}]}

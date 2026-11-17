@@ -258,7 +258,7 @@ def test_t1_interruption_returns_to_same_agent_instead_of_reporting_convergence(
     assert outcome['failure']['failure_stage'] == 'carried_contact'
     assert outcome['output']['actions'] == 2
     assert [call[0] for call in calls].count('move') == 1
-    assert outcome['recovery'][-1]['tier'] == 'T3'
+    assert outcome['recovery'][-1]['tier'] == 'T2'
 
 
 
@@ -269,7 +269,7 @@ def test_failed_same_target_ik_returns_to_agent_without_motion_or_model_repair(t
         run_step(hub, executor, stage, 0, description, pictures, tmp_path/'step')
     assert hub.robot.steps == 30
     assert not any(c[0] == 'move' for c in calls)
-    assert [e['tier'] for e in caught.value.recovery] == ['T1', 'T1', 'T3']
+    assert [e['tier'] for e in caught.value.recovery] == ['T1', 'T1', 'T2']
     assert not hasattr(executor, 'repair_step')
 
 
@@ -283,7 +283,7 @@ def test_stalled_motion_returns_actual_failure_without_blind_continuation(tmp_pa
     assert [c[0] for c in calls].count('move')==1
     assert result['failure']['failure_stage']=='motion'
     assert result['output']['converged'] is False
-    assert result['recovery'][-1]['tier']=='T3'
+    assert result['recovery'][-1]['tier']=='T2'
 
 
 def test_continuation_preserves_compiled_motion_and_whole_target_hold(tmp_path):

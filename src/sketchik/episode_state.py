@@ -106,6 +106,8 @@ class EpisodeState:
         self.save()
 
     def record_gripper_event(self, source_step, command, object_id):
+        if self.data.get('initial_grasp_contact'):
+            self.data['initial_grasp_contact'].update(active=False, retired_at_step=int(source_step))
         self.data['grasp_epoch']=self.data.get('grasp_epoch',0)+1
         self.data['last_gripper_event']={'source_step':int(source_step),'command':command,
             'object_id':object_id,'grasp_epoch':self.data['grasp_epoch']}

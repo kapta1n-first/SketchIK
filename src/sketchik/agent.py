@@ -17,6 +17,7 @@ from urllib.parse import urlparse
 from PIL import Image
 
 from .tools import ToolHub
+from .request_cancellation import RequestCancelled
 
 
 class ProviderError(RuntimeError):
@@ -105,6 +106,7 @@ class ChatClient:
         self.url = base_url.rstrip("/") + "/chat/completions"
         # Local gateways/tests must not be sent through a workstation HTTP proxy.
         direct = not use_env_proxy or parsed.hostname in ("localhost", "127.0.0.1", "::1")
+        self._direct = direct
         self.opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
                        if direct
                        else urllib.request.build_opener())
@@ -114,6 +116,8 @@ class ChatClient:
         self.stream, self.budget_field = stream, budget_field
         self.on_stream_progress = None
         self.request_pause_handler = None
+        self.request_cancellation = None
+        self.attempt_observer = None
         self.operator_resumed_requests = 0
         self._stream_metrics = {}
         self.reference_exact_images = reference_exact_images
@@ -226,14 +230,14 @@ class ChatClient:
             for line in response:
                 if trace is not None:
                     trace.write(line.replace(self.api_key.encode(),b'[redacted]'));trace.flush()
+                if self.request_cancellation is not None:
+                    self.request_cancellation.check()
                 if not line.strip() or line.startswith(b':'):
                     continue
                 if not line.startswith(b'data:'):
                     # Some compatible gateways ignore stream=True and return a complete JSON body.
                     if not chunks and line.lstrip().startswith(b'{'):
-                        tail=response.read()
-                        if trace is not None:
-                            trace.write(tail.replace(self.api_key.encode(),b'[redacted]'))
+                        tail=self._read_body(response, trace)
                         reply=json.loads(line+tail)
                         fallback=True
                         choices=reply.get('choices') or []
@@ -270,16 +274,63 @@ class ChatClient:
             if not fallback:
                 self._stream_metrics={'mode':'sse','chunks':chunks,'first_generation_s':first,
                     'reasoning_chars':reasoning_chars,'content_chars':content_chars,'stream_complete':finish is not None}
+            self._partial_stream = {'message': {'role': 'assistant', 'content': ''.join(content),
+                'reasoning_content': ''.join(reasoning), 'tool_calls': [calls[i] for i in sorted(calls)]},
+                'usage': usage}
         message={'role':'assistant','content':''.join(content)}
         if reasoning_chars:message['reasoning_content']=''.join(reasoning)
         if calls:message['tool_calls']=[calls[i] for i in sorted(calls)]
         return {'choices':[{'message':message,'finish_reason':finish}],'usage':usage}
 
+    def _read_body(self, response, trace=None):
+        chunks = []
+        read = getattr(response, 'read1', response.read)
+        while True:
+            if self.request_cancellation is not None:
+                self.request_cancellation.check()
+            chunk = read(65536)
+            if not chunk:
+                break
+            if trace is not None:
+                trace.write(chunk.replace(self.api_key.encode(), b'[redacted]'))
+                trace.flush()
+            chunks.append(chunk)
+        return b''.join(chunks)
+
     def complete(self, messages, tools=None):
         """Retry only after an installed handler receives an explicit operator resume."""
         while True:
             try:
-                return self._complete_once(messages, tools)
+                from contextlib import nullcontext
+                self.last_request_metadata = {}
+                self.last_response_metadata = {}
+                self._stream_metrics = {}
+                self._partial_stream = {}
+                self._stream_trace_path = None
+                with self.attempt_observer(self) if self.attempt_observer is not None else nullcontext():
+                    try:
+                        if self.request_cancellation is not None:
+                            self.request_cancellation.check()
+                        result = self._complete_once(messages, tools)
+                        if self.request_cancellation is not None:
+                            self.request_cancellation.check()
+                        return result
+                    except RequestCancelled:
+                        token = self.request_cancellation
+                        if token is None or not token.event.is_set():
+                            raise
+                        self.last_response_metadata = {'status': 'cancelled',
+                            'reason': token.reason, 'automatic_retries': 0,
+                            'request_body_sha256': self.last_request_metadata.get('body_sha256'),
+                            'stream_metrics': self._stream_metrics,
+                            'stream_trace_file': self._stream_trace_path,
+                            'upstream_cancellation_confirmed': False,
+                            **self._partial_stream}
+                        if self.transport_dir is not None:
+                            self.transport_dir.mkdir(parents=True, exist_ok=True)
+                            with (self.transport_dir/'responses.jsonl').open('a') as archive:
+                                archive.write(json.dumps(self.last_response_metadata, allow_nan=False)+'\n')
+                        raise RequestCancelled('Obsolete advance planning request cancelled') from None
             except RejectedResponse:
                 raise  # A completed length/filter refusal is not a broken connection.
             except ProviderError as exc:
@@ -327,12 +378,26 @@ class ChatClient:
         # Provider bodies may echo auth/inputs; retain only whitelisted categories.
         try:
             sent=time.perf_counter()
-            with self.opener.open(request, timeout=self.timeout) as response:
+            token = self.request_cancellation
+            if token is not None:
+                token.check()
+            opener = token.opener(direct=self._direct) if token is not None else self.opener
+            with opener.open(request, timeout=self.timeout) as response:
                 path=None
                 if self.stream and self.transport_dir is not None:
                     folder=self.transport_dir/'streams';folder.mkdir(exist_ok=True)
                     path=folder/(str(time.time_ns())+'_'+self.last_request_metadata['body_sha256']+'.sse')
-                reply=self._read_stream(response,sent,path) if self.stream else json.loads(response.read())
+                    self._stream_trace_path = str(path)
+                if self.stream:
+                    reply = self._read_stream(response, sent, path)
+                elif token is not None and self.transport_dir is not None:
+                    folder = self.transport_dir/'streams'; folder.mkdir(exist_ok=True)
+                    path = folder/(str(time.time_ns())+'_'+self.last_request_metadata['body_sha256']+'.body')
+                    self._stream_trace_path = str(path)
+                    with path.open('wb') as trace:
+                        reply = json.loads(self._read_body(response, trace))
+                else:
+                    reply = json.loads(response.read())
         except urllib.error.HTTPError as exc:
             self.last_response_metadata = http_error_metadata(exc, api_key=self.api_key,
                 request_hash=self.last_request_metadata['body_sha256'], elapsed_s=time.perf_counter()-sent)
@@ -342,6 +407,8 @@ class ChatClient:
             raise ProviderError(f"Provider HTTP {exc.code}; no automatic retry",
                 response_metadata=self.last_response_metadata) from None
         except (urllib.error.URLError, OSError, json.JSONDecodeError, http.client.HTTPException) as exc:
+            if self.request_cancellation is not None:
+                self.request_cancellation.check()
             reason = getattr(exc, "reason", exc)
             # Only record exception classes/numeric errno, never raw network messages.
             # URLError.reason can contain URLs or provider-echoed private data.
@@ -349,6 +416,8 @@ class ChatClient:
             if isinstance(reason, OSError) and isinstance(reason.errno, int):
                 detail += f"; errno={reason.errno}"
             raise ProviderError(f"Provider transport/JSON failure ({detail}); no automatic retry") from None
+        if self.request_cancellation is not None:
+            self.request_cancellation.check()
         choices = reply.get("choices")
         if not isinstance(choices, list) or not choices:
             raise ProviderError("Provider returned no choices")

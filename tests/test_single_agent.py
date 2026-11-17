@@ -294,6 +294,10 @@ def episode(tmp_path, monkeypatch):
             'cameras': [{'camera': camera} for camera in ('agentview', 'robot0_eye_in_hand')]}))
         for camera in ('agentview', 'robot0_eye_in_hand'):
             Image.new('RGB', (32, 32), 'blue').save(folder/(camera+'.png'))
+            if not (folder/(camera+'.npz')).exists():
+                np.savez(folder/(camera+'.npz'), depth_m=np.ones((32, 32), np.float32),
+                    K=np.asarray([[80., 0., 16.], [0., 80., 16.], [0., 0., 1.]]),
+                    world_from_camera=np.eye(4))
         return {'source_step': state['step'], 'observation_id': identity, 'state': deepcopy(state)}, []
     hub.observe = observe
     cloud = tmp_path/'points.npz'
@@ -321,11 +325,598 @@ def binding(anchor=None):
         'offset_m': [0, 0, .1], 'offset_frame': 'world', 'orientation': 'preserve'}
 
 
+def live_fixture(episode):
+    hub, handoff, actions, _ = episode
+    artifacts = EpisodeArtifacts(hub, handoff)
+    artifacts.prepare()
+    executor = DirectExecutor(hub, handoff, artifacts)
+    description, _ = hub.observe()
+    folder = hub.run/'observations'/description['observation_id']
+    for camera in ('agentview', 'robot0_eye_in_hand'):
+        transform = np.eye(4); transform[:3, 3] = [.2, .3, 0.]
+        np.savez(folder/(camera+'.npz'), depth_m=np.full((32, 32), .9, np.float32),
+            K=np.asarray([[80., 0., 16.], [0., 80., 16.], [0., 0., 1.]]),
+            world_from_camera=transform)
+    artifacts.current(executor, hub.run/'live_initial')
+    return hub, artifacts, executor
+
+
+def advance_live_fixture(hub, artifacts, executor, *, operate=True, drain=True):
+    before = hub.robot.steps
+    hub._fixture_state['step'] += 1
+    hub.robot.steps = hub._fixture_state['step']
+    description, _ = hub.observe()
+    source = hub.run/'observations'/f'obs_{before:05d}'
+    folder = hub.run/'observations'/description['observation_id']
+    import shutil
+    for camera in ('agentview', 'robot0_eye_in_hand'):
+        shutil.copyfile(source/(camera+'.npz'), folder/(camera+'.npz'))
+    if operate:
+        artifacts.live_dispatches.append({'source_step': before, 'targets': ['object'],
+            'framing_points': [[.2, .3, .9]], 'physical_steps_advanced': 1})
+    result = artifacts.current(executor, hub.run/f'live_current_{hub.robot.steps}')
+    if drain:
+        artifacts.live_cloud_files.collect_ready(wait=True)
+    return result
+
+
+def test_background_cloud_does_not_block_A_but_explicit_read_waits_for_exact_snapshot(episode, monkeypatch):
+    from threading import Event, Thread
+    import sketchik.live_cloud as cloud
+    started, release, returned = Event(), Event(), Event()
+    real = cloud.prepare_snapshot
+    def slow(*args):
+        started.set()
+        assert release.wait(5)
+        return real(*args)
+    monkeypatch.setattr(cloud, 'prepare_snapshot', slow)
+    hub, artifacts, executor = live_fixture(episode)
+    try:
+        current = advance_live_fixture(hub, artifacts, executor, drain=False)
+        assert started.wait(2) and current['current_clouds']['overview_pending']
+        assert artifacts.latest['source_step'] == hub.robot.steps
+        assert sum(p.get('type') == 'image_url' for p in artifacts.feedback_parts()) == 2
+        result = []
+        def read():
+            result.append(artifacts.read_image('current_clouds/latest/overview.png')[0])
+            returned.set()
+        reader = Thread(target=read); reader.start()
+        assert not returned.wait(.05)
+        release.set(); reader.join(5)
+        assert returned.is_set() and result[0]['source_step'] == hub.robot.steps
+        assert result[0]['view_kind'] == 'retained_scene_context' and not result[0]['selectable']
+        assert result[0]['logical_image_slot'] == 'current_clouds/latest/overview.png'
+    finally:
+        release.set(); artifacts.live_cloud_files.close()
+
+
+def test_background_worker_error_is_not_downgraded_to_bad_view(episode, monkeypatch):
+    def broken(*args):
+        raise OSError('fixture disk failure')
+    monkeypatch.setattr('sketchik.live_cloud.prepare_snapshot', broken)
+    hub, artifacts, executor = live_fixture(episode)
+    try:
+        with pytest.raises(OSError, match='disk failure'):
+            advance_live_fixture(hub, artifacts, executor)
+    finally:
+        # The failed future remains available until its fault is inspected.
+        with pytest.raises(OSError, match='disk failure'):
+            artifacts.live_cloud_files.close()
+
+
+def test_older_background_job_cannot_restore_retired_latest_pixels(episode, monkeypatch):
+    from threading import Event
+    import sketchik.live_cloud as cloud
+    started, release = Event(), Event()
+    real = cloud.prepare_snapshot
+    def delayed(description, *args):
+        if description['source_step'] == 31:
+            started.set()
+            assert release.wait(5)
+        return real(description, *args)
+    monkeypatch.setattr(cloud, 'prepare_snapshot', delayed)
+    hub, artifacts, executor = live_fixture(episode)
+    try:
+        advance_live_fixture(hub, artifacts, executor, drain=False)
+        assert started.wait(2)
+        advance_live_fixture(hub, artifacts, executor, drain=False)
+        assert artifacts.files.entries['current_clouds/latest/overview.png']['source_step'] == 32
+        release.set()
+        artifacts.live_cloud_files.collect_ready(wait=True)
+        artifacts.live_cloud_files.collect_ready()
+        record, _ = artifacts.read_image('current_clouds/latest/overview.png')
+        assert record['source_step'] == 32
+        assert artifacts.live_cloud_files.snapshot['source_step'] == 32
+        assert artifacts.live_cloud_files.last_update['source_step'] == 32
+    finally:
+        release.set(); artifacts.live_cloud_files.close()
+
+
+def test_latest_listing_does_not_render_or_view_and_feedback_does_not_add_cloud_images(episode):
+    hub, artifacts, executor = live_fixture(episode)
+    count = lambda parts: sum(part.get('type') == 'image_url' for part in parts)
+    before_count = count(artifacts.feedback_parts())
+    original_references = artifacts.reference_image_paths()
+    current = advance_live_fixture(hub, artifacts, executor)
+    before = set(artifacts.views)
+    listing = artifacts.files.list_dir(current['current_clouds']['directory'])
+    slot = next(v for v in listing['entries'] if v['path'].endswith('object_00_face.png'))
+    assert slot['deferred'] and slot['resolved_path'] is None
+    assert set(artifacts.views) == before and not any(artifacts.current_context(v) for key, v in artifacts.views.items()
+        if key in artifacts.seen_views)
+    assert count(artifacts.feedback_parts()) == before_count
+    assert artifacts.reference_image_paths() == original_references
+    assert not list((artifacts.live_cloud_files.snapshot['folder']).glob('slot_*/*.png'))
+
+
+def test_changed_geometry_paths_are_explicit_and_display_step_updates_only_after_read(episode):
+    hub, artifacts, executor = live_fixture(episode)
+    current = advance_live_fixture(hub, artifacts, executor)
+    entry = current['current_clouds']['updated_object_views'][0]
+    assert entry['object_id'] == 'object'
+    assert entry['latest_displayed_step'] < hub.robot.steps
+    assert entry['paths'] == ['current_clouds/latest/object_00_face.png']  # This fixture has one view.
+    alias = 'current_clouds/latest/object_00_face.png'
+    assert alias in entry['paths']
+    artifacts.files.list_dir('current_clouds/latest')
+    assert artifacts.live_cloud_files.status(hub.observe()[0])['updated_object_views'][0]['latest_displayed_step'] < hub.robot.steps
+    record, _ = artifacts.read_image(alias)
+    after = artifacts.live_cloud_files.status(hub.observe()[0])['updated_object_views'][0]
+    assert after['latest_displayed_step'] == record['source_step'] == hub.robot.steps
+    advance_live_fixture(hub, artifacts, executor)
+    updated = artifacts.live_cloud_files.status(hub.observe()[0])['updated_object_views'][0]
+    assert updated['latest_displayed_step'] < hub.robot.steps
+
+
+def test_read_latest_materializes_one_exact_selectable_view_without_implicit_binding(episode):
+    from sketchik.single_agent import bind_request_fields
+    hub, artifacts, executor = live_fixture(episode)
+    advance_live_fixture(hub, artifacts, executor)
+    alias = 'current_clouds/latest/object_00_face.png'
+    before = set(artifacts.views)
+    record, _ = artifacts.read_image(alias)
+    assert record['requested_path'] == alias and record['path'] != alias
+    assert record['capture_is_current_physical_step'] and not record['historical_evidence_only']
+    assert record['view_kind'] == 'current_measurement_context'
+    assert artifacts.owners[record['view_id']] is None
+    assert set(artifacts.views)-before == {record['view_id']}
+    assert not artifacts.reference_reads  # Not silently resent with fixed historical references.
+    view = artifacts.views[record['view_id']]
+    with np.load(view['index_map_file']) as data:
+        y, x = np.argwhere(data['point_index'] >= 0)[0]
+    anchor = {'kind': 'cloud_point', 'view_id': record['view_id'], 'pixel_xy': [int(x), int(y)]}
+    answer = submission(hub.robot.steps, anchor)
+    plan, stage = prepare_actions(executor, artifacts, answer)
+    from sketchik.pose_binding import compile_binding
+    pose, audit = compile_binding(binding(anchor), stage['frozen_packets'][0], lambda *args: None,
+        cloud_views=stage['cloud_views'][0])
+    assert pose['position'][2] == pytest.approx(1., abs=1e-6)
+    assert audit['carry_reference_eligible'] is False and audit['binding_scope'] == 'single_sample_context'
+    answer['actions'][0].pop('reference_target_id')
+    with pytest.raises(ValueError, match='required unless'):
+        bind_request_fields(artifacts, answer, hub.robot.steps)
+
+
+def test_latest_pointer_advances_without_changing_old_pixels_or_resurrecting_coordinates(episode):
+    import hashlib
+    hub, artifacts, executor = live_fixture(episode)
+    advance_live_fixture(hub, artifacts, executor)
+    alias = 'current_clouds/latest/object_00_face.png'
+    old, _ = artifacts.read_image(alias)
+    view = artifacts.views[old['view_id']]
+    hashes = {name: hashlib.sha256(Path(view[name]).read_bytes()).hexdigest()
+        for name in ('image_file', 'index_map_file', 'cloud_file')}
+    with np.load(view['index_map_file']) as data:
+        y, x = np.argwhere(data['point_index'] >= 0)[0]
+    selection = binding({'kind': 'cloud_point', 'view_id': old['view_id'], 'pixel_xy': [int(x), int(y)]})
+    artifacts.validate_point(selection, 'object')
+    advance_live_fixture(hub, artifacts, executor)
+    assert artifacts.files.image_aliases[alias] is None
+    assert old['path'] in artifacts.seen_paths and alias not in artifacts.seen_paths
+    for name, digest in hashes.items():
+        assert hashlib.sha256(Path(view[name]).read_bytes()).hexdigest() == digest
+    historical, _ = artifacts.read_image(old['path'])
+    assert historical['historical_evidence_only'] and not historical['selectable']
+    catalogued = next(v for v in artifacts.latest['available_sources']['cloud_views']
+        if v['view_id'] == old['view_id'])
+    assert not catalogued['selectable'] and catalogued['historical_evidence_only']
+    assert catalogued['point_time_status']['current_snapshot'] is False
+    with pytest.raises(ValueError, match='Earlier current cloud'):
+        artifacts.validate_point(selection, 'object')
+    current, _ = artifacts.read_image(alias)
+    assert current['view_id'] != old['view_id'] and current['source_step'] == hub.robot.steps
+
+
+def test_same_snapshot_reuses_files_and_static_shape_keeps_original_source_time(episode):
+    hub, artifacts, executor = live_fixture(episode)
+    alias = 'current_clouds/latest/object_00_face.png'
+    original = artifacts.files.image_aliases[alias]
+    assert artifacts.files.entries[alias]['source_steps'] == [10]
+    advance_live_fixture(hub, artifacts, executor, operate=False)
+    assert artifacts.files.image_aliases[alias] == original
+    snapshot = artifacts.live_cloud_files.snapshot
+    table = Path(snapshot['cloud_file']); modified = table.stat().st_mtime_ns
+    count = len(artifacts.views)
+    artifacts.current(executor, hub.run/'repeat_without_motion')
+    assert artifacts.live_cloud_files.snapshot is snapshot
+    assert table.stat().st_mtime_ns == modified and len(artifacts.views) == count
+    assert artifacts.files.entries[alias]['source_steps'] == [10]
+
+
+def test_current_static_point_survives_its_frozen_route_but_not_a_new_request(episode):
+    hub, artifacts, executor = live_fixture(episode)
+    advance_live_fixture(hub, artifacts, executor)
+    record, _ = artifacts.read_image('current_clouds/latest/object_00_face.png')
+    view = artifacts.views[record['view_id']]
+    with np.load(view['index_map_file']) as data:
+        y, x = np.argwhere(data['point_index'] >= 0)[0]
+    selection = binding({'kind': 'cloud_point', 'view_id': record['view_id'],
+        'pixel_xy': [int(x), int(y)]})
+    request_step = hub.robot.steps
+    hub.robot.steps += 1
+    # A frozen route still references the measured static destination. This
+    # does not grant a later planning request access to that old snapshot.
+    assert artifacts.validate_point(selection, 'object', request_step=request_step)['source_step'] == request_step
+    with pytest.raises(ValueError, match='Earlier current cloud'):
+        artifacts.validate_point(selection, 'object', request_step=hub.robot.steps)
+    hub.journal.mark_moved('object', hub.robot.steps)
+    with pytest.raises(ValueError, match='predates actual object'):
+        artifacts.validate_point(selection, 'object', request_step=request_step)
+
+
+def test_held_coordinate_framing_transforms_original_points_without_redrawing(episode):
+    from scipy.spatial.transform import Rotation
+    from sketchik.carry_reference import initialize_reference, suspend
+    hub, artifacts, executor = live_fixture(episode)
+    original = np.array([[-.02, -.01, .03], [.03, .01, .11], [0., -.02, .07]])
+    reference = initialize_reference({'object_id': 'object'}, original, None, 2, [4, 8, 12])
+    hub.carried_surface_reference = reference
+    images_before = set(artifacts.views)
+    hub._fixture_state.update(position=[.2, -.3, 1.1],
+        quaternion_xyzw=Rotation.from_euler('xyz', [.2, -.5, .7]).as_quat().tolist())
+    target, bounds = artifacts.live_cloud_files._held_bounds()
+    expected = Rotation.from_quat(hub._fixture_state['quaternion_xyzw']).apply(original)+hub._fixture_state['position']
+    assert target == 'object'
+    np.testing.assert_allclose(bounds, [expected.min(axis=0), expected.max(axis=0)])
+    np.testing.assert_array_equal(reference['local_xyz_m'], original)
+    np.testing.assert_array_equal(reference['point_ids'], [4, 8, 12])
+    assert set(artifacts.views) == images_before
+    suspend(reference, hub.robot.steps, 'observed slip', kind='relative_pose_changed')
+    assert artifacts.live_cloud_files._held_bounds() == (None, None)
+
+
+def test_rigid_held_shape_reuses_bitmap_but_selected_sample_gets_current_xyz(episode, monkeypatch):
+    import hashlib
+    from scipy.spatial.transform import Rotation
+    from sketchik.carry_reference import initialize_reference, retained_point_binding
+    from sketchik.pose_binding import compile_binding
+    from sketchik.single_agent import working_cloud_record
+    hub, artifacts, executor = live_fixture(episode)
+    artifacts.handoff['objects'][0]['shape_motion'] = 'rigid'
+    view = artifacts.views['object_face']
+    image_hash = hashlib.sha256(Path(view['image_file']).read_bytes()).hexdigest()
+    with np.load(view['cloud_file']) as data:
+        world = data['world_xyz_m'][:25].astype(float)
+    local = world-np.array([0., 0., 1.])
+    hub.episode_state.data['grasp_epoch'] = 1
+    hub.carried_target_id = 'object'
+    hub.carried_surface_reference = initialize_reference({'object_id': 'object',
+        'source_cloud_file': view['cloud_file'], 'source_step': 30}, local, None, 1,
+        np.arange(25), world_xyz_m=world)
+    hub._fixture_state.update(gripper_command=1., position=[.4, -.1, 1.2],
+        quaternion_xyzw=Rotation.from_euler('z', .7).as_quat().tolist())
+    hub.journal.mark_moved('object', 30)
+    monkeypatch.setattr(artifacts, 'relocalize_object', lambda *args: pytest.fail('Normal rigid carry must not run ICP'))
+    advance_live_fixture(hub, artifacts, executor)
+    before = set(artifacts.views)
+    record, _ = artifacts.read_image('current_clouds/latest/object_00_face.png')
+    assert set(artifacts.views) == before and record['view_id'] == 'object_face'
+    assert hashlib.sha256(Path(view['image_file']).read_bytes()).hexdigest() == image_hash
+    status = working_cloud_record(record)['point_time_status']
+    assert status['coordinate_policy'] == 'retained_point_id_transformed_by_current_eef'
+    assert status['image_axes_are_historical'] and status['coordinate_estimated_at_step'] == hub.robot.steps
+    anchor = {'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [1, 1]}
+    plan, stage = prepare_actions(executor, artifacts, submission(hub.robot.steps, anchor))
+    pose, audit = compile_binding(binding(anchor), stage['frozen_packets'][0], lambda *args: None,
+        cloud_views=stage['cloud_views'][0])
+    expected = Rotation.from_quat(hub._fixture_state['quaternion_xyzw']).apply(local[0])+hub._fixture_state['position']
+    np.testing.assert_allclose(pose['position'], expected+[0., 0., .1])
+    assert audit['source_observation']['source_step'] == 10
+    assert audit['coordinate_estimate']['source_step'] == hub.robot.steps
+    with pytest.raises(ValueError, match='retained point IDs'):
+        retained_point_binding(hub, view, 'object', world[0],
+            {'cloud_point_index': 29, 'cloud_pixel_xy': [1, 1]})
+    frozen_step = hub.robot.steps
+    advance_live_fixture(hub, artifacts, executor)
+    with pytest.raises(ValueError, match='intervening motion'):
+        artifacts.validate_point(binding(anchor), 'object', request_step=frozen_step)
+    hub.carried_surface_reference['validity'] = 'suspended'
+    with pytest.raises(ValueError, match='Held-object pixels|predates actual object'):
+        artifacts.validate_point(binding(anchor), 'object')
+
+
+def test_rigid_world_recovery_runs_only_on_requested_read_and_keeps_shape_on_failed_fit(episode, monkeypatch):
+    hub, artifacts, executor = live_fixture(episode)
+    artifacts.handoff['objects'][0]['shape_motion'] = 'rigid'
+    hub.journal.mark_moved('object', 30)
+    calls = []
+    monkeypatch.setattr(artifacts, 'relocalize_object', lambda *args:
+        (calls.append(args) or {'status': 'unavailable', 'reason': 'ambiguous_pose_or_identity'}))
+    advance_live_fixture(hub, artifacts, executor)
+    assert calls == []
+    alias = 'current_clouds/latest/object_00_face.png'
+    record, _ = artifacts.read_image(alias)
+    assert len(calls) == 1 and record['view_id'] == 'object_face'
+    assert record['latest_entry']['pose_status']['status'] == 'unavailable'
+    artifacts.read_image(alias)
+    assert len(calls) == 1  # No repeated registration on the same evidence.
+    anchor = {'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [1, 1]}
+    with pytest.raises(ValueError, match='predates actual object'):
+        artifacts.validate_point(binding(anchor), 'object')
+    measured, _ = artifacts.read_image(alias[:-4]+'_measured.png')
+    assert measured['view_kind'] == 'current_measurement_context'
+    assert artifacts.owners[measured['view_id']] is None
+
+
+@pytest.mark.parametrize('motion', ['articulated', 'unknown'])
+def test_changed_nonrigid_scope_reads_current_geometry_without_whole_object_registration(episode, monkeypatch, motion):
+    hub, artifacts, executor = live_fixture(episode)
+    artifacts.handoff['objects'][0]['shape_motion'] = motion
+    hub.journal.mark_moved('object', 30)
+    monkeypatch.setattr(artifacts, 'ensure_rigid_pose', lambda *args: pytest.fail('No whole-object rigid fit'))
+    advance_live_fixture(hub, artifacts, executor)
+    record, _ = artifacts.read_image('current_clouds/latest/object_00_face.png')
+    assert record['view_kind'] == 'current_measurement_context'
+
+
+def test_latest_alias_is_not_a_second_arbitrary_file_interface(tmp_path):
+    files = PublicFiles(tmp_path/'public')
+    image = tmp_path/'image.png'; Image.new('RGB', (8, 8)).save(image)
+    files.publish('history/v1.png', source=image)
+    files.image_alias('latest/face.png', 'history/v1.png')
+    record, _ = files.read_image('latest/face.png')
+    assert record['path'] == 'history/v1.png' and record['requested_path'] == 'latest/face.png'
+    for target in ('../secret.png', '/tmp/secret.png', 'unpublished.png', 'latest/face.png'):
+        with pytest.raises(ValueError):
+            files.image_alias('latest/other.png', target)
+    with pytest.raises(ValueError, match='cannot replace'):
+        files.image_alias('history/v1.png', 'history/v1.png')
+    files.image_alias('latest/deferred.png', metadata={'source_step': 31})
+    assert next(v for v in files.list_dir('latest')['entries'] if v['path'].endswith('deferred.png'))['deferred']
+    with pytest.raises(ValueError, match='deferred'):
+        files.read_image('latest/deferred.png')
+
+
+@pytest.mark.parametrize('invalidate_before_close', [False, True])
+def test_context_contact_only_seeds_an_independently_valid_original_component(episode, invalidate_before_close):
+    hub, artifacts, executor = live_fixture(episode)
+    advance_live_fixture(hub, artifacts, executor)
+    current, _ = artifacts.read_image('current_clouds/latest/object_00_face.png')
+    context = artifacts.views[current['view_id']]
+    original = artifacts.views['object_face']
+    cloud = Path(original['cloud_file'])
+    np.savez(cloud.parent/'extent_groups.npz', cloud_file=str(cloud), point_group_ids=np.ones(30, int))
+    hub.last_contact_binding = {'target_id': 'object',
+        'audit': {'anchor_world_xyz_m': [.2, .3, .9], 'binding_scope': 'single_sample_context',
+            'carry_reference_eligible': False, 'binding': {'anchor': {'view_id': current['view_id']}}},
+        'views': [context, original], 'geometry_binding': {},
+        'world_validity_at_binding': {},
+        'world_validity_before_close': {'invalidated_at_step': 20} if invalidate_before_close else {},
+        'observed_source': {'observation_id': 'obs_00031', 'source_step': 31}}
+    folder = hub.run/'carry_seed'; folder.mkdir()
+    executor.seed_scan_carry('object', folder)
+    record = json.loads((folder/'scan_carry_reference.json').read_text())
+    if invalidate_before_close:
+        assert record['status'] == 'unavailable' and hub.carried_surface_reference is None
+        assert 'no unique independently bound' in record['reason']
+    else:
+        assert record['status'] == 'predicted_rigid'
+        assert record['independent_template_evidence']['context_roi_used_as_template'] is False
+        assert record['independent_template_evidence']['source_cloud_file'] == str(cloud)
+        reference = hub.carried_surface_reference
+        assert len(reference['local_xyz_m']) == 30  # Original template, not the 2048-point context.
+        np.testing.assert_array_equal(reference['point_ids'], np.arange(30))
+        assert reference['rigid_attachment_verified'] is False
+
+
+def test_context_without_an_independent_template_never_becomes_whole_carried_region(episode):
+    hub, artifacts, executor = live_fixture(episode)
+    advance_live_fixture(hub, artifacts, executor)
+    current, _ = artifacts.read_image('current_clouds/latest/object_00_face.png')
+    context = artifacts.views[current['view_id']]
+    # Even a neighbouring extent_groups file must not make a context eligible.
+    cloud = Path(context['cloud_file'])
+    np.savez(cloud.parent/'extent_groups.npz', cloud_file=str(cloud), point_group_ids=np.ones(context['point_count'], int))
+    hub.last_contact_binding = {'target_id': 'object',
+        'audit': {'anchor_world_xyz_m': [.2, .3, .9], 'binding_scope': 'single_sample_context',
+            'carry_reference_eligible': False, 'binding': {'anchor': {'view_id': current['view_id']}}},
+        'views': [context], 'geometry_binding': {},
+        'observed_source': {'observation_id': 'obs_00031', 'source_step': 31}}
+    folder = hub.run/'carry_seed'; folder.mkdir()
+    executor.seed_scan_carry('object', folder)
+    record = json.loads((folder/'scan_carry_reference.json').read_text())
+    assert record['status'] == 'unavailable' and hub.carried_surface_reference is None
+    assert 'no unique independently bound' in record['reason']
+
+
+def test_relocalized_shape_can_be_regrasped_without_replacing_original_samples(episode, monkeypatch):
+    from scipy.spatial.transform import Rotation
+    from sketchik.carry_reference import retained_point_binding
+    hub, handoff, actions, view = episode
+    handoff['objects'][0]['shape_motion'] = 'rigid'
+    artifacts = EpisodeArtifacts(hub, handoff); artifacts.prepare()
+    executor = DirectExecutor(hub, handoff, artifacts)
+    artifacts.read_image(artifacts.image_paths['object_face'])
+    with np.load(view['cloud_file']) as data:
+        original = data['world_xyz_m'][:25].astype(float)
+    rotation = Rotation.from_euler('z', .4).as_matrix()
+    translation = np.array([-.2, -.3, .1])
+    world = original@rotation.T+translation
+    members = hub.run/'registered_members.npz'
+    np.savez(members, original_point_ids=np.arange(25))
+    artifacts.rigid_view_bindings['object_face'] = {
+        'owner': 'object', 'pose_id': 'independent_pose', 'source_step': 30,
+        'original_cloud_file': str(Path(view['cloud_file']).resolve()),
+        'members_file': str(members),
+        'transform': {'rotation': rotation.tolist(), 'translation_m': translation.tolist()}}
+    hub.journal.mark_moved('object', 20)
+    monkeypatch.setattr('sketchik.observed_clearance.visible_reference_support',
+        lambda *args: {'status': 'supported', 'supported_points': 25})
+    anchor = {'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [1, 1]}
+    answer = submission(30, anchor)
+    answer['actions'].append({'primitive': 'set_gripper', 'target_id': 'object',
+        'intent': 'close at relocated contact', 'selection': {'command': 'close', 'steps': 1}})
+    plan, stage = prepare_actions(executor, artifacts, answer)
+    apply_assessment(hub, answer)
+    receipt = execute_sketch(hub, executor, plan, 0, frozen_binding=stage)
+    assert receipt['commands_completed'] and actions == ['move', 'set_gripper']
+    reference = hub.carried_surface_reference
+    assert reference['source_kind'] == 'registered_rigid_shape'
+    np.testing.assert_array_equal(reference['point_ids'], np.arange(25))
+    np.testing.assert_array_equal(reference['original_world_xyz_m'], original)
+    np.testing.assert_allclose(reference['local_xyz_m'], world-hub.robot.state()['position'])
+    # A later EEF motion changes coordinates, never pixel identity or the original samples.
+    hub._fixture_state['position'][0] += .08
+    mapped = retained_point_binding(hub, view, 'object', original[0],
+        {'cloud_point_index': 0, 'cloud_pixel_xy': [1, 1]})
+    np.testing.assert_allclose(mapped['world_xyz_m'], world[0]+[.08, 0., 0.])
+    evidence = hub.last_contact_binding
+    with pytest.raises(ValueError, match='invalid before'):
+        executor._registered_contact_template({**evidence,
+            'world_validity_before_close': {'invalidated_at_step': 31}}, world[0])
+    with pytest.raises(ValueError, match='exact registered'):
+        executor._registered_contact_template(evidence, world[0]+[.01, 0., 0.])
+    monkeypatch.setattr('sketchik.observed_clearance.visible_reference_support',
+        lambda *args: {'status': 'contradicted'})
+    with pytest.raises(ValueError, match='does not support'):
+        executor._registered_contact_template(evidence, world[0])
+
+
 def submission(step, anchor=None):
     return {'source_step': step, 'intent': 'move from actual state', 'visible_evidence': 'fixture',
         'held_object_id': None, 'held_pose_relation': 'none', 'actions': [{
             'primitive': 'move', 'target_id': 'object', 'reference_target_id': 'object',
-            'intent': 'raise', 'selection': {'waypoints': [binding(anchor)]}}]}
+        'intent': 'raise', 'selection': {'waypoints': [binding(anchor)]}}]}
+
+
+@pytest.mark.parametrize('failed,stale', [(False, False), (True, False), (False, True)])
+def test_async_same_A_drafts_during_motion_and_normal_outcome_continues_directly(episode, monkeypatch, failed, stale):
+    from threading import Event, get_ident
+    from sketchik.stage_context import closed_tool_dialogue
+    hub, handoff, actions, _ = episode
+    # Even unknown/articulated semantic shape no longer adds an approval turn.
+    handoff['objects'][0]['shape_motion'] = 'articulated'
+    owner = get_ident(); entered = Event(); motion = Event()
+    original_move = hub.executor.move
+    def move(**kwargs):
+        if not actions:
+            assert entered.wait(5), 'draft must run during execution'
+            motion.set()
+        return original_move(**kwargs)
+    hub.executor.move = move
+    original_execute = execute_sketch
+    if failed:
+        def fail(*args, **kwargs):
+            receipt = original_execute(*args, **kwargs)
+            return {**receipt, 'commands_completed': False, 'failure': 'actual segment failure'}
+        monkeypatch.setattr('sketchik.single_agent.execute_sketch', fail)
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        def complete(self, messages, tools):
+            self.calls += 1
+            if self.calls == 1:
+                name, value = 'execute_actions', submission(hub.robot.steps)
+            elif self.calls == 2:
+                assert get_ident() != owner and [t['function']['name'] for t in tools] == ['draft_next_sketch']
+                closed_tool_dialogue(messages)
+                entered.set(); assert motion.wait(5)
+                name, value = 'draft_next_sketch', {'status': 'ready', 'reason': 'existing geometry',
+                    'preconditions': 'current motion ends normally', 'intent': 'next subtask',
+                    'actions': submission(30)['actions']}
+                if stale:
+                    value['actions'][0]['selection']['waypoints'][0]['anchor'] = {
+                        'kind': 'cloud_point', 'view_id': 'never_read', 'pixel_xy': [0, 0]}
+            else:
+                assert self.calls == 3 and get_ident() == owner
+                assert {t['function']['name'] for t in tools} == {t['function']['name'] for t in tools_for({'object'})}
+                assert actions == (['move', 'move'] if not failed and not stale else ['move'])
+                name, value = 'finish', {'status': 'blocked', 'summary': 'fixture only',
+                    'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                        'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'], 'visible_evidence': 'fixture'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(value)}}]}}
+    client = Client(); messages = []
+    result = run_single_agent(hub, client, messages, handoff, max_turns=6, max_batches=2, async_planning=True)
+    closed_tool_dialogue(messages)
+    assert result['status'] == 'single_agent_blocked' and client.calls == 3
+    assert result['a_execution_requests'] == 3 and result['async_planning']['requests'][0]['overlap_wall_s'] > 0
+    assert len(result['subtasks']) == (2 if not failed and not stale else 1)
+    assert result['binding_or_file_invalid_replies'] == 0  # Program preflight is not an invalid A reply.
+    if stale:
+        assert result['async_planning']['continuation_checks'][0]['status'] == 'fail'
+    if failed:
+        assert 'discarded' in result['async_planning']['requests'][0]
+
+
+def test_async_does_not_spend_last_request_or_last_sketch_on_speculation(episode):
+    hub, handoff, actions, _ = episode
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        def complete(self, messages, tools):
+            self.calls += 1
+            assert not any(t['function']['name'] == 'draft_next_sketch' for t in tools)
+            if self.calls == 1:
+                value, name = submission(hub.robot.steps), 'execute_actions'
+            else:
+                value, name = {'status': 'blocked', 'summary': 'fixture', 'goal_evidence': [
+                    {'goal': handoff['task'], 'assessment': 'unknown', 'image_paths': ['observations/obs_00031/agentview.png'],
+                        'visible_evidence': 'fixture'}]}, 'finish'
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(value)}}]}}
+    result = run_single_agent(hub, Client(), [], handoff, max_turns=2, max_batches=2, async_planning=True)
+    assert result['async_planning']['requests'] == [] and actions == ['move']
+
+
+@pytest.mark.parametrize('fault', ['contact', 'depth'])
+def test_async_actual_fault_returns_same_A_to_normal_tools_without_dispatch(episode, monkeypatch, fault):
+    from sketchik.stage_context import StageContext, closed_tool_dialogue
+    hub, handoff, actions, _ = episode
+    original_current = EpisodeArtifacts.current
+    def current(artifacts, *args, **kwargs):
+        value = original_current(artifacts, *args, **kwargs)
+        if getattr(hub, 'single_a_batches', 0) == 1:
+            if fault == 'contact': value['contact_warning'] = {'reason': 'actual contact changed'}
+            else: value['geometry']['carried_observed_geometry'] = {'visible_support': {'status': 'contradicted'}}
+        return value
+    monkeypatch.setattr(EpisodeArtifacts, 'current', current)
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        stage_context = StageContext(max_chars=2000, keep_messages=1, keep_chars=1000, retain_episode_references=True)
+        def complete(self, messages, tools):
+            self.calls += 1
+            if self.calls == 1:
+                name, value = 'execute_actions', submission(hub.robot.steps)
+            elif self.calls == 2:
+                name, value = 'draft_next_sketch', {'status': 'ready', 'reason': 'existing geometry',
+                    'preconditions': 'normal motion', 'intent': 'next', 'actions': submission(30)['actions']}
+            else:
+                assert self.calls == 3 and actions == ['move'] and len(tools) == 7
+                active, _ = self.stage_context.apply(messages); closed_tool_dialogue(active)
+                assert 'draft_next_sketch' in json.dumps(active)  # Original inert intent retained for recovery.
+                name, value = 'finish', {'status': 'blocked', 'summary': 'fixture only',
+                    'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                        'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'], 'visible_evidence': 'Actual fault'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(value)}}]}}
+    source = []; client = Client()
+    result = run_single_agent(hub, client, source, handoff, max_turns=6, max_batches=2, async_planning=True)
+    assert result['status'] == 'single_agent_blocked' and actions == ['move']
+    assert result['async_planning']['program_continuations'] == 0
+    assert result['async_planning']['continuation_checks'][0]['status'] == 'fail'
+    closed_tool_dialogue(source)
 
 
 def test_saved_cloud_requires_actual_view_and_observed_time_not_new_request_time(episode):
@@ -490,6 +1081,63 @@ def test_release_then_old_point_stops_suffix_but_dynamic_eef_can_withdraw(episod
     plan, stage = prepare_actions(executor, artifacts, submission(hub.robot.steps))
     assert execute_sketch(hub, executor, plan, 1, frozen_binding=stage)['commands_completed']
     assert actions == ['set_gripper', 'move']
+
+
+@pytest.mark.parametrize('status', ['contradicted', 'unknown', 'contact_geometry_supported'])
+def test_first_close_contact_result_controls_suffix_without_replaying_gripper(episode, status):
+    hub, handoff, actions, _ = episode
+    artifacts = EpisodeArtifacts(hub, handoff)
+    executor = DirectExecutor(hub, handoff, artifacts)
+    checked = []
+    def check(target_id, before, after, folder):
+        checked.append((target_id, before['source_step'], after['source_step']))
+        # The real event and epoch must exist before any contact interpretation.
+        assert hub.episode_state.data['last_gripper_event']['command'] == 'close'
+        assert hub.episode_state.data['grasp_epoch'] == 1
+        result = {'status': status, 'reason': 'frozen local contact evidence',
+            'source_step': after['source_step'], 'active': True, 'grasp_epoch': 1,
+            'holding_certified': False, 'target_identity_certified': False}
+        hub.episode_state.data['initial_grasp_contact'] = result
+        return result
+    executor.check_initial_grasp_contact = check
+    answer = submission(30)
+    answer['actions'].insert(0, {'primitive': 'set_gripper', 'target_id': 'object',
+        'intent': 'grasp before lifting', 'selection': {'command': 'close', 'steps': 1}})
+    plan, stage = prepare_actions(executor, artifacts, answer)
+    receipt = execute_sketch(hub, executor, plan, 0, frozen_binding=stage)
+    assert checked == [('object', 30, 31)]
+    assert receipt['steps'][0]['completed'] is True  # Close really happened.
+    assert receipt['steps'][0]['initial_grasp_contact']['status'] == status
+    if status == 'contradicted':
+        assert actions == ['set_gripper'] and receipt['commands_completed'] is False
+        assert receipt['steps'][0]['recovery_failure']['failure_stage'] == 'grasp_contact'
+        assert receipt['recovery'][-1]['tier'] == 'T2'
+        assert receipt['remaining_suffix_executed'] is False
+        current = artifacts.current(executor, hub.run/'contact_failure_current')
+        assert current['initial_grasp_contact']['status'] == 'contradicted'
+        # A fresh recovery can retreat from the actual stop; the old close is not replayed.
+        repair, fresh = prepare_actions(executor, artifacts, submission(hub.robot.steps))
+        assert execute_sketch(hub, executor, repair, 1, frozen_binding=fresh)['commands_completed']
+        assert actions == ['set_gripper', 'move']
+    else:
+        assert receipt['commands_completed'] and actions == ['set_gripper', 'move']
+
+
+def test_configuration_close_skips_grasp_check_and_retires_old_contact_evidence(episode):
+    hub, handoff, actions, _ = episode
+    artifacts = EpisodeArtifacts(hub, handoff)
+    executor = DirectExecutor(hub, handoff, artifacts)
+    hub.episode_state.data['initial_grasp_contact'] = {
+        'status': 'contact_geometry_supported', 'source_step': 29, 'active': True}
+    executor.check_initial_grasp_contact = lambda *args: pytest.fail('No intended grasp target')
+    answer = submission(30)
+    answer['actions'].insert(0, {'primitive': 'set_gripper', 'target_id': None,
+        'intent': 'configure fingers for pushing', 'selection': {'command': 'close', 'steps': 1}})
+    plan, stage = prepare_actions(executor, artifacts, answer)
+    receipt = execute_sketch(hub, executor, plan, 0, frozen_binding=stage)
+    assert receipt['commands_completed'] and actions == ['set_gripper', 'move']
+    assert hub.episode_state.data['initial_grasp_contact']['active'] is False
+    assert hub.episode_state.data['initial_grasp_contact']['retired_at_step'] == 31
 
 
 def test_single_review_resends_actual_close_and_current_pairs_across_context_epoch(episode):
@@ -949,11 +1597,14 @@ def add_binding_catalog(hub, handoff, view, monkeypatch):
 
 def test_identity_correction_rebuilds_sources_and_retires_wrong_points_without_physics(episode, monkeypatch):
     hub, handoff, actions, view = episode
+    handoff['objects'][0]['shape_motion'] = 'rigid'
     add_binding_catalog(hub, handoff, view, monkeypatch)
     (hub.run/'dimensions.json').write_text(json.dumps({'objects': {'object': {
         'initial_observed_shape': {'test_component_ids': ['G1']}, 'wrong_height': .99}}}))
     artifacts = EpisodeArtifacts(hub, handoff)
     initial = artifacts.prepare()
+    artifacts.live_cloud_files.setup(hub.observe()[0])
+    latest_alias = 'current_clouds/latest/object_00_face.png'
     artifacts.reference_parts(initial)
     original_image = (artifacts.files.root/'geometry/object_00/object_face.png').read_bytes()
     answer = {'source_step': 30, 'object_id': 'object', 'component_ids': ['G2'],
@@ -965,6 +1616,12 @@ def test_identity_correction_rebuilds_sources_and_retires_wrong_points_without_p
     assert result['robot_actions'] == result['new_camera_observations'] == 0
     assert hub.robot.steps == 30 and actions == []
     assert handoff['objects'][0]['component_ids'] == ['G2']
+    assert handoff['objects'][0]['shape_motion'] == 'rigid'
+    slot = artifacts.live_cloud_files.slots[latest_alias]
+    assert 'binding_001' in slot['original_view_id']
+    assert artifacts.files.image_aliases[latest_alias] == slot['original_path']
+    latest_record, _ = artifacts.read_image(latest_alias)
+    assert latest_record['view_id'] == slot['original_view_id'] and latest_record['selectable']
     dimensions = json.loads((hub.run/'dimensions.json').read_text())['objects']['object']
     assert dimensions['initial_observed_shape']['test_component_ids'] == ['G2']
     assert 'wrong_height' not in dimensions
@@ -1701,14 +2358,19 @@ def test_inspection_candidates_do_not_become_explicit_protected_reference_reads(
 
 
 def test_registered_cloud_uses_new_coordinate_epoch_without_rewriting_old_capture_or_clearing_warning(episode, monkeypatch):
-    from sketchik.cloud_selection import public_view, resolve_cloud_point
+    import hashlib
+    from sketchik.pose_binding import compile_binding
     from sketchik.single_agent import working_cloud_record
     hub, artifacts, executor, result, _ = current_refresh_fixture(episode)
-    rng = np.random.default_rng(18)
-    xyz = rng.uniform(-.02, .02, (150, 3))+[.2, .3, .9]
-    template = {'world_xyz_m': xyz, 'rgb': np.full((150, 3), 90, np.uint8),
-        'pixel_xy': np.zeros((150, 2), np.uint16), 'source_index': np.zeros(150, np.uint16)}
-    sources = [{'observation_id': 'original', 'camera': 'agentview', 'source_step': 10}]
+    artifacts.handoff['objects'][0]['shape_motion'] = 'rigid'
+    view = artifacts.views['object_face']
+    with np.load(view['cloud_file']) as data:
+        template = {key: data[key][:25].copy() for key in ('world_xyz_m', 'rgb', 'pixel_xy', 'source_index')}
+    xyz = template['world_xyz_m'].copy()
+    template.update(template_source_cloud_file=np.asarray(view['cloud_file']), template_point_ids=np.arange(25))
+    sources = view['sources']
+    hashes = {name: hashlib.sha256(Path(view[name]).read_bytes()).hexdigest()
+        for name in ('image_file', 'index_map_file', 'cloud_file')}
     hub.scene_catalog = {'components': {}}
     monkeypatch.setattr('sketchik.object_registration.catalog_template', lambda *a: (template, sources))
     registration = {'status': 'accepted', 'source_step': 30, 'reason': 'supported_unique_fit', 'wall_s': .1,
@@ -1722,26 +2384,27 @@ def test_registered_cloud_uses_new_coordinate_epoch_without_rewriting_old_captur
     assert summary['status'] == 'accepted' and summary['agent_requests'] == summary['robot_actions'] == 0
     assert hub.episode_state.data['contact_warning'] == warning
     assert hub.carried_target_id is None and hub.carried_surface_reference is None
-    entry = summary['views'][0]; record, _ = artifacts.read_image(entry['rgb'])
-    assert working_cloud_record(record)['coordinate_estimate']['registered_at_step'] == 30
-    view = artifacts.views[entry['view_id']]
-    with np.load(view['index_map_file']) as data:
-        positions = np.argwhere(data['point_index'] >= 0)
-    y, x = positions[len(positions)//2]
-    anchor = {'kind': 'cloud_point', 'view_id': view['view_id'], 'pixel_xy': [int(x), int(y)], 'group_id': 1}
-    point, provenance = resolve_cloud_point(anchor, [public_view(view)], [view])
-    assert provenance['source_observation']['source_step'] == 10
-    assert provenance['coordinate_estimate']['registered_at_step'] == 30
+    assert summary['bitmap_reused'] and summary['coordinates_available']
+    record, _ = artifacts.read_image(artifacts.image_paths['object_face'])
+    status = working_cloud_record(record)['point_time_status']
+    assert status['coordinate_estimated_at_step'] == 30 and status['image_axes_are_historical']
+    anchor = {'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [1, 1]}
     checked = artifacts.validate_point(binding(anchor), 'object', request_step=30)
     assert checked['source_step'] == 30
-    with np.load(view['cloud_file']) as data:
-        np.testing.assert_allclose(data['world_xyz_m'], xyz+[.03, -.02, .01])
-        np.testing.assert_array_equal(data['original_world_xyz_m'], xyz)
+    answer = submission(30, anchor)
+    plan, stage = prepare_actions(executor, artifacts, answer)
+    pose, audit = compile_binding(binding(anchor), stage['frozen_packets'][0], lambda *args: None,
+        cloud_views=stage['cloud_views'][0])
+    np.testing.assert_allclose(pose['position'], xyz[0]+[.03, -.02, .11])
+    assert audit['source_observation']['source_step'] == 10
+    assert audit['coordinate_estimate']['source_step'] == 30
+    assert audit['carry_reference_eligible'] is False
+    for name, digest in hashes.items():
+        assert hashlib.sha256(Path(view[name]).read_bytes()).hexdigest() == digest
     hub.journal.mark_moved('object', 31)
     with pytest.raises(ValueError, match='predates actual object motion'):
         artifacts.validate_point(binding(anchor), 'object', request_step=31)
-    with pytest.raises(ValueError, match='superseded'):
-        artifacts.validate_point(binding({'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [1, 1]}), 'object')
+    assert hub.episode_state.data['contact_warning'] == warning
 
 
 def test_current_binding_replaces_stale_positions_without_erasing_shape_or_contact_warning(episode):
@@ -2108,6 +2771,7 @@ def test_history_dispatch_path_ik_failure_advances_no_physics(episode):
     assert entry['status'] == 'dispatched_no_physics'
     assert len(entry['dispatches']) == 1 and entry['physical_steps_advanced'] == 0
     assert receipt['execution_progress']['unexecuted_suffix'] == []
+    assert artifacts.live_dispatches == []
 
 
 def test_history_episode_end_preserves_undispatched_suffix_and_filters_oracle(episode):
@@ -2396,3 +3060,204 @@ def test_pose_rebind_retains_native_capture_frame_of_an_already_registered_cloud
     assert result['carried_pose_rebind']['status']=='relocalized'
     np.testing.assert_array_equal(ref['original_world_xyz_m'],old)  # Frozen grasp frame is separate.
     np.testing.assert_allclose(ref['local_xyz_m'],old+[.01,.02,-1.])
+
+
+def test_program_continuation_has_no_fabricated_A_assessment_or_extra_request(episode, monkeypatch):
+    hub, handoff, actions, _ = episode
+    handoff['objects'][0]['shape_motion'] = 'rigid'
+    assessments = []
+    original_assessment = apply_assessment
+    def assess(hub, answer):
+        assessments.append(deepcopy(answer))
+        original_assessment(hub, answer)
+    monkeypatch.setattr('sketchik.single_agent.apply_assessment', assess)
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        def complete(self, messages, tools):
+            self.calls += 1
+            if self.calls == 1:
+                name, args = 'execute_actions', submission(30)
+            elif self.calls == 2:
+                assert tools[0]['function']['name'] == 'draft_next_sketch'
+                name, args = 'draft_next_sketch', {'status': 'ready', 'reason': 'same known geometry',
+                    'preconditions': 'previous motion completed', 'intent': 'second motion',
+                    'actions': submission(30)['actions']}
+            else:
+                assert self.calls == 3 and actions == ['move', 'move']
+                assert len(assessments) == 1
+                name, args = 'finish', {'status': 'blocked', 'summary': 'Two fixture motions only',
+                    'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                        'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'],
+                        'visible_evidence': 'No fixture task completion evidence'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls),
+                'type': 'function', 'function': {'name': name, 'arguments': json.dumps(args)}}]}}
+    client = Client(); messages = []
+    result = run_single_agent(hub, client, messages, handoff, max_turns=5, max_batches=2, async_planning=True)
+    assert result['async_planning']['program_continuations'] == 1
+    assert result['a_execution_tool_calls'] == 3 and hub.single_a_requests == 3
+    ledger = hub.single_a_artifacts.ledger['batches'][1]
+    assert ledger['model_submission'] is None
+    assert ledger['dispatch_origin']['authorization'] == 'conditional_draft'
+    assert not ledger['dispatch_origin']['model_request_issued_for_dispatch']
+    assert 'visible_evidence' not in ledger['program_submission'] and 'held_object_id' not in ledger['program_submission']
+    assert not any(c['function']['name'] == 'program_prepared_sketch' for m in messages
+        if m['role'] == 'assistant' for c in m.get('tool_calls', []))
+
+
+def test_failed_execution_waits_for_late_draft_and_prepares_successor_during_repair(episode):
+    from threading import Event
+    hub, handoff, actions, _ = episode
+    handoff['objects'][0]['shape_motion'] = 'rigid'
+    moved = Event(); draft_finished = Event(); worker_started = Event()
+    original_move = hub.executor.move
+    def move(**params):
+        assert worker_started.wait(5)
+        result = original_move(**params)
+        if len(actions) == 1:
+            moved.set()
+            return {**result, 'converged': False, 'position_error_m': .02, 'state': hub.robot.state()}
+        return result
+    hub.executor.move = move
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        def complete(self, messages, tools):
+            self.calls += 1
+            turn = self.calls
+            if turn in (1, 3):
+                if turn == 3:
+                    assert draft_finished.is_set() and actions == ['move']
+                    assert hub.async_recovery_candidate is not None
+                    assert 'async_recovery_reference' in json.loads((hub.run/'agent_public/current.json').read_text())
+                    assert any('async_candidate_discarded' in m.get('content', '') for m in messages if isinstance(m.get('content'), str))
+                name, args = 'execute_actions', submission(hub.robot.steps)
+                args['intent'] = 'repair from actual stop' if turn == 3 else 'first attempt'
+            elif turn in (2, 4):
+                assert tools[0]['function']['name'] == 'draft_next_sketch'
+                worker_started.set()
+                if turn == 2:
+                    assert moved.wait(5)
+                    draft_finished.set()
+                else:
+                    # Same persistent A, now preparing the successor while the repair is running.
+                    assert any('repair from actual stop' in m.get('content', '') for m in messages if isinstance(m.get('content'), str))
+                name, args = 'draft_next_sketch', {'status': 'ready', 'reason': 'existing geometry',
+                    'preconditions': 'actual prior motion completed', 'intent': 'new successor' if turn == 4 else 'old nonexecuted successor',
+                    'actions': submission(hub.robot.steps)['actions']}
+            else:
+                assert turn == 5 and actions == ['move']*3
+                name, args = 'finish', {'status': 'blocked', 'summary': 'Only fixture execution',
+                    'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                        'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'],
+                        'visible_evidence': 'Fixture only'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(turn), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(args)}}]}}
+    client = Client(); messages = []
+    result = run_single_agent(hub, client, messages, handoff, max_turns=8, max_batches=3, async_planning=True)
+    assert client.calls == 5 and len(result['async_planning']['requests']) == 2
+    assert 'discarded' in result['async_planning']['requests'][0]
+    assert result['async_planning']['program_continuations'] == 1
+    ledger = hub.single_a_artifacts.ledger['batches']
+    assert ledger[0]['receipt']['commands_completed'] is False
+    assert ledger[1]['model_submission']['intent'] == 'repair from actual stop'
+    assert ledger[2]['program_submission']['intent'] == 'new successor'
+    old = json.loads((hub.run/'agent_public/sketch/recovery_reference.json').read_text())
+    assert not old['executable'] and old['candidate']['intent'] == 'old nonexecuted successor'
+
+
+@pytest.mark.parametrize('repair_at_terminal', [False, True])
+def test_async_grasp_release_continues_without_approval_then_uses_actual_terminal_feedback(episode, repair_at_terminal):
+    from sketchik.stage_context import StageContext, closed_tool_dialogue
+    hub, handoff, actions, _ = episode
+    handoff['objects'][0]['shape_motion'] = 'articulated'  # No extra semantic gate.
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        stage_context = StageContext(max_chars=2000, keep_messages=1, keep_chars=1000, retain_episode_references=True)
+        def complete(self, messages, tools):
+            self.calls += 1
+            names = [t['function']['name'] for t in tools]
+            if self.calls == 1:
+                name, value = 'execute_actions', submission(hub.robot.steps)
+                value['actions'] += [
+                    {'primitive': 'set_gripper', 'target_id': 'object', 'intent': 'planned grasp',
+                        'selection': {'command': 'close', 'steps': 20}},
+                    deepcopy(value['actions'][0])]
+            elif self.calls == 2:
+                assert names == ['draft_next_sketch']
+                name, value = 'draft_next_sketch', {'status': 'ready', 'intent': 'place and release',
+                    'reason': 'existing geometry', 'preconditions': 'normal current execution',
+                    'actions': [*submission(30)['actions'],
+                        {'primitive': 'set_gripper', 'target_id': None, 'intent': 'release',
+                            'selection': {'command': 'open', 'steps': 20}},
+                        *submission(30)['actions']]}
+            elif self.calls == 3:
+                assert names == ['draft_next_sketch']
+                # Current draft request follows actual close, without a new A holding declaration.
+                assert hub.episode_state.data['a_held_claim']['object_id'] is None
+                name, value = 'draft_next_sketch', {'status': 'finish_review',
+                    'reason': 'The executing release and withdrawal should finish the task'}
+            else:
+                assert len(tools) == 7
+                if self.calls == 4:
+                    assert any('async_terminal_actual' in m.get('content', '') for m in messages if isinstance(m.get('content'), str))
+                    assert hub.robot.state()['gripper_command'] == -1. and actions.count('set_gripper') == 2
+                    active, _ = self.stage_context.apply(messages); closed_tool_dialogue(active)
+                    assert 'finish_review' in json.dumps(active)
+                if self.calls == 4 and repair_at_terminal:
+                    name, value = 'execute_actions', submission(hub.robot.steps)
+                else:
+                    assert self.calls == (5 if repair_at_terminal else 4)
+                    name, value = 'finish', {'status': 'blocked', 'summary': 'No fixture semantic success certification',
+                        'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                            'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'],
+                            'visible_evidence': 'Actual release complete; fixture does not prove the task'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(value)}}]}}
+    messages=[]; client=Client()
+    result=run_single_agent(hub, client, messages, handoff, max_turns=8, max_batches=3, async_planning=True)
+    assert result['status'] == 'single_agent_blocked'
+    assert result['async_planning']['program_continuations'] == 1
+    assert result['a_execution_requests'] == (5 if repair_at_terminal else 4)
+    assert actions == ['move', 'set_gripper', 'move', 'move', 'set_gripper', 'move'] + (['move'] if repair_at_terminal else [])
+    ledger=hub.single_a_artifacts.ledger['batches']
+    assert ledger[1]['model_submission'] is None and ledger[1]['dispatch_origin']['authorization'] == 'conditional_draft'
+    assert 'visible_evidence' not in ledger[1]['program_submission'] and 'held_pose_relation' not in ledger[1]['program_submission']
+    epochs=result['async_planning']['continuation_checks'][0]['grasp_epoch_transition']
+    assert epochs['prepared'] != epochs['actual']  # Actual new grasp epoch is allowed.
+    assert len(result['async_planning']['requests']) == 2
+    assert all(m.get('function', {}).get('name') != 'accept_prepared_sketch' for msg in messages
+        for m in msg.get('tool_calls', []))
+    closed_tool_dialogue(messages)
+
+
+def test_auto_candidate_cannot_revive_world_points_retired_by_actual_close(episode):
+    hub, handoff, actions, _ = episode
+    class Client:
+        calls = 0
+        last_request_metadata = {}
+        def complete(self, messages, tools):
+            self.calls += 1
+            if self.calls == 1:
+                name, value = 'execute_actions', submission(30)
+                value['actions'].append({'primitive': 'set_gripper', 'target_id': 'object', 'intent': 'grasp',
+                    'selection': {'command': 'close', 'steps': 20}})
+            elif self.calls == 2:
+                name, value = 'draft_next_sketch', {'status': 'ready', 'reason': 'fixture',
+                    'preconditions': 'normal close completes', 'intent': 'use old world point',
+                    'actions': submission(30, {'kind': 'cloud_point', 'view_id': 'object_face', 'pixel_xy': [0, 0]})['actions']}
+            else:
+                assert self.calls == 3 and len(tools) == 7 and actions == ['move', 'set_gripper']
+                assert hub.async_recovery_candidate is not None
+                name, value = 'finish', {'status': 'blocked', 'summary': 'Old coordinates unavailable',
+                    'goal_evidence': [{'goal': handoff['task'], 'assessment': 'unknown',
+                        'image_paths': [f'observations/obs_{hub.robot.steps:05d}/agentview.png'], 'visible_evidence': 'Actual close occurred'}]}
+            return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
+                'function': {'name': name, 'arguments': json.dumps(value)}}]}}
+    result=run_single_agent(hub, Client(), [], handoff, max_turns=6, max_batches=2, async_planning=True)
+    gate=result['async_planning']['continuation_checks'][0]
+    assert gate['status'] == 'fail'
+    assert any(c['check'] == 'current_geometry_preflight' and 'predates' in c['reason'] for c in gate['checks'])
+    assert result['action_batches_accepted'] == 1 and result['async_planning']['program_continuations'] == 0
+    assert result['binding_or_file_invalid_replies'] == 0

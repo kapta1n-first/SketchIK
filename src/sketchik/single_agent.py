@@ -68,12 +68,20 @@ def working_cloud_record(record, *, catalogue=False):
         'point_time_status', 'point_cloud_path', 'point_index_path', 'point_groups_path',
         'historical_evidence_only', 'retired_reason', 'coordinate_estimate')
     names += ('point_footprint_pixels', 'point_footprint_half_width_m', 'pixels_per_metre')
+    names += ('view_kind', 'snapshot_id', 'source_step', 'selection_scope',
+        'carry_reference_eligible', 'slot_target_hint', 'coverage', 'framing_changed',
+        'display_bounds_world_m', 'measurement_kind', 'requested_path', 'latest_entry')
+    names += ('logical_image_slot', 'mixed_evidence_layers')
     result = {key: deepcopy(record[key]) for key in names if key in record}
     if not catalogue and 'projection_frame' in record:
         result['projection_frame'] = deepcopy(record['projection_frame'])
     if 'point_time_status' in result:
         result['point_time_status'] = {key: result['point_time_status'][key]
-            for key in ('owner', 'invalidated_at_step', 'coordinate_estimated_at_step') if key in result['point_time_status']}
+            for key in ('owner', 'invalidated_at_step', 'coordinate_estimated_at_step',
+                'source_step', 'current_snapshot', 'coordinate_policy', 'reference_id',
+                'relation_revision', 'pose_id', 'image_axes_are_historical',
+                'height_colours_are_historical', 'shape_pose_rotation_world',
+                'scope') if key in result['point_time_status']}
     sources = record.get('source_observations')
     path = result.get('image_path', result.get('path'))
     if sources is not None and path:
@@ -269,10 +277,10 @@ def tools_for(objects, max_points=6):
         ('read_text_file', 'Read a published UTF-8 file, with explicit pagination. No arbitrary run or project access.',
             obj({'path': TEXT, 'offset': {'type': 'integer', 'minimum': 0},
                 'max_chars': {'type': 'integer', 'minimum': 1, 'maximum': 40000}}, ['path'])),
-        ('read_image', 'Read any indexed published image path, including views not yet in available_sources. A successful read registers its cloud view_id or native image reference for subsequent point selection, subject to the existing owner/time checks. Saved pixels stay aligned with the exact point table. No camera motion.',
+        ('read_image', 'Optionally view an indexed published image, including views not yet in available_sources. A successful read registers its cloud view_id or native pixel source, subject to owner/time checks. latest resolves an immutable version; current local and _measured views provide current measured samples. Reading a rigid latest original-shape entry may attempt supported pose matching; the result states coordinate availability. Current context samples require explicit reference_target_id. No camera motion.',
             obj({'path': TEXT}, ['path'])),
         ('get_state', 'Read current robot and observed geometry facts. No physics or new camera motion.', obj({})),
-        ('refresh_object', 'Submit exactly one tool call in this reply; do not mix it with other calls. inspect: organize current saved RGB-D into all numbered visible fragments; no camera motion or identity choice. bind: explicitly select shown candidates or none, then publish exact current point views. Historical initial_scene groups can only correct untouched initial identities. Does not certify holding or clear contact warnings.',
+        ('refresh_object', 'Optional object association capability. Submit exactly one tool call in this reply; do not mix it with other calls. inspect organizes saved current RGB-D into numbered fragments without camera motion, identity choice or whole-object registration. bind explicitly selects shown fragments or none and publishes current point views; it does not restore the old complete template. rebind_held_pose optionally attempts the same grasp\'s relative-pose recovery. initial_scene only corrects untouched initial identities. Does not certify holding or clear contact warnings.',
             {'oneOf': [inspect_schema, bind_schema]}),
         ('finish', 'Submit exactly one tool call in this reply; do not mix it with other calls. Stop with a visible-evidence assessment. blocked/failure are valid. The benchmark is evaluated separately.',
             obj({'status': {'enum': ['success', 'failure', 'blocked']}, 'summary': TEXT,
@@ -321,7 +329,19 @@ class DirectExecutor(NumericalCompiler):
             except (ValueError, ValidationError) as exc:
                 raise BindingUnavailable(str(exc)) from exc
         result = super().compile_step(stage, index, description, folder)
+        contact = getattr(self.hub, 'last_contact_binding', None)
+        if (step['primitive'] == 'set_gripper' and step.get('command') == 'close'
+                and contact and contact.get('target_id') == step.get('target_id')):
+            contact['world_validity_before_close'] = deepcopy(
+                self.hub.journal.data['objects'].get(step['target_id'], {}))
         if result.get('parameters') is not None:
+            audit = result.get('audit') or {}
+            estimate = audit.get('coordinate_estimate') or {}
+            if step['primitive'] == 'move' and estimate.get('kind') == 'registered_rigid_point':
+                binding = self.artifacts.rigid_view_bindings.get(audit['cloud_view_id'])
+                if binding and binding['pose_id'] == estimate['pose_id'] and binding['owner'] == step['target_id']:
+                    result['independent_rigid_template'] = deepcopy(binding)
+                    (Path(folder)/'rigid_template_at_contact.json').write_text(json.dumps(binding, indent=2))
             from .step_recovery import repeats_stalled_goal
             failure = getattr(self.hub, 'single_last_motion_failure', None)
             if failure and repeats_stalled_goal(failure, result, self.hub.robot.state()):
@@ -330,6 +350,20 @@ class DirectExecutor(NumericalCompiler):
                 raise blocked
         result['parameter_source'] = self.parameter_source
         return result
+
+    def _compile_selection(self, step, selection, packet, cloud_views, clearance, description, folder, prefix):
+        retained = packet.get('retained_cloud_point_bindings', [])
+        if step['primitive'] == 'move' and any(value['view_id'] == selection['anchor'].get('view_id')
+                and value['pixel_xy'] == selection['anchor'].get('pixel_xy') for value in retained):
+            evidence = self.artifacts.validate_point(selection, step['reference_target_id'],
+                request_step=packet['grounding_source_step'])
+            current = evidence.get('retained_cloud_point_binding')
+            held = any(value['kind'] == 'retained_grasp_point_current_eef' for value in retained
+                if value['view_id'] == selection['anchor'].get('view_id')
+                and value['pixel_xy'] == selection['anchor'].get('pixel_xy'))
+            if current not in retained or (held and (clearance is None or clearance.carried_local is None)):
+                raise BindingUnavailable('The frozen retained point no longer has the same supported grasp relation')
+        return super()._compile_selection(step, selection, packet, cloud_views, clearance, description, folder, prefix)
 
 
 class EpisodeArtifacts:
@@ -354,8 +388,14 @@ class EpisodeArtifacts:
         self.reference_reads = []
         self.geometry_inspections = {}
         self.registration_attempts = set()
-        self.registered_views = {}
         self.registration_templates = {}
+        self.original_shape_views = {}
+        self.rigid_view_bindings = {}
+        self.pose_inspections = {}
+        self.pose_attempts = set()
+        from .live_cloud import LiveCloudFiles
+        self.live_cloud_files = LiveCloudFiles(self)
+        self.live_dispatches = []
 
     def execution_history_index(self):
         return [{'batch': item['batch'], 'request_turn': item['request_turn'],
@@ -388,11 +428,14 @@ class EpisodeArtifacts:
             self.latest['budgets'] = single_budget(self.hub)
             self.publish_available_sources()
 
-    def begin_execution(self, plan, stage, batch, *, submission, bound_submission):
+    def begin_execution(self, plan, stage, batch, *, submission, bound_submission, program_origin=None):
         self.hub.single_a_batches = batch
         self.ledger['batches'].append({'batch': batch, 'request_turn': self.hub.single_a_requests,
             'request_source_step': plan['source_step'], 'status': 'started',
-            'model_submission': deepcopy(submission), 'request_bound_submission': deepcopy(bound_submission),
+            'model_submission': deepcopy(submission) if program_origin is None else None,
+            'program_submission': deepcopy(submission) if program_origin is not None else None,
+            'dispatch_origin': deepcopy(program_origin) if program_origin is not None else 'model_tool',
+            'request_bound_submission': deepcopy(bound_submission),
             'expanded_steps': [{'expanded_step_index': index,
                 'location': deepcopy(stage['locations'][index]),
                 'primitive': step['primitive'], 'target_id': step.get('target_id'), 'intent': step.get('intent'),
@@ -409,6 +452,21 @@ class EpisodeArtifacts:
         if not self.ledger['batches'] or self.ledger['batches'][-1]['status'] != 'started':
             return
         entry = self.ledger['batches'][-1]['expanded_steps'][index]
+        step = stage['plan']['steps'][index]
+        known = {item['object_id'] for item in self.handoff['objects']}
+        targets = {step.get('target_id'), step.get('reference_target_id')}&known
+        points = [self.hub.robot.state()['position']]
+        for value in ((compiled.get('parameters') or {}).get('position'),
+                (compiled.get('audit') or {}).get('anchor_world_xyz_m')):
+            if value is not None and np.asarray(value).shape == (3,):
+                points.append(value)
+        held_id, held_bounds = self.live_cloud_files._held_bounds()
+        if held_id in targets and held_bounds is not None:
+            points.extend(held_bounds.tolist())
+        self.live_dispatches.append({'source_step': self.hub.robot.steps,
+            'targets': sorted(targets), 'framing_points': deepcopy(points),
+            'batch': self.ledger['batches'][-1]['batch'], 'expanded_step_index': index,
+            'physical_steps_advanced': 0})
         entry['dispatches'].append({'source_step': self.hub.robot.steps,
             'actual_entry_state': public(self.hub.robot.state()),
             'parameters': public(deepcopy(compiled['parameters'])),
@@ -466,6 +524,12 @@ class EpisodeArtifacts:
                     source_step_end=self.hub.robot.steps, physical_steps_advanced=advanced)
         receipt['execution_progress'] = self.execution_progress(batch)
         batch.update(status='finished', receipt=deepcopy(receipt))
+        for record in self.live_dispatches:
+            if record.get('batch') == batch['batch']:
+                entry = batch['expanded_steps'][record['expanded_step_index']]
+                record['physical_steps_advanced'] = entry.get('physical_steps_advanced', 0)
+        self.live_dispatches = [record for record in self.live_dispatches
+            if record.get('batch') != batch['batch'] or record.get('physical_steps_advanced', 0) > 0]
         self.receipts.append(receipt)
         self.save_execution_ledger()
 
@@ -543,6 +607,8 @@ class EpisodeArtifacts:
             'observed_extent_groups': context.get('observed_extent_groups'),
             'horizontal_layers': context.get('horizontal_layers'),
             'scope': 'Whole observed object and adjacent structure; rectangles/groups are not semantic masks or complete shape.'}
+        self.original_shape_views[target] = [self.files.entries[path]['view_id']
+            for entry in entries for path in (entry['rgb'], entry['height'])]
 
     def default_object_image_paths(self):
         entries = [self.object_entries.get(item['object_id'], {}).get('views', [])
@@ -624,6 +690,9 @@ class EpisodeArtifacts:
         from .scene_catalog import bind_requirements
         target = answer['object_id']
         self.registration_templates.pop(target, None)
+        self.rigid_view_bindings = {key: value for key, value in self.rigid_view_bindings.items()
+            if value['owner'] != target}
+        self.pose_attempts = {key for key in self.pose_attempts if key[0] != target}
         index = next(i for i, item in enumerate(self.handoff['objects']) if item['object_id'] == target)
         previous = deepcopy(self.handoff['objects'][index])
         revision = self.binding_revisions.get(target, 0)+1
@@ -636,7 +705,7 @@ class EpisodeArtifacts:
             'journal': self.hub.journal.data['objects'].get(target)}, indent=2))
         (folder/'request.json').write_text(json.dumps(answer, indent=2))
         requirements = {key: deepcopy(previous[key]) for key in
-            ('object_id', 'interactions', 'required_surfaces')}
+            ('object_id', 'interactions', 'required_surfaces', 'shape_motion') if key in previous}
         requirements.update(component_ids=answer['component_ids'], description=answer['description'], missing_surfaces=[])
         replacement = bind_requirements({'source_step': answer['source_step'], 'objects': [requirements]},
             self.hub.scene_catalog)['objects'][0]
@@ -658,6 +727,7 @@ class EpisodeArtifacts:
         self.hub.journal.save()
         description, _ = self.hub.observe()
         self.publish_object(replacement, index, description, revision=revision)
+        self.live_cloud_files.rebind_static_shape(target, description)
         self.publish_scene()
         result = {'object_id': target, 'component_ids': replacement['component_ids'],
             'previous_component_ids': previous.get('component_ids', []), 'binding_revision': revision,
@@ -983,7 +1053,7 @@ class EpisodeArtifacts:
                 'Old goals and object/contact states are historical; no diagnosis, retry command or current reachability certification.'}
 
     def prepare_geometry_recovery(self, target, reason):
-        """Relocalize old named samples from current dual depth, without an A call."""
+        """Prepare current fragments from saved dual depth, without an A call."""
         attempt = (target, self.hub.robot.steps)
         if attempt in self.registration_attempts:
             return None
@@ -995,7 +1065,9 @@ class EpisodeArtifacts:
             self.read_image('observations/'+self.latest['observation_id']+'/'+camera+'.png', remember=False)
         answer = {'mode': 'inspect', 'object_id': target}
         result, _, _ = self.refresh_object(answer, self.validate_refresh(answer, self.hub.robot.steps))
-        registration = self.relocalize_object(target, self.geometry_inspections[result['evidence_id']])
+        registration = {'status': 'deferred', 'reason':
+            'Rigid world-pose matching is performed on a requested latest shape read; '
+            'articulated/unknown objects use current measurements. No automatic ICP here.'}
         result['old_cloud_relocalization'] = registration
         self.latest.setdefault('object_relocalizations', {})[target] = registration
         self.hub.emit({'event': 'single_a_failure_geometry_prepared', 'source_step': self.hub.robot.steps,
@@ -1013,8 +1085,7 @@ class EpisodeArtifacts:
             item=next(value for value in self.handoff['objects'] if value['object_id']==target)
             catalog=getattr(self.hub,'scene_catalog',None)
             template=catalog_template(catalog,item.get('component_ids',[])) if catalog else None
-            original_views=[self.views[entry['view_id']] for entry in self.object_entries[target].get('views',[])
-                if entry['view_id'] not in self.registered_views]
+            original_views=[self.views[key] for key in self.original_shape_views.get(target, [])]
             if original_views and template:
                 template=expand_named_template(template,original_views[0])
             self.registration_templates[target]=template
@@ -1023,8 +1094,10 @@ class EpisodeArtifacts:
     def relocalize_object(self, target, inspection):
         from .object_registration import register_object, save_registered_cloud
         from .perception import saved_frame
-        from .cloud_selection import write_views, height_auxiliary
         item = next(value for value in self.handoff['objects'] if value['object_id'] == target)
+        if item.get('shape_motion', 'unknown') != 'rigid':
+            return {'status': 'unavailable', 'reason': 'Whole referenced shape is not declared rigid',
+                'robot_actions': 0, 'agent_requests': 0}
         object_key = f'object_{self.handoff["objects"].index(item):02d}'
         catalog = getattr(self.hub, 'scene_catalog', None)
         template = self.registration_template(target)
@@ -1071,45 +1144,61 @@ class EpisodeArtifacts:
             return summary
         folder = root/f'accepted_{index:03d}'
         cloud = save_registered_cloud(old, sources, registration, folder)
-        prefix = f'{object_key}_registered_{index:03d}'
-        views = write_views(cloud, sources, folder, prefix, inspection['view_eye_direction_world'],
-            role='Old observed samples at RGB-D registered pose; estimated coordinates, not new surface observations',
-            selectable=True, group_ids=np.ones(len(old['world_xyz_m']), np.int32))
-        revision = self.binding_revisions.get(target, 0)+1
-        estimate = {'kind': 'rgbd_rigid_registration', 'registered_at_step': self.hub.robot.steps,
-            'audit_file': public_audit, 'original_capture_times_preserved': True,
-            'current_sources': inspection['sources'], 'holding_certified': False,
-            'scope': 'Rigid pose estimate; original pixels refer to earlier captures, not the current predicted world position.'}
-        entries, fresh = [], set()
-        for view in views:
-            view['coordinate_estimate'] = deepcopy(estimate)
-            from PIL import Image, ImageDraw
-            image = Image.open(view['image_file']).convert('RGB')
-            draw = ImageDraw.Draw(image)
-            draw.rectangle((0, 0, image.width-1, 26), fill=(225, 225, 225))
-            draw.text((18, 10), 'RGB-D REGISTERED POSE ESTIMATE / earlier observed points / not current surface measurements', fill='black')
-            image.save(view['image_file'])
-            path = self.publish_view(view, target, f'geometry/registration/{object_key}/accepted_{index:03d}')
-            height_view = height_auxiliary(view, folder/'height')
-            height = self.publish_view(height_view, target, f'geometry/registration/{object_key}/accepted_{index:03d}')
-            for value in (view, height_view):
-                fresh.add(value['view_id'])
-                self.registered_views[value['view_id']] = {'owner': target, 'source_step': self.hub.robot.steps,
-                    'audit_file': public_audit}
-            entries.append({'rgb': path, 'height': height, 'view_id': view['view_id']})
-        for key, owner in self.owners.items():
-            if owner == target and key not in fresh:
-                self.retired_views.setdefault(key, 'Superseded by RGB-D rigid relocalization; historical capture retained')
-                self.seen_views.discard(key)
-        self.binding_revisions[target] = revision
-        self.object_entries[target] = {**self.object_entries[target], 'views': entries,
-            'binding_revision': revision, 'pose_registration': estimate,
-            'scope': 'All old named observed points transformed by estimated rigid pose, without hidden-shape completion.'}
-        self.hub.journal.update_object(target, {'pose_registration': estimate})
-        summary['views'] = entries
-        self.publish_scene()
+        from .rigid_binding import save_bindings
+        views = [self.views[key] for key in self.original_shape_views.get(target, [])]
+        bindings = save_bindings(old, sources, registration, views, folder/'shape_pose_bindings', target)
+        self.rigid_view_bindings.update(bindings)
+        public_pose = f'geometry/registration/{object_key}/accepted_{index:03d}/shape_pose.json'
+        self.files.publish(public_pose, source=folder/'shape_pose_bindings/bindings.json')
+        summary.update(bitmap_reused=True, pose_binding_file=public_pose,
+            reusable_view_ids=sorted(bindings), coordinates_available=bool(bindings))
+        # Retain all registered XYZ as data, while keeping the original bitmap
+        # and original pixel -> sample IDs. No reprojection or height recolour.
+        self.files.publish(f'geometry/registration/{object_key}/accepted_{index:03d}/points.npz',
+            source=cloud, metadata={'kind': 'registered_rigid_points', 'selectable_without_view': False})
+        self.hub.journal.update_object(target, {'pose_registration': {
+            'source_step': self.hub.robot.steps, 'audit_file': public_audit, 'bitmap_reused': True}})
         self.hub.emit({'event': 'single_a_object_registration', 'object_id': target, **summary})
         return summary
+
+    def ensure_rigid_pose(self, target, snapshot):
+        """On-demand world pose from saved current dual RGB-D, without plots."""
+        from .carry_reference import active_reference
+        from .rigid_binding import valid_binding
+        active = active_reference(self.hub)
+        if active and active['object_id'] == target:
+            return {'status': 'held_coordinates_available', 'robot_actions': 0, 'agent_requests': 0}
+        changed = self.hub.journal.data['objects'].get(target, {}).get('invalidated_at_step')
+        if changed is None:
+            return {'status': 'original_static_coordinates_available', 'robot_actions': 0, 'agent_requests': 0}
+        if any(valid_binding(self.hub, value, target) for value in self.rigid_view_bindings.values()):
+            return {'status': 'registered_coordinates_available', 'robot_actions': 0, 'agent_requests': 0}
+        attempt = (target, snapshot['snapshot_id'])
+        if attempt in self.pose_attempts:
+            return {'status': 'coordinates_unavailable', 'reason': 'Matching already attempted on this snapshot'}
+        self.pose_attempts.add(attempt)
+        from .current_geometry import inspect_snapshot
+        from .perception import saved_frame
+        key = snapshot['snapshot_id']
+        if key not in self.pose_inspections:
+            inputs = []
+            for source in snapshot['sources']:
+                frame = saved_frame(self.hub.run, source['observation_id'], source['camera'])
+                height, width = frame['depth_m'].shape
+                inputs.append({'frame': frame, 'observation_id': source['observation_id'],
+                    'bounds_xyxy': [0, 0, width, height]})
+            mask = None
+            if hasattr(self.hub.executor.ik, 'model'):
+                from .observed_clearance import ObservedClearance
+                geometry = ObservedClearance(self.hub.executor.ik)
+                state = self.hub.robot.state()
+                mask = lambda xyz: geometry.non_robot_mask(xyz, state, margin=.004)
+            table_path = self.hub.run/'table_context/context.json'
+            table = json.loads(table_path.read_text()) if table_path.exists() else {}
+            self.pose_inspections[key] = inspect_snapshot(inputs, snapshot['source_step'],
+                snapshot['folder']/'pose_inspection', non_robot_mask=mask,
+                table_height=table.get('observed_table_height_m'), render_images=False)
+        return self.relocalize_object(target, self.pose_inspections[key])
 
     def publish_point_data(self, view, owner, folder):
         """Retain exact binary geometry once; expose references, never XYZ dumps."""
@@ -1153,7 +1242,20 @@ class EpisodeArtifacts:
         return path
 
     def read_image(self, path, *, remember=True):
+        requested = self.files.canonical_name(path)
+        if (requested in self.live_cloud_files.slots or
+                requested == self.live_cloud_files.root+'/overview.png'):
+            try:
+                with timings_for(self.hub).scope('current_cloud_local_view'):
+                    self.live_cloud_files.materialize(requested)
+            except Exception as exc:
+                raise RuntimeError('Failed to generate a registered latest cloud image') from exc
         record, picture = self.files.read_image(path)
+        if requested.startswith(self.live_cloud_files.root+'/'):
+            record['logical_image_slot'] = requested
+        if requested in self.files.image_aliases:
+            record['latest_entry'] = {key: value for key, value in self.files.entries[requested].items()
+                if key in ('local_image_policy', 'shape_motion', 'pose_status', 'pose_source_step')}
         self.seen_paths.add(record['path'])
         record['public_artifact_read'] = bool(remember)
         record['display_origin'] = 'explicit_read_image' if remember else 'automatic_current_or_reference_display'
@@ -1163,42 +1265,115 @@ class EpisodeArtifacts:
             and record.get('source_step') == self.hub.robot.steps)
         current_candidates = (record.get('kind') == 'current_geometry_candidates'
             and record.get('source_step') == self.hub.robot.steps)
+        current_cloud = self.current_context(record)
+        record['capture_is_current_physical_step'] |= current_cloud
         record['historical_evidence_only'] = not (record['capture_is_current_physical_step'] or current_hand or current_candidates)
+        if record.get('view_kind') == 'current_measurement_context' and not current_cloud:
+            record.update(selectable=False, retired_reason='An older current snapshot; read the fixed latest entry')
         if record.get('kind') == 'hand_geometry':
             record['mixed_evidence_layers'] = True
             record['current_measured_layers_at_current_physical_step'] = current_hand
+        if record.get('view_kind') == 'retained_scene_context':
+            record.update(mixed_evidence_layers=True, selectable=False)
         if record.get('view_id') in self.owners:
             record['point_time_status'] = self.point_time_status(self.owners[record['view_id']])
-            if record.get('view_id') in self.registered_views:
-                record['point_time_status']['coordinate_estimated_at_step'] = self.registered_views[record['view_id']]['source_step']
         if record.get('view_id') in self.retired_views:
             record.update(selectable=False, retired_reason=self.retired_views[record['view_id']])
         elif record.get('view_id'):
             self.seen_views.add(record['view_id'])
+        key = record.get('view_id')
+        if key and self.retained_view_status(key):
+            record.update(selectable=True, selection_scope='retained_grasp_points_only')
+            record['point_time_status'].update(self.retained_view_status(key))
+            record['selection_scope'] = 'independently_retained_template_points_only'
+            if 'projection_frame' in record:
+                record['projection_frame']['scope'] = ('Original bitmap axes refer to the capture world frame, '
+                    'not the current object pose; use the separately supplied pose rotation and current RGB.')
+            record.pop('retired_reason', None)
+            self.seen_views.add(key)
         if remember and record.get('view_id') not in self.retired_views:
             # The bounded visual working set follows A's explicit image reads,
             # including native historical views needed to resolve structure.
             primary = set(self.default_object_image_paths())
             if (record.get('kind') in ('native_rgb', 'current_geometry_candidates') or
                     (record.get('kind') == 'point_cloud_projection' and record['path'] not in primary)):
-                self.reference_reads = [old for old in self.reference_reads
-                    if old != record['path'] and self.files.entries[old].get('view_id') not in self.retired_views]
-                self.reference_reads = (self.reference_reads+[record['path']])[-6:]
+                if record.get('view_kind') != 'current_measurement_context':
+                    self.reference_reads = [old for old in self.reference_reads
+                        if old != record['path'] and self.files.entries[old].get('view_id') not in self.retired_views]
+                    self.reference_reads = (self.reference_reads+[record['path']])[-6:]
         if record.get('kind') == 'native_rgb' and record.get('observation_id'):
             self.seen_rgb.add((record['observation_id'], record['camera']))
+        self.live_cloud_files.note_displayed(requested, record)
         if self.latest is not None:
+            self.latest['current_clouds'] = self.live_cloud_files.status(self.live_cloud_files.description)
             self.publish_available_sources()
         return record, picture
+
+    def current_context(self, view):
+        snapshot = self.live_cloud_files.snapshot
+        return bool(view.get('view_kind') == 'current_measurement_context' and snapshot
+            and view.get('snapshot_id') == snapshot['snapshot_id']
+            and view.get('source_step') == self.hub.robot.steps)
+
+    def retained_view_status(self, key):
+        from .carry_reference import retained_view_reference
+        reference = retained_view_reference(self.hub, self.views[key], self.owners[key])
+        common = {'image_axes_are_historical': True,
+            'height_colours_are_historical': self.views[key].get('mode') == 'height',
+            'scope': 'Bitmap/capture axes/height colours stay historical. Only independently retained sample IDs receive estimated current coordinates.'}
+        if reference is not None:
+            value = {**common, 'coordinate_estimated_at_step': self.hub.robot.steps,
+                'coordinate_policy': 'retained_point_id_transformed_by_current_eef',
+                'reference_id': reference['reference_id'], 'relation_revision': reference['relation_revision']}
+            if reference.get('source_world_to_eef_rotation') is not None:
+                from scipy.spatial.transform import Rotation
+                value['shape_pose_rotation_world'] = (Rotation.from_quat(self.hub.robot.state()['quaternion_xyzw']).as_matrix()
+                    @np.asarray(reference['source_world_to_eef_rotation'])).tolist()
+            return value
+        from .rigid_binding import valid_binding
+        binding = self.rigid_view_bindings.get(key)
+        if valid_binding(self.hub, binding, self.owners[key]):
+            return {**common, 'coordinate_estimated_at_step': binding['source_step'],
+                'coordinate_policy': 'registered_pose_on_original_point_ids', 'pose_id': binding['pose_id'],
+                'shape_pose_rotation_world': binding['transform']['rotation']}
+        return None
+
+    def cloud_keys(self, reference):
+        return [key for key in sorted(self.seen_views)
+            if (self.views[key].get('view_kind') != 'current_measurement_context'
+                and self.owners[key] == reference and (key not in self.retired_views or self.retained_view_status(key)))
+                or self.current_context(self.views[key])]
 
     def publish_available_sources(self):
         """The catalogue and compiler registry describe the same read images."""
         from .cloud_selection import public_view
-        sources = {'cloud_views': [{**public_view(self.views[key]),
+        cloud_views = []
+        for key in sorted(self.seen_views):
+            view = self.views[key]
+            record = {**public_view(view),
                 'object_id': self.owners[key], 'image_path': self.image_paths[key],
                 'point_time_status': self.point_time_status(self.owners[key]),
                 **{name: value for name, value in self.files.entries[self.image_paths[key]].items()
                     if name in ('point_cloud_path', 'point_index_path', 'point_groups_path', 'projection_frame')}}
-            for key in sorted(self.seen_views)],
+            if view.get('view_kind') == 'current_measurement_context':
+                current = self.current_context(view)
+                record.update(historical_evidence_only=not current,
+                    selectable=bool(view.get('selectable') and current),
+                    point_time_status={'owner': None, 'source_step': view['source_step'],
+                        'current_snapshot': current,
+                        'scope': 'Only this explicitly selected sample; reference_target_id is required. '
+                            'An older current snapshot is historical; read current_clouds/latest.'})
+                if not current:
+                    record['retired_reason'] = 'An older current snapshot; read the fixed latest entry'
+            if key in self.retired_views:
+                record.update(selectable=False, retired_reason=self.retired_views[key])
+            retained = self.retained_view_status(key)
+            if retained:
+                record.update(selectable=True, selection_scope='independently_retained_template_points_only')
+                record['point_time_status'].update(retained)
+                record.pop('retired_reason', None)
+            cloud_views.append(record)
+        sources = {'cloud_views': cloud_views,
             'image_references': [{'observation_id': key, 'camera': camera,
                 'image_path': 'observations/'+key+'/'+camera+'.png'}
                 for key, camera in sorted(self.seen_rgb)]}
@@ -1267,7 +1442,7 @@ class EpisodeArtifacts:
         return {'source_step': description['source_step'], 'observation_id': description['observation_id'],
             'eef': {k: description['state'][k] for k in ('position', 'quaternion_xyzw')},
             'operation_reference_target_id': reference,
-            'cloud_views': [public_view(self.views[key]) for key in sorted(self.seen_views) if self.owners[key] == reference],
+            'cloud_views': [public_view(self.views[key]) for key in self.cloud_keys(reference)],
             'image_references': [{'observation_id': key, 'camera': camera} for key, camera in sorted(self.seen_rgb)],
             'observed_opening_frames': [], 'motion_check_mode': 'ik_only' if self.hub.ik_only else 'observed_surfaces'}
 
@@ -1284,28 +1459,44 @@ class EpisodeArtifacts:
             raise ValueError('Select an observed cloud/image point; no implicit opening candidates in this mode')
         if anchor['kind'] == 'cloud_point':
             key = anchor.get('view_id')
-            if key in self.retired_views:
+            retained_view = key in self.views and self.retained_view_status(key)
+            if key in self.retired_views and not retained_view:
                 raise ValueError('Selected point belongs to a superseded object binding; read the corrected local view')
             if key not in self.seen_views:
                 raise ValueError('Read the exact point cloud image before selecting it')
-            if self.owners[key] != reference:
+            context = self.views[key].get('view_kind') == 'current_measurement_context'
+            if context and not self.current_context(self.views[key]):
+                # A frozen stage may use its request snapshot across static
+                # destination waypoints; it may not revive a prior request view.
+                snapshot = self.live_cloud_files.snapshot
+                if (snapshot is None or self.views[key].get('snapshot_id') != snapshot['snapshot_id']
+                        or self.views[key].get('source_step') != request_step):
+                    raise ValueError('Earlier current cloud snapshot is historical; read current_clouds/latest')
+            if context and reference not in {item['object_id'] for item in self.handoff['objects']}:
+                raise ValueError('Current context requires an explicit known reference_target_id for this sample')
+            if not context and self.owners[key] != reference:
                 raise ValueError('Point cloud owner differs from reference_target_id')
             from .cloud_selection import public_view
             view = self.views[key]
-            _, provenance = resolve_cloud_point(anchor, [public_view(view)], [view])
+            point, provenance = resolve_cloud_point(anchor, [public_view(view)], [view])
+            if retained_view:
+                from .carry_reference import retained_point_binding
+                retained = retained_point_binding(self.hub, view, reference, point, provenance)
+                if retained is not None and request_step is not None and request_step != self.hub.robot.steps:
+                    raise ValueError('Retained held-point anchor predates intervening motion; use a static destination or dynamic EEF')
+                if retained is None:
+                    from .rigid_binding import point_binding
+                    retained = point_binding(self.hub, self.rigid_view_bindings.get(key), reference, view, point, provenance)
+                if retained is None:
+                    raise ValueError('Retained point has no valid pose for this reference_target_id')
+                return {'kind': 'cloud_point', 'owner': reference, 'source_step': retained['source_step'],
+                    'retained_cloud_point_binding': retained}
             source = provenance.get('source_observation', {})
             source_step = source.get('source_step')
             if source_step is None and source.get('observation_id'):
                 source_step = saved_frame(self.hub.run, source['observation_id'], source['camera'])['step']
             if source_step is None:
                 raise ValueError('Cloud point has no observed-time provenance')
-            registration = self.registered_views.get(key)
-            if registration:
-                if registration['owner'] != reference:
-                    raise ValueError('Registered point owner differs from reference_target_id')
-                # Capture time stays in provenance. Only the separately saved
-                # accepted pose estimate supplies a newer coordinate epoch.
-                source_step = registration['source_step']
         else:
             key = (anchor.get('observation_id'), anchor.get('camera'))
             if key not in self.seen_rgb:
@@ -1360,6 +1551,7 @@ class EpisodeArtifacts:
                 'geometry_binding': item.get('geometry_binding'),
                 'semantic_identity_verified': False} for item in self.handoff['objects']],
             'contact_warning': executor.hub.episode_state.data.get('contact_warning'),
+            'initial_grasp_contact': deepcopy(executor.hub.episode_state.data.get('initial_grasp_contact')),
             'object_invalidations': {key: record.get('invalidated_at_step') for key, record in self.hub.journal.data['objects'].items()},
             'recent_execution_receipts': self.receipts[-2:],
             'failed_attempts_this_episode': self.failure_attempts(),
@@ -1402,6 +1594,15 @@ class EpisodeArtifacts:
         value['hand_image_paths'] = [name for name, entry in self.files.entries.items()
             if name.startswith('hand/') and entry.get('kind') == 'hand_geometry'
                 and entry.get('source_step') == description['source_step']]
+        with timings_for(self.hub).scope('current_cloud_files'):
+            self.live_cloud_files.update(description)
+        value['current_clouds'] = self.live_cloud_files.status(description)
+        recovery_candidate = getattr(self.hub, 'async_recovery_candidate', None)
+        if recovery_candidate is not None:
+            self.files.publish('sketch/recovery_reference.json', value={'candidate': recovery_candidate,
+                'executable': False, 'scope': 'Historical intent only. Use actual stop to repair; stale coordinates stay invalid.'})
+            value['async_recovery_reference'] = {'candidate_id': recovery_candidate['candidate_id'],
+                'intent': recovery_candidate.get('intent', recovery_candidate['reason']), 'executable': False, 'path': 'sketch/recovery_reference.json'}
         self.latest = value
         self.publish_available_sources()
         return value
@@ -1411,7 +1612,9 @@ class EpisodeArtifacts:
         def viewed(paths):
             for path in paths:
                 self.files.path(path)
-                if self.files.canonical_name(path) not in self.seen_paths:
+                canonical = self.files.canonical_name(path)
+                canonical = self.files.image_aliases.get(canonical, canonical)
+                if canonical not in self.seen_paths:
                     raise ValueError('Semantic evidence must cite image paths actually viewed by this A')
         previous = {(item['object_id'], item['task_phrase']): item
             for item in self.hub.episode_state.data.get('a_task_referents', [])}
@@ -1452,7 +1655,7 @@ class EpisodeArtifacts:
         parts = [{'type': 'text', 'text': json.dumps({'phase': EPISODE_REFERENCES,
             'assembled_at_source_step': self.hub.robot.steps, 'original_task': self.handoff['task'],
             'historical_evidence_only': True,
-            'objects': [{key: item[key] for key in ('object_id', 'component_ids', 'description', 'interactions', 'required_surfaces', 'identity_correction')
+            'objects': [{key: item[key] for key in ('object_id', 'component_ids', 'description', 'interactions', 'required_surfaces', 'shape_motion', 'identity_correction')
                 if key in item} for item in self.handoff['objects']],
             'object_image_index': [{**item, 'views': [{key: view[key]
                 for key in ('rgb', 'height', 'view_id') if key in view} for view in item['views']]}
@@ -1462,7 +1665,7 @@ class EpisodeArtifacts:
                 'Read an indexed image once before selecting it; additional angles and full metadata remain in scene.json.'},
             ensure_ascii=False)}]
         for path in dict.fromkeys(paths):
-            record, picture = self.read_image(path, remember=False)
+            record, picture = self.read_image(self.live_cloud_files.latest_alias(path), remember=False)
             parts.extend([{'type': 'text', 'text': json.dumps(working_cloud_record(record))}, picture])
         return parts
 
@@ -1628,9 +1831,12 @@ def prepare_actions(executor, artifacts, answer):
         packet = artifacts.packet(description, reference)
         if step['primitive'] == 'move':
             for point in action['selection']['waypoints']:
-                artifacts.validate_point(point, reference)
+                evidence = artifacts.validate_point(point, reference)
+                if evidence.get('retained_cloud_point_binding'):
+                    packet.setdefault('retained_cloud_point_bindings', []).append(
+                        evidence['retained_cloud_point_binding'])
         steps.append(step); selections.append(action['selection']); packets.append(packet)
-        views.append([artifacts.views[key] for key in sorted(artifacts.seen_views) if artifacts.owners[key] == reference])
+        views.append([artifacts.views[key] for key in artifacts.cloud_keys(reference)])
     plan = {'source_step': hub.robot.steps, 'subtask': answer.get('intent'), 'steps': steps,
         'hard_constraints': [], 'preferences': [], 'expected_effects': [], 'object_goals': []}
     stage = expand_stage(plan, selections, [{'kind': 'always'} for _ in steps], packets, views,
@@ -1644,7 +1850,7 @@ def prepare_actions(executor, artifacts, answer):
 
 
 def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, max_points=6,
-                     max_tool_calls=100, max_invalid_replies=4):
+                     max_tool_calls=100, max_invalid_replies=4, async_planning=False):
     from .agent import transcript_copy
     from .planning import save_planning_history
     from .stage_context import EPISODE_INSTRUCTIONS
@@ -1656,9 +1862,15 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
     hub.single_a_requests = hub.single_a_tool_calls = hub.single_a_batches = 0
     hub.single_a_invalid_replies = 0
     hub.single_a_format_rejections = hub.single_a_binding_rejections = 0
+    async_records = []; async_decisions = []; continuation_checks = []; consumed_candidates = set()
     def terminal(status, **fields):
-        return {**single_execution_report(hub), 'status': status, **fields}
+        return {**single_execution_report(hub), 'status': status, **fields,
+            'async_planning': {'enabled': async_planning, 'requests': async_records,
+                'preparation_decisions': async_decisions, 'continuation_checks': continuation_checks,
+                'program_continuations': len(consumed_candidates),
+                'scope': 'Same A; normal sketches continue directly. Actual failures return to A; terminal proposals use actual feedback. Overlap is not measured speedup.'}}
     artifacts = EpisodeArtifacts(hub, handoff)
+    hub.single_a_artifacts = artifacts
     executor = DirectExecutor(hub, handoff, artifacts)
     initial = artifacts.prepare()
     from .stage_context import archived_messages
@@ -1703,56 +1915,128 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                 'All other acquisition images/numeric telemetry remain in acquisition/index.json and observations/.'})}, *evidence]})
     messages.extend(artifacts.feedback_messages())
     tools = tools_for({item['object_id'] for item in handoff['objects']}, max_points)
-    validators = {tool['function']['name']: Draft202012Validator(tool['function']['parameters']) for tool in tools}
+    from .async_planning import (draft_tool, draft_context_start, execute_overlapped,
+        continuation_snapshot, check_continuation)
+    draft_schema = draft_tool(tools[0]['function']['parameters'])
     (hub.run/'a_tools.json').write_text(json.dumps(tools, indent=2))
     interfaces = {key: value for key, value in json.loads((hub.run/'interfaces.json').read_text()).items()
         if key in ('protocol_version', 'a_observation', 'a_scene_requirements')}
     interfaces.update(single_agent_tools=tools, single_agent_has_separate_grounding_phase=False)
+    interfaces['async_planning'] = {'enabled': async_planning, 'same_persistent_A': True,
+        'draft_tool': draft_schema if async_planning else None, 'actual_outcome_approval_required': False,
+        'program_continuation': 'all_normal_sketches', 'program_checks': ['pass', 'fail'],
+        'preparation_every_segment_with_budget': True, 'draft_may_defer': False,
+        'finish_review_is_proposal_only': True}
     (hub.run/'interfaces.json').write_text(json.dumps(interfaces, indent=2))
-    batches = 0; invalid = 0
-    for turn in range(1, max_turns+1):
+    def retire_candidate(candidate, reason):
+        if candidate is not None:
+            artifacts.files.publish('sketch/prepared_next.json', value={
+                'candidate': candidate, 'pending': False, 'retired_reason': reason,
+                'scope': 'Historical conditional proposal; not an execution command or current geometry.'})
+            hub.emit({'event': 'async_candidate_retired', 'candidate_id': candidate['candidate_id'],
+                'reason': reason, 'source_step': hub.robot.steps})
+    batches = 0; invalid = 0; pending_candidate = None
+    while hub.single_a_requests < max_turns:
+        turn = hub.single_a_requests+1
         if hub.single_a_tool_calls >= max_tool_calls:
             return terminal('single_agent_tool_budget_exhausted')
-        if context is not None:
-            with timings_for(hub).scope('model_context_preparation'):
-                context.prepare_boundary(messages, artifacts.latest, hub.run/'a_context', hub.emit)
-        hub.single_a_requests = turn
-        request_step = hub.robot.steps
-        artifacts.publish_budget()
-        folder = hub.run/'single_a'/f'turn_{turn:03d}'; folder.mkdir(parents=True, exist_ok=True)
-        hub.emit({'event': 'single_a_request_started', 'turn': turn, 'source_step': hub.robot.steps})
-        started = time.perf_counter()
-        with timings_for(hub).scope('api_request'):
-            response = client.complete(messages, tools)
-        (folder/'response.json').write_text(json.dumps(response, indent=2))
-        messages.append(response['message'])
-        hub.emit({'event': 'single_a_request_finished', 'turn': turn, 'wall_s': time.perf_counter()-started,
-            'usage': response.get('usage'), 'transport': client.last_request_metadata})
-        calls = response['message'].get('tool_calls') or []
-        if not calls:
-            # Some compatible providers use a JSON tool envelope instead of native tool calls.
-            try:
-                value = json.loads(response['message'].get('content') or '')
-                if 'actions' in value:
-                    name, arguments = 'execute_actions', value
+        program_dispatch = None
+        program_plan = None
+        if pending_candidate is not None:
+            gate = check_continuation(pending_candidate, artifacts.latest, hub.previous_stage_receipt,
+                batch=batches, snapshot=continuation_snapshot(hub), episode=hub.episode_state.data,
+                consumed=consumed_candidates)
+            if gate['status'] == 'pass' and pending_candidate['status'] == 'ready':
+                proposed = {'intent': pending_candidate['intent'], 'actions': deepcopy(pending_candidate['actions']),
+                    'source_step': hub.robot.steps}
+                try:
+                    proposed = bind_request_fields(artifacts, proposed, hub.robot.steps)
+                    program_plan = prepare_actions(executor, artifacts, proposed)
+                except ValueError as exc:
+                    gate['status'] = 'fail'
+                    gate['checks'].append({'check': 'current_geometry_preflight', 'status': 'fail', 'reason': str(exc)[:1800]})
                 else:
-                    name, arguments = value['name'], value['arguments']
-                calls = [{'function': {'name': name, 'arguments': json.dumps(arguments)}}]
-            except (ValueError, TypeError, KeyError):
-                messages.append({'role': 'user', 'content': 'Use one of the supplied tools; no robot action was executed.'})
-                artifacts.record_rejected_attempt(request_turn=turn, request_source_step=request_step,
-                    name=None, arguments=response['message'].get('content'),
-                    result={'error_kind': 'tool_format', 'error': 'No valid tool call or JSON envelope'},
-                    assessment_committed=False)
-                invalid += 1
-                hub.single_a_invalid_replies = invalid
-                hub.single_a_format_rejections += 1
-                artifacts.publish_budget()
-                if invalid >= max_invalid_replies:
-                    return terminal('single_agent_invalid_output')
-                continue
-        over_budget = hub.single_a_tool_calls+len(calls) > max_tool_calls
-        if not over_budget:
+                    program_dispatch = {'candidate_id': pending_candidate['candidate_id'],
+                        'authorization': 'conditional_draft', 'continuation_check': deepcopy(gate),
+                        'model_request_issued_for_dispatch': False}
+            continuation_checks.append(gate)
+            artifacts.files.publish('sketch/continuation_check.json', value=gate)
+            hub.emit({'event': 'async_continuation_checked', **gate})
+            messages.append({'role': 'user', 'content': json.dumps({'phase': 'async_continuation_check', **gate})})
+            if gate['status'] == 'fail':
+                hub.async_recovery_candidate = deepcopy(pending_candidate)
+                retire_candidate(pending_candidate, 'program_check_failed')
+                pending_candidate = None
+            elif pending_candidate['status'] == 'finish_review':
+                hub.async_recovery_candidate = deepcopy(pending_candidate)
+                retire_candidate(pending_candidate, 'terminal_proposal_actual_result')
+                messages.append({'role': 'user', 'content': json.dumps({
+                    'phase': 'async_terminal_actual', 'source_step': hub.robot.steps,
+                    'candidate_id': pending_candidate['candidate_id'],
+                    'instruction': 'This was only your proposal to end after the executing sketch. '
+                        'Use the latest ACTUAL feedback to finish if satisfied or repair if needed. '
+                        'All normal tools are available. Do not invent a settling wait for another review.'})})
+                pending_candidate = None
+        if program_dispatch is not None:
+            # This is a program event using an already saved A draft, never a new A reply.
+            request_step = hub.robot.steps
+            folder = hub.run/'program_continuations'/f'batch_{batches+1:03d}'
+            folder.mkdir(parents=True, exist_ok=False)
+            (folder/'authorization.json').write_text(json.dumps(program_dispatch, indent=2))
+            messages.append({'role': 'user', 'content': json.dumps({'phase': 'program_continuation_dispatch',
+                **program_dispatch, 'instruction': 'Program is attempting your saved conditional sketch. '
+                    'No new A holding/semantic assessment was made.'})})
+            calls = [{'function': {'name': 'program_prepared_sketch', 'arguments': json.dumps(proposed)}}]
+            validators = {'program_prepared_sketch': Draft202012Validator(obj({
+                'intent': {'type': 'string'}, 'source_step': {'type': 'integer'},
+                'actions': tools[0]['function']['parameters']['properties']['actions']},
+                ['intent', 'source_step', 'actions']))}
+        else:
+            reference_candidate = getattr(hub, 'async_recovery_candidate', None)
+            retained_draft = draft_context_start(messages, reference_candidate) if reference_candidate is not None else None
+            active_tools = tools
+            validators = {tool['function']['name']: Draft202012Validator(tool['function']['parameters']) for tool in active_tools}
+            if context is not None:
+                with timings_for(hub).scope('model_context_preparation'):
+                    context.prepare_boundary(messages, artifacts.latest, hub.run/'a_context', hub.emit,
+                        **({'retain_from': retained_draft} if retained_draft is not None else {}))
+            hub.single_a_requests = turn
+            request_step = hub.robot.steps
+            artifacts.publish_budget()
+            folder = hub.run/'single_a'/f'turn_{turn:03d}'; folder.mkdir(parents=True, exist_ok=True)
+            hub.emit({'event': 'single_a_request_started', 'turn': turn, 'source_step': hub.robot.steps})
+            started = time.perf_counter()
+            with timings_for(hub).scope('api_request'):
+                response = client.complete(messages, active_tools)
+            (folder/'response.json').write_text(json.dumps(response, indent=2))
+            messages.append(response['message'])
+            hub.emit({'event': 'single_a_request_finished', 'turn': turn, 'wall_s': time.perf_counter()-started,
+                'usage': response.get('usage'), 'transport': client.last_request_metadata})
+            calls = response['message'].get('tool_calls') or []
+            if not calls:
+                # Some compatible providers use a JSON tool envelope instead of native tool calls.
+                try:
+                    value = json.loads(response['message'].get('content') or '')
+                    if 'actions' in value:
+                        name, arguments = 'execute_actions', value
+                    else:
+                        name, arguments = value['name'], value['arguments']
+                    calls = [{'function': {'name': name, 'arguments': json.dumps(arguments)}}]
+                except (ValueError, TypeError, KeyError):
+                    messages.append({'role': 'user', 'content': 'Use one of the supplied tools; no robot action was executed.'})
+                    artifacts.record_rejected_attempt(request_turn=turn, request_source_step=request_step,
+                        name=None, arguments=response['message'].get('content'),
+                        result={'error_kind': 'tool_format', 'error': 'No valid tool call or JSON envelope'},
+                        assessment_committed=False)
+                    invalid += 1
+                    hub.single_a_invalid_replies = invalid
+                    hub.single_a_format_rejections += 1
+                    artifacts.publish_budget()
+                    if invalid >= max_invalid_replies:
+                        return terminal('single_agent_invalid_output')
+                    continue
+        over_budget = program_dispatch is None and hub.single_a_tool_calls+len(calls) > max_tool_calls
+        if not over_budget and program_dispatch is None:
             hub.single_a_tool_calls += len(calls)
         artifacts.publish_budget()
         batch_has_mutation = any(call['function']['name'] in ('execute_actions', 'finish', 'refresh_object') for call in calls)
@@ -1761,6 +2045,7 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
         reply_invalid = False; assessed = False
         for call in calls:
             name = call['function']['name']
+            early_tool_receipt = False
             dispatch_started = False
             error_kind = 'tool_format'
             try:
@@ -1782,30 +2067,67 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                     raise ValueError((batch_error+' ' if batch_error else '')+detail) from None
                 if batch_invalid:
                     raise ValueError(batch_error)
-                error_kind = 'parameter_binding' if name in ('execute_actions', 'refresh_object', 'finish') else 'file_access'
-                if name == 'execute_actions':
+                error_kind = 'parameter_binding' if name in ('execute_actions', 'program_prepared_sketch', 'refresh_object', 'finish') else 'file_access'
+                if name in ('execute_actions', 'program_prepared_sketch'):
                     if batches >= max_batches:
                         raise ValueError('Action-batch budget exhausted; finish with an honest assessment')
-                    artifacts.validate_semantic_assessment(arguments)
+                    if program_dispatch is None:
+                        artifacts.validate_semantic_assessment(arguments)
                     original_submission = deepcopy(arguments)
                     (folder/'submitted_actions.json').write_text(json.dumps(arguments, indent=2))
                     validate_request_snapshot(artifacts, arguments, request_step)
-                    apply_assessment(hub, arguments)
-                    assessed = True
+                    if program_dispatch is None:
+                        apply_assessment(hub, arguments)
+                        assessed = True
                     arguments = bind_request_fields(artifacts, arguments, request_step)
                     (folder/'request_bound_actions.json').write_text(json.dumps(arguments, indent=2))
-                    plan, stage = prepare_actions(executor, artifacts, arguments)
+                    plan, stage = program_plan if program_dispatch is not None else prepare_actions(executor, artifacts, arguments)
                     dispatch_started = True
                     artifacts.begin_execution(plan, stage, batches+1,
-                        submission=original_submission, bound_submission=arguments)
+                        submission=original_submission, bound_submission=arguments, program_origin=program_dispatch)
+                    if program_dispatch is not None:
+                        consumed_candidates.add(pending_candidate['candidate_id'])
+                        pending_candidate['executed'] = True
+                    hub.async_recovery_candidate = None
+                    if pending_candidate is not None:
+                        retire_candidate(pending_candidate,
+                            'program_continuation' if program_dispatch is not None else 'A_replanned')
+                        pending_candidate = None
+                    preparation_budget = (batches+1 < max_batches and
+                        hub.single_a_requests+2 <= max_turns and hub.single_a_tool_calls+2 <= max_tool_calls)
+                    can_prepare = async_planning and preparation_budget
+                    if async_planning:
+                        decision = {'batch': batches+1, 'source_step': hub.robot.steps,
+                            'request_started': can_prepare,
+                            'reason': 'every_segment' if can_prepare else 'budget_reserved_for_next_actual_request'}
+                        async_decisions.append(decision)
+                        hub.emit({'event': 'async_preparation_decision', **decision})
+                    draft_error = None
                     try:
-                        receipt = execute_sketch(hub, executor, plan, batches, frozen_binding=stage)
+                        if can_prepare:
+                            early_tool_receipt = True
+                            receipt, pending_candidate, entry, draft_error = execute_overlapped(
+                                hub, client, messages, draft_schema, call, original_submission, batches+1,
+                                lambda: execute_sketch(hub, executor, plan, batches, frozen_binding=stage))
+                            async_records.append(entry)
+                            if pending_candidate is not None:
+                                artifacts.files.publish('sketch/prepared_next.json', value={
+                                    'candidate': pending_candidate, 'pending': True,
+                                    'scope': 'Conditional proposal only; no action dispatched or future state certified.'})
+                        else:
+                            receipt = execute_sketch(hub, executor, plan, batches, frozen_binding=stage)
                     except BaseException as exc:
                         artifacts.interrupt_execution(exc)
                         raise
                     batches += 1; acted = True
                     artifacts.finish_execution(receipt)
                     hub.previous_stage_receipt = receipt
+                    if draft_error is not None:
+                        from .agent import RejectedResponse
+                        if not isinstance(draft_error, RejectedResponse):
+                            artifacts.current(executor, folder/'actual')
+                            save_planning_history(hub.run, messages)
+                            raise draft_error
                     if not receipt.get('commands_completed'):
                         hub.episode_state.remember_route_failure(previous_stage_outcome(receipt))
                     for item in receipt.get('steps', []):
@@ -1816,6 +2138,7 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                                     'actual_motion': item['result'], 'original_absolute_goal': goal}
                     result = public(receipt)
                     hub.emit({'event': 'single_a_actions_finished', 'batch': batches,
+                        'dispatch_origin': 'program_continuation' if program_dispatch is not None else 'model_tool',
                         'source_step': hub.robot.steps, 'commands_completed': receipt.get('commands_completed')})
                 elif name == 'list_dir':
                     result = artifacts.files.list_dir(**arguments)
@@ -1836,6 +2159,8 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                     dispatch_started = True
                     before_references = list(artifacts.reference_reads)
                     result, parts, rebound = artifacts.refresh_object(arguments, prepared)
+                    retire_candidate(pending_candidate, 'explicit_object_refresh')
+                    pending_candidate = None
                     image_parts.extend(parts)
                     references_changed |= before_references != artifacts.reference_reads
                 else:
@@ -1844,6 +2169,8 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                     result = {'original_task': handoff['task'], 'agent_assessment': arguments,
                         'semantic_identity_certified': False, 'official_success_visible_to_agent': False}
                     finished = arguments
+                    retire_candidate(pending_candidate, 'A_finished')
+                    pending_candidate = None
             except (ValidationError, ValueError) as exc:
                 # Physical execution exceptions must never be recast as a harmless tool typo.
                 if acted or dispatch_started:
@@ -1873,7 +2200,7 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
             elif name == 'read_image' and result.get('kind') == 'point_cloud_projection':
                 presented = working_cloud_record(result)
             presented = {**presented, 'execution_budgets': single_budget(hub)}
-            if call.get('id'):
+            if call.get('id') and not early_tool_receipt:
                 messages.append({'role': 'tool', 'tool_call_id': call['id'], 'content': json.dumps(presented, ensure_ascii=False)})
             else:
                 messages.append({'role': 'user', 'content': json.dumps({'tool': name, 'result': presented}, ensure_ascii=False)})

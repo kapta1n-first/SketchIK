@@ -31,6 +31,26 @@ def urls(messages):
             for p in m['content'] if p.get('type') == 'image_url']
 
 
+def test_new_logical_cloud_slot_replaces_old_protected_bitmap_without_deleting_history():
+    from sketchik.stage_context import EPISODE_REFERENCES
+    def card(slot):
+        return {'type': 'text', 'text': json.dumps({'logical_image_slot': slot})}
+    source = [{'role': 'user', 'content': [
+        {'type': 'text', 'text': json.dumps({'phase': EPISODE_REFERENCES})},
+        card('current_clouds/latest/object_00_face.png'), image(1),
+        card('current_clouds/latest/object_01_face.png'), image(2)]},
+        {'role': 'user', 'content': [card('current_clouds/latest/object_00_face.png'), image(3)]}]
+    original = deepcopy(source)
+    window = ImageWindow(2, 2, 100_000, archive_reader='read_image')
+    wire, audit = window.apply(source, deepcopy(source))
+    assert urls(wire) == [image(2)['image_url']['url'], image(3)['image_url']['url']]
+    assert source == original and len(window.catalog) == 3
+    assert audit['omitted_images'][0]['reason'] == 'superseded_logical_slot'
+    old_id = audit['omitted_images'][0]['history_image_id']
+    _, restored = window.retrieve([old_id])
+    assert urls([{'content': restored}]) == [image(1)['image_url']['url']]
+
+
 def test_public_file_image_read_keeps_the_latest_actual_observation_live():
     source = history(5)
     current = urls(source)[-1]

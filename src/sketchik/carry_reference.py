@@ -6,6 +6,7 @@ All records are episode-local hypotheses, not attachment certificates.
 from __future__ import annotations
 
 import hashlib
+from pathlib import Path
 import numpy as np
 
 
@@ -60,6 +61,55 @@ def report(reference):
         'validity', 'suspended_at_step', 'suspension_kind', 'suspension_reason',
         'reviewed_at_step', 'review_pose_relation', 'restored_at_step', 'reference_scope',
         'relocalized_at_step', 'relation_basis') if key in reference}
+
+
+def active_reference(hub):
+    """A usable rigid hypothesis, not proof of attachment or complete shape."""
+    reference = getattr(hub, 'carried_surface_reference', None) or {}
+    episode = getattr(getattr(hub, 'episode_state', None), 'data', {})
+    state = hub.robot.state()
+    if (reference.get('validity') != 'active' or state.get('gripper_command') != 1.
+            or reference.get('grasp_epoch') != episode.get('grasp_epoch', 0)
+            or episode.get('contact_warning')
+            or episode.get('carry_premise') == 'invalidated_by_contact_change'
+            or len(reference.get('local_xyz_m', [])) < 25):
+        return None
+    declared = getattr(hub, 'carried_target_id', None)
+    if declared is not None and declared != reference.get('object_id'):
+        return None
+    return reference
+
+
+def retained_view_reference(hub, view, owner):
+    reference = active_reference(hub)
+    if (reference is None or reference.get('object_id') != owner
+            or not reference.get('source_cloud_file') or not view.get('cloud_file')
+            or view.get('view_kind') == 'current_measurement_context'):
+        return None
+    return reference if Path(view['cloud_file']).resolve() == Path(reference['source_cloud_file']).resolve() else None
+
+
+def retained_point_binding(hub, view, owner, point, provenance):
+    """Same bitmap/sample ID; derive only that retained sample's current XYZ."""
+    reference = retained_view_reference(hub, view, owner)
+    if reference is None:
+        return None
+    matches = np.flatnonzero(np.asarray(reference['point_ids']) == provenance['cloud_point_index'])
+    if len(matches) != 1:
+        raise ValueError('Selected pixel is not one of this grasp\'s retained point IDs')
+    slot = int(matches[0])
+    original = reference.get('original_world_xyz_m')
+    if original is None or not np.array_equal(np.asarray(original)[slot], point):
+        raise ValueError('Retained sample no longer matches its original source coordinates')
+    from scipy.spatial.transform import Rotation
+    state = hub.robot.state()
+    world = Rotation.from_quat(state['quaternion_xyzw']).apply(reference['local_xyz_m'][slot])+state['position']
+    return {'kind': 'retained_grasp_point_current_eef', 'view_id': view['view_id'],
+        'pixel_xy': provenance['cloud_pixel_xy'], 'cloud_point_index': provenance['cloud_point_index'],
+        'original_world_xyz_m': np.asarray(point).tolist(), 'world_xyz_m': world.tolist(),
+        'reference_id': reference['reference_id'], 'grasp_epoch': reference['grasp_epoch'],
+        'relation_revision': reference['relation_revision'], 'source_step': state['step'],
+        'holding_certified': False}
 
 
 def pose_rebind_identity_error(reference, object_id, grasp_epoch, current_state):
@@ -160,6 +210,7 @@ def relocalize_reference(reference, *, object_id, grasp_epoch, explicit_pose_reb
         local_points_sha256=hashlib.sha256(reference['local_xyz_m'].tobytes()).hexdigest())
     reference.setdefault('relation_history', []).append(previous)
     reference.update(local_xyz_m=updated, relation_revision=reference['relation_revision']+1,
+        source_world_to_eef_rotation=(Rotation.from_quat(quat).as_matrix().T@rotation).tolist(),
         validity='active', relocalized_at_step=int(current_state['step']),
         relation_basis='Explicit current clean-patch RGB-D registration of original samples',
         rigid_attachment_verified=False)

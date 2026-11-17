@@ -19,7 +19,7 @@ from .task_execution import hand_observation_parts
 from .timing import timed, timings_for
 from .tools import ToolHub, public
 
-PROTOCOL_VERSION = 64
+PROTOCOL_VERSION = 72
 
 
 def semantic_observation_description(description):
@@ -452,7 +452,10 @@ def run(args):
                     'a_stage_context_enabled': getattr(args, 'a_context_window', False),
                     'long_term_memory': False},
         'execution': {'simulator_owner': 'calling thread', 'binding': 'current sketch batch',
-                      'synchronous': True, 'max_route_points': getattr(args, 'max_route_points', 6),
+                      'synchronous': not getattr(args, 'async_planning', False),
+                      'async_next_sketch_planning': getattr(args, 'async_planning', False),
+                      'model_calls_serial': True,
+                      'max_route_points': getattr(args, 'max_route_points', 6),
                       'motion_check_mode': 'ik_only', 'per_primitive_model_call': False,
                       'failure': 'stop unexecuted suffix'},
         'records': {'interfaces': 'interfaces.json', 'context': 'context_manifest.json',
@@ -495,6 +498,7 @@ def run(args):
         history.attach(hub)
         snapshot(robot, folder/'initial_observation', metadata, folder.name)
         client_a = make_task_client(args, folder)
+        client_a.attempt_observer = usage.measure_attempt
         from .request_recovery import RequestRecovery
         request_recovery = RequestRecovery(folder, client_a, robot.state, emit)
         client_a.request_pause_handler = request_recovery.wait_for_resume
@@ -550,7 +554,8 @@ def run(args):
         report.update(run_single_agent(hub, client_a, messages, packet,
             max_turns=args.max_turns, max_batches=args.max_subtasks,
             max_points=args.max_route_points, max_tool_calls=args.max_tool_calls,
-            max_invalid_replies=getattr(args, 'max_invalid_replies', 4)))
+            max_invalid_replies=getattr(args, 'max_invalid_replies', 4),
+            async_planning=getattr(args, 'async_planning', False)))
         report['operator_resumed_requests'] = getattr(client_a, 'operator_resumed_requests', 0)
     except KeyboardInterrupt:
         report.update(status='interrupted', interruption='Operator stopped the task; no automatic restart')
@@ -566,6 +571,14 @@ def run(args):
         emit({'event': 'trial_exception', 'error': report['error'],
               **({'provider_response': provider_response} if provider_response else {})})
     finally:
+        artifacts = getattr(hub, 'single_a_artifacts', None)
+        if artifacts is not None:
+            try:
+                artifacts.live_cloud_files.close()
+            except Exception as exc:
+                report['background_cloud_error_type'] = type(exc).__name__
+                report.setdefault('error', 'Background point-cloud processing failed')
+                report['status'] = 'failed'
         if request_recovery is not None:
             report.update(operator_resumed_requests=request_recovery.resumes,
                 api_operator_pause_wall_s=request_recovery.pause_wall_s)
@@ -620,6 +633,10 @@ def main():
              'No robot actions are dispatched for invalid calls; all API/tool attempts remain counted.')
     parser.add_argument('--max-subtasks', type=int, default=6,
         help='Complete sketch-batch budget.')
+    parser.add_argument('--async-planning', action='store_true',
+        help='Same A conditionally drafts the next subtask during current execution; '
+             'all normal sketches continue directly; actual failures return to A and terminal proposals receive actual feedback. '
+             'Draft and review requests count toward existing budgets.')
     parser.add_argument('--completion-diagnostic', action='store_true',
         help='Fresh single-A diagnostic: continue past official success to verify actual release/withdrawal; '
              'retain physical/backend termination, record first and final evaluation separately, never show GT to A.')

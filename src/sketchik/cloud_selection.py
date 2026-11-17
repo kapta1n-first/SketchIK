@@ -162,7 +162,7 @@ def annotate_groups(image, mapping, group_ids):
 
 
 def write_views(cloud_file, sources, folder, prefix, eye, *, role, selectable=True,
-                group_ids=None, directions=None):
+                group_ids=None, directions=None, footprint_pixels=9, viewport_points=None):
     """Selected projections share an unchanged point table and exact local maps."""
     folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
     cloud_file=Path(cloud_file).resolve()
@@ -184,7 +184,8 @@ def write_views(cloud_file, sources, folder, prefix, eye, *, role, selectable=Tr
     views=[]
     for name,direction in directions:
         view_id=prefix+'_'+name
-        picture,mapping,meta=rasterize(points,rgb,'rgb',tuple(direction),footprint_pixels=9)
+        picture,mapping,meta=rasterize(points,rgb,'rgb',tuple(direction),
+            footprint_pixels=footprint_pixels, viewport_points=viewport_points)
         if group_ids is not None:
             meta['component_label_bounds_xyxy']=annotate_groups(picture,mapping,group_ids)
             meta['point_group_ids_file']=str(group_file)
@@ -209,7 +210,10 @@ def public_view(view):
         if key in view)
     if 'component_label_bounds_xyxy' in view:keys.append('component_label_bounds_xyxy')
     if 'group_ids' in view:keys.append('group_ids')
-    for key in ('height_range_world_z_m','same_pixel_map_as','coordinate_estimate'):
+    for key in ('height_range_world_z_m','same_pixel_map_as','coordinate_estimate',
+            'view_kind','snapshot_id','source_step','selection_scope','carry_reference_eligible',
+            'slot_target_hint','display_bounds_world_m','coverage','framing_changed',
+            'measurement_kind','historical_points_fused','projection_role'):
         if key in view:keys.append(key)
     result={key:view[key] for key in keys}
     result['source_observations']=[{key:source[key] for key in ('observation_id','source_step','camera') if key in source}
@@ -278,6 +282,10 @@ def resolve_cloud_point(anchor, allowed_views, local_views):
         point=data['world_xyz_m'][index].astype(float)
         provenance={'cloud_view_id':identity,'cloud_pixel_xy':pixel,'cloud_point_index':index,
             'cloud_file':view['cloud_file'],'cloud_role':view['role']}
+        if view.get('view_kind') == 'current_measurement_context':
+            provenance.update(binding_scope='single_sample_context',
+                carry_reference_eligible=False, snapshot_id=view['snapshot_id'],
+                measurement_kind=view['measurement_kind'])
         if view.get('coordinate_estimate'):
             provenance['coordinate_estimate'] = view['coordinate_estimate']
         if 'source_index' in data and 'pixel_xy' in data:

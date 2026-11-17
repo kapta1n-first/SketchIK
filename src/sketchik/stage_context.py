@@ -139,7 +139,9 @@ class StageContext:
             'retained_tail_messages': len(tail), 'active_source_indices': active_indices,
             'source_history_changed': False, 'retained_tool_reasoning_unchanged': True}
 
-    def prepare_boundary(self, messages, checkpoint, folder, emit, *, force=False):
+    def prepare_boundary(self, messages, checkpoint, folder, emit, *, force=False, retain_from=None):
+        if retain_from is not None and (type(retain_from) is not int or not 0 <= retain_from < len(messages)):
+            raise ValueError('Retained dialogue start must identify an existing source message')
         active, current = self.apply(messages)
         before = metrics(active)
         if not force and before['text_chars'] <= self.limits['max_chars'] and before['messages'] <= self.limits['max_messages']:
@@ -162,6 +164,7 @@ class StageContext:
         if robot is not None and self.limits['retain_robot_facts']:
             indices.append(robot)
         latest_actual_images = latest_current_state = latest_references = None
+        latest_cloud_slots = {}
         if self.limits['retain_episode_references']:
             for index, item in enumerate(messages):
                 content = item.get('content')
@@ -178,6 +181,15 @@ class StageContext:
                     latest_actual_images = index
                 if isinstance(tag, dict) and tag.get('phase') == CURRENT_STATE:
                     latest_current_state = index
+                for part in content:
+                    if part.get('type') != 'text':
+                        continue
+                    try:
+                        card = json.loads(part.get('text', ''))
+                    except (ValueError, TypeError):
+                        continue
+                    if isinstance(card, dict) and isinstance(card.get('logical_image_slot'), str):
+                        latest_cloud_slots[card['logical_image_slot']] = index
             if latest_references is not None:
                 indices.append(latest_references)
         # The most recent permanent instructions lead the working request,
@@ -217,6 +229,11 @@ class StageContext:
                         tail = candidates[start:]
                         if metrics([messages[i] for i in tail])['text_chars'] <= self.limits['keep_chars']:
                             break
+        # Keep the real image/card pair for each last-read logical slot across
+        # epochs. Reintroducing only its old initial bitmap would misalign the
+        # agent's visible pixels with the current slot version.
+        protected = set(range(retain_from, len(messages))) if retain_from is not None else set()
+        tail = sorted((set(tail) | set(latest_cloud_slots.values()) | protected)-set(indices))
         if latest_actual_images is not None and latest_actual_images not in indices:
             # This independent user message has no tool pairing. Keep its
             # original position relative to retained decisions/results.
@@ -235,6 +252,7 @@ class StageContext:
             'parent_epoch': current['epoch'], 'source_step': checkpoint['source_step'],
             'boundary_message_index': len(messages), 'fixed_prefix_indices': indices,
             'retained_tail_indices': tail,
+            'protected_dialogue_from_index': retain_from,
             'source_sha256': hashlib.sha256(json.dumps(source_public, sort_keys=True).encode()).hexdigest(),
             'limits': self.limits, 'previous_active': before}
         message = {'role': 'user', 'content': json.dumps({MARKER: marker,
@@ -257,4 +275,3 @@ class StageContext:
         emit({'event': 'a_context_checkpoint', **marker, 'after': after,
             'source_history_retained': True, 'model_summary_requests': 0})
         return marker
-

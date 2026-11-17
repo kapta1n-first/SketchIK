@@ -48,6 +48,7 @@ def test_credit_snapshot_one_query_and_no_private_account_data(gateway):
     {'success': True, 'total_remain': -1},
     {'success': True, 'total_remain': 'NaN'},
     {'success': True, 'total_remain': 12, 'details': [{'error': 'private-provider-error'}]},
+    {'success': True, 'total_remain': 0, 'details': []},
 ])
 def test_unknown_or_partial_balance_is_not_zero_or_success(gateway, payload):
     config, state = gateway
@@ -122,6 +123,39 @@ def test_ledger_keeps_one_final_record_per_run_and_no_invented_historical_balanc
     assert len((tmp_path/'ledger/trials.jsonl').read_text().splitlines()) == 1
     assert len((tmp_path/'ledger/trials.csv').read_text().splitlines()) == 2
     assert json.loads((folder/'usage.json').read_text())['total_requests'] == 3
+
+
+def test_every_failed_and_resumed_attempt_is_measured_without_exposing_inputs(tmp_path, monkeypatch):
+    from sketchik.agent import ChatClient, ProviderError
+    from sketchik.usage_accounting import TrialUsage
+    values = iter([1000., 1000., 990., 990., 975., 975.])
+    def balance(_):
+        return {'status': 'available', 'remaining_platform_credits': next(values)}
+    monkeypatch.setattr('sketchik.usage_accounting.credit_snapshot', balance)
+    usage = TrialUsage(tmp_path, tmp_path/'ledger')
+    client = ChatClient('http://127.0.0.1:1/v1', 'fixture', 'private-test-key')
+    client.attempt_observer = usage.measure_attempt
+    calls = []
+    def attempt(messages, tools):
+        calls.append(1)
+        client.last_request_metadata = {'body_sha256': 'same-body', 'body_bytes': 80}
+        if len(calls) == 1:
+            raise ProviderError('fixture disconnect')
+        client.last_response_metadata = {'finish_reason': 'stop'}
+        return {'message': {'role': 'assistant', 'content': 'ready'}}
+    client._complete_once = attempt
+    client.request_pause_handler = lambda *args: None  # Explicit test-only resume.
+    client.complete([{'role': 'user', 'content': 'private-task-input'}])
+    usage.finish({'status': 'finished'})
+    records = [json.loads(x) for x in (tmp_path/'usage_attempts.jsonl').read_text().splitlines()]
+    assert [r['account_credit_decrease'] for r in records] == [10., 15.]
+    assert records[0]['failure_type'] == 'ProviderError' and records[1]['failure_type'] is None
+    assert client.operator_resumed_requests == 1 and len(calls) == 2
+    assert all(r['attributed_request_cost'] is None for r in records)
+    assert 'private' not in (tmp_path/'usage_attempts.jsonl').read_text()
+    final = json.loads((tmp_path/'usage.json').read_text())
+    assert final['account_credit_decrease'] == 25.
+    assert final['attempt_accounting']['failed_attempts'] == 1
 
 
 def test_trial_failure_finalizes_usage_without_replacing_original_failure(tmp_path, monkeypatch):

@@ -29,7 +29,7 @@ def validate_rectangle(bounds, shape):
 
 
 def inspect_snapshot(inputs, source_step, folder, *, non_robot_mask=None,
-                     table_height=None):
+                     table_height=None, render_images=True):
     """Generate every local geometric candidate, without binding an object.
 
     inputs contain saved frames and A's native-image rectangles. Non-robot
@@ -84,6 +84,8 @@ def inspect_snapshot(inputs, source_step, folder, *, non_robot_mask=None,
     except OSError:
         label_font = ImageFont.load_default()
     for source_id, value in enumerate(inputs):
+        if not render_images:
+            break
         image = np.asarray(value['frame']['rgb']).copy()
         visible = (source_ids == source_id) & (labels > 0)
         for group_id in np.unique(labels[visible]):

@@ -54,11 +54,21 @@ class ImageWindow:
         image_messages = []
         episode_reference_images = set()
         latest_actual_images = set()
+        slot_versions = {}
+        latest_slot_versions = {}
+        newest_explicit_history = set()
         for mi, message in enumerate(source):
             if not isinstance(message.get('content'), list):
                 continue
             ids = []
+            card = {}
             for pi, part in enumerate(message['content']):
+                if part.get('type') == 'text':
+                    try:
+                        value = json.loads(part.get('text', ''))
+                        card = value if isinstance(value, dict) else {}
+                    except (ValueError, TypeError):
+                        card = {}
                 if part.get('type') != 'image_url':
                     continue
                 digest = hashlib.sha256(json.dumps(part, sort_keys=True, ensure_ascii=False,
@@ -71,6 +81,12 @@ class ImageWindow:
                     item['wire_count'] += 1
                 item['positions'].append([mi, pi])
                 ids.append(identity)
+                slot = card.get('logical_image_slot')
+                if isinstance(slot, str) and slot:
+                    slot_versions.setdefault(slot, set()).add(identity)
+                    latest_slot_versions[slot] = identity
+                elif card.get('public_artifact_read') is True and mi == len(source)-1:
+                    newest_explicit_history.add(identity)
             if ids:
                 first = message['content'][0]
                 try:
@@ -93,9 +109,14 @@ class ImageWindow:
         protected = set(image_messages[0][0] + image_messages[-1][0] + (regular[-1] if regular else []))
         protected.update(episode_reference_images)
         protected.update(latest_actual_images)
+        # Logical slots replace their older encoded bitmaps, without editing
+        # source history or removing explicitly requested historical evidence.
+        superseded = (set().union(*slot_versions.values()) if slot_versions else set()) - set(latest_slot_versions.values())
+        superseded.difference_update(newest_explicit_history)
+        protected.difference_update(superseded)
         # Retrieval appends an original image in the newest message, making it live again.
         self.hidden.difference_update(protected)
-        active = set(entries) - self.hidden
+        active = set(entries) - self.hidden - superseded
         size = lambda ids: sum(entries[key]['wire_bytes'] for key in ids)
         count = lambda ids: sum(entries[key]['wire_count'] for key in ids)
         if count(active) > self.limits['max_images'] or size(active) > self.limits['max_bytes']:
@@ -114,7 +135,8 @@ class ImageWindow:
             if key in active:
                 continue
             omitted.append({'history_image_id': key, 'original_positions': item['positions'],
-                            'encoded_url_bytes': item['wire_bytes']})
+                            'encoded_url_bytes': item['wire_bytes'],
+                            'reason': 'superseded_logical_slot' if key in superseded else 'image_window_budget'})
             for mi, pi in item['positions']:
                 encoded[mi]['content'][pi] = {'type': 'text', 'text':
                     f'[Archived image {key} omitted from this request by the explicit image window. '
@@ -124,6 +146,7 @@ class ImageWindow:
             'images_before': count(entries), 'images_after': count(active),
             'encoded_image_url_bytes_before': size(entries), 'encoded_image_url_bytes_after': size(active),
             'protected_image_ids': sorted(protected), 'omitted_images': omitted,
+            'latest_logical_image_slots': latest_slot_versions,
             'source_history_changed': False, 'text_tool_history_and_reasoning_preserved': True}
 
     def retrieve(self, image_ids, catalog_offset=0):

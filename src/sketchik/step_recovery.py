@@ -1,4 +1,4 @@
-"""Numerical recovery of the same target, then reconciliation by the same agent."""
+"""T1 retries the same numerical target; T2 returns recovery to the same agent."""
 from __future__ import annotations
 
 from contextlib import nullcontext
@@ -58,7 +58,7 @@ def run_step(hub, grounder, stage, index, description, pictures, folder, *, subt
         return result
 
     def escalate(error):
-        record('T3','return_to_A',failure=error)
+        record('T2','return_to_A',failure=error)
         if last_output is not None:
             return {'compiled':last_compiled,'output':last_output,'recovery':summary(),'failure':error}
         exc=BindingUnavailable(json.dumps(error,allow_nan=False));exc.failure=error;exc.recovery=summary()

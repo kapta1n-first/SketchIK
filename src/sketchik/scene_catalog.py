@@ -192,6 +192,8 @@ def binding_schema(catalog):
         'uniqueItems':True},'source_regions':{'type':'array','items':source,'minItems':1,
             'description':'Optional coarse native-image regions only when G groups omit an essential part. Not contact points.'},'description':text,
         'interactions':{'type':'array','items':text,'minItems':1},
+        'shape_motion':{'enum':['rigid','articulated','unknown'],
+            'description':'Optional claim about this referenced point-set scope, not its name. rigid keeps shape and changes pose; articulated has relative part motion; omission is unknown.'},
         'required_surfaces':{'type':'array','items':{'enum':['overall_shape','contact_surface','opening','interior_support']},
             'minItems':1,'uniqueItems':True},
         'missing_surfaces':{'type':'array','items':{'enum':['overall_shape','contact_surface','opening','interior_support']},
@@ -243,6 +245,7 @@ def bind_requirements(requirements,catalog):
                 if source not in sources:sources.append(source)
         if not sources:raise ValueError('Selected component has no recorded RGB-D source')
         objects.append({'object_id':item['object_id'],'description':item['description'],
+            'shape_motion':item.get('shape_motion','unknown'),
             'component_ids':component_ids,'interactions':item['interactions'],
             'required_surfaces':item['required_surfaces'],'needed_geometry':', '.join(item['required_surfaces']),
             'acquisition_needs':item.get('missing_surfaces',[

@@ -85,6 +85,22 @@ def compile_binding(binding, packet, resolve_frame, carried_local=None, cloud_vi
     elif anchor['kind']=='cloud_point':
         from .cloud_selection import resolve_cloud_point
         point,provenance=resolve_cloud_point(anchor,packet.get('cloud_views',[]),cloud_views or [])
+        if provenance.get('binding_scope') == 'single_sample_context':
+            provenance['semantic_owner_assertion'] = packet.get('operation_reference_target_id')
+        retained = [value for value in packet.get('retained_cloud_point_bindings', [])
+            if value['view_id'] == anchor['view_id'] and value['pixel_xy'] == anchor['pixel_xy']]
+        if retained:
+            value = retained[0]
+            wrong_time = (value['source_step'] != packet['source_step']
+                if value['kind'] == 'retained_grasp_point_current_eef' else value['source_step'] > packet['source_step'])
+            if (any(item != value for item in retained) or wrong_time
+                    or value['cloud_point_index'] != provenance['cloud_point_index']
+                    or not np.array_equal(value['original_world_xyz_m'], point)):
+                raise ValueError('Retained point binding differs from this frozen sample or physical step')
+            point = vector(value['world_xyz_m'], 3, 'current retained sample')
+            provenance.update(original_anchor_world_xyz_m=value['original_world_xyz_m'],
+                coordinate_estimate=value, carry_reference_eligible=False,
+                binding_scope='one_retained_grasp_sample')
     elif anchor['kind']=='image_point':
         key=(anchor.get('observation_id'),anchor.get('camera'))
         allowed={(v['observation_id'],v['camera']) for v in packet.get('image_references',[])}

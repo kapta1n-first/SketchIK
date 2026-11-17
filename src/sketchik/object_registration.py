@@ -34,7 +34,9 @@ def catalog_template(catalog, component_ids):
         raise ValueError('Initial identity groups do not align with original RGB-D points')
     chosen = np.isin(labels, groups)
     if chosen.sum() < 60: return None
-    return {key: value[chosen] for key, value in arrays.items()}, catalog['table_sources']
+    return {**{key: value[chosen] for key, value in arrays.items()},
+        'template_source_cloud_file': np.asarray(str(Path(catalog['point_cloud_file']).resolve())),
+        'template_point_ids': np.flatnonzero(chosen)}, catalog['table_sources']
 
 
 def expand_named_template(template, view):
@@ -60,7 +62,9 @@ def expand_named_template(template, view):
         if (distance <= .005).mean() >= .15:
             keep |= mask
     if keep.sum() < 60: return template
-    return {key: value[keep] for key, value in arrays.items()}, view['sources']
+    return {**{key: value[keep] for key, value in arrays.items()},
+        'template_source_cloud_file': np.asarray(str(Path(view['cloud_file']).resolve())),
+        'template_point_ids': np.flatnonzero(keep)}, view['sources']
 
 
 def rigid_fit(source, target):

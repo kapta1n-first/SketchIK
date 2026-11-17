@@ -31,6 +31,25 @@ def checkpoint():
         'current_receipt_is_semantic_success': False}
 
 
+def test_latest_cloud_card_and_image_survive_multiple_context_boundaries(tmp_path):
+    source = dialogue(0)
+    selected = {'role': 'user', 'content': [{'type': 'text', 'text': json.dumps({
+        'logical_image_slot': 'current_clouds/latest/object_00_face.png', 'view_id': 'new-current-view'})},
+        {'type': 'image_url', 'image_url': {'url': 'data:image/png;base64,NEWPOINTS'}}]}
+    source.append(selected)
+    source.extend(dialogue(8)[3:])
+    context = StageContext(max_chars=5000, keep_messages=3, keep_chars=3000,
+        retain_episode_references=True)
+    original = deepcopy(source)
+    context.prepare_boundary(source, checkpoint(), tmp_path, lambda _: None, force=True)
+    assert selected in context.apply(source)[0] and source[:-1] == original
+    source.extend(dialogue(8)[3:])
+    context.prepare_boundary(source, checkpoint(), tmp_path, lambda _: None, force=True)
+    active, _ = context.apply(source)
+    assert selected in active
+    assert json.loads(selected['content'][0]['text'])['view_id'] == 'new-current-view'
+
+
 def test_boundary_keeps_full_source_and_restarts_from_real_state(tmp_path):
     source = dialogue(); original = deepcopy(source); context = StageContext(max_chars=5000)
     events = []
@@ -273,6 +292,28 @@ def test_recent_dialogue_survives_multiple_epochs_and_retired_epochs_do_not_retu
     assert active[-7:-1] == suffix[-6:]
 
 
+def test_pending_draft_dialogue_is_pinned_without_copying_actions_or_mutating_source(tmp_path):
+    from sketchik.stage_context import closed_tool_dialogue
+    context = StageContext(max_chars=5000, keep_messages=1, keep_chars=1000)
+    source = dialogue(10)
+    draft_start = len(source)
+    draft = [{'role': 'assistant', 'tool_calls': [{'id': 'pending', 'function': {
+        'name': 'draft_next_sketch', 'arguments': json.dumps({'actions': ['original candidate'],
+            'preconditions': 'original condition'})}}]},
+        {'role': 'tool', 'tool_call_id': 'pending', 'content': '{"saved":true}'}]
+    source.extend(deepcopy(draft))
+    source.extend(deepcopy(dialogue(4)[3:]))
+    before = deepcopy(source)
+    marker = context.prepare_boundary(source, checkpoint(), tmp_path, lambda _: None,
+        force=True, retain_from=draft_start)
+    assert marker and marker['protected_dialogue_from_index'] == draft_start
+    active, _ = context.apply(source)
+    assert source[:-1] == before
+    assert active.count(draft[0]) == 1 and active.count(draft[1]) == 1
+    closed_tool_dialogue(active)
+    assert StageContext().apply(json.loads(json.dumps(source)))[0] == active
+
+
 @pytest.mark.parametrize('keep,chars', [(True, None), (-1, None), (80, None), (2, 0), (2, 120_000)])
 def test_invalid_retained_context_limits(keep, chars):
     with pytest.raises(ValueError): StageContext(keep_messages=keep, keep_chars=chars)
@@ -353,5 +394,3 @@ def test_single_factory_keeps_recent_dialogues_and_public_files(tmp_path):
 @pytest.mark.parametrize('limits', [(0, 80), (True, 80), (5000, 1.5)])
 def test_invalid_stage_limits(limits):
     with pytest.raises(ValueError): StageContext(*limits)
-
-

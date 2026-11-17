@@ -6,10 +6,32 @@ surfaces. All valid source pixels are retained; only plotting is sampled.
 from __future__ import annotations
 
 import json
+import hashlib
+from collections import OrderedDict
+from threading import RLock
 from pathlib import Path
 import time
 
 import numpy as np
+
+
+_NATIVE_POINT_CACHE = OrderedDict()
+_NATIVE_POINT_CACHE_LOCK = RLock()
+
+
+def frame_point_key(frame):
+    """Content-address pure backprojection, including the refreshed calibration.
+
+    This bounded in-process cache contains no object identities or contact state.
+    Hashing the arrays also prevents a mutated frame from reusing old geometry.
+    """
+    digest = hashlib.sha256(b'native-backprojection-v1')
+    digest.update(str((frame.get('step'), frame.get('camera'))).encode())
+    for name in ('depth_m', 'rgb', 'K', 'world_from_camera'):
+        value = np.asarray(frame[name])
+        digest.update(str((name, value.shape, value.dtype.str)).encode())
+        digest.update(np.ascontiguousarray(value).tobytes())
+    return digest.hexdigest()
 
 
 def frame_points(frame):
@@ -17,13 +39,26 @@ def frame_points(frame):
     rgb = np.asarray(frame['rgb'])
     if depth.ndim != 2 or rgb.shape != (*depth.shape, 3):
         raise ValueError('Native RGB and depth must have matching dimensions')
+    key = frame_point_key(frame)
+    with _NATIVE_POINT_CACHE_LOCK:
+        if key in _NATIVE_POINT_CACHE:
+            _NATIVE_POINT_CACHE.move_to_end(key)
+            return _NATIVE_POINT_CACHE[key]
     valid = np.isfinite(depth) & (depth > 0)
     y, x = np.nonzero(valid)
     rays = np.linalg.solve(frame['K'], np.vstack([x, y, np.ones(len(x))])).T
     camera = rays * depth[y, x, None]
     transform = np.asarray(frame['world_from_camera'])
     xyz = camera @ transform[:3, :3].T + transform[:3, 3]
-    return xyz.astype(np.float32), rgb[y, x].astype(np.uint8), np.column_stack([x, y]).astype(np.uint16)
+    result = (xyz.astype(np.float32), rgb[y, x].astype(np.uint8),
+        np.column_stack([x, y]).astype(np.uint16))
+    for value in result:
+        value.flags.writeable = False
+    with _NATIVE_POINT_CACHE_LOCK:
+        _NATIVE_POINT_CACHE[key] = result
+        while len(_NATIVE_POINT_CACHE) > 2:
+            _NATIVE_POINT_CACHE.popitem(last=False)
+    return result
 
 
 def save_scene(frames, folder, observation_id):

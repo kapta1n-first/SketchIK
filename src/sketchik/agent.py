@@ -91,7 +91,7 @@ class ChatClient:
     def __init__(self, base_url, model, api_key, reasoning=None, timeout=90, *, use_env_proxy=True,
                  image_jpeg_quality=None, transport_dir=None, reference_exact_images=False,
                  image_window=None, max_tokens=None, stage_context=None, stream=False,
-                 budget_field='max_tokens'):
+                 budget_field='max_tokens', json_tools=False):
         parsed = urlparse(base_url or "")
         if parsed.scheme not in ("http", "https") or not parsed.netloc or parsed.username or parsed.password or parsed.query:
             raise ValueError("Expected API base URL without embedded credentials or query")
@@ -114,6 +114,7 @@ class ChatClient:
         self.image_jpeg_quality = image_jpeg_quality
         self.max_tokens = max_tokens
         self.stream, self.budget_field = stream, budget_field
+        self.json_tools = json_tools
         self.on_stream_progress = None
         self.request_pause_handler = None
         self.request_cancellation = None
@@ -133,6 +134,7 @@ class ChatClient:
                          "reasoning_effort": reasoning, "automatic_retries": 0, "timeout_s": timeout,
                          "requested_max_tokens": max_tokens,
                          "stream":stream,"budget_field":budget_field,
+                         "tool_transport": 'json_text_tools_v1' if json_tools else 'native_tools',
                          "stage_context": stage_context.limits if stage_context is not None else None,
                          "proxy_mode": "direct" if direct else "environment",
                          "reference_exact_images": reference_exact_images,
@@ -344,8 +346,11 @@ class ChatClient:
         self.last_response_metadata = {}
         self._stream_metrics = {}
         wire = self.wire_messages(messages)
+        if self.json_tools and tools is not None:
+            from .json_tools import request_messages
+            wire = request_messages(wire, tools)
         payload = {"model": self.model, "messages": wire}
-        if tools is not None:
+        if tools is not None and not self.json_tools:
             payload.update(tools=tools, tool_choice="auto", parallel_tool_calls=False)
         if self.reasoning:
             payload["reasoning_effort"] = self.reasoning
@@ -436,6 +441,14 @@ class ChatClient:
         message = choice.get("message")
         if not isinstance(message, dict) or message.get("role") != "assistant":
             raise ProviderError("Invalid assistant message")
+        if self.json_tools and tools is not None:
+            from .json_tools import response_message
+            message, conversion = response_message(message)
+            self.last_response_metadata['json_tool_conversion'] = conversion
+            if self.transport_dir is not None:
+                with (self.transport_dir/'json_tool_conversions.jsonl').open('a') as archive:
+                    archive.write(json.dumps({'request_body_sha256': self.last_request_metadata['body_sha256'],
+                        **conversion, 'decoded_message': message}, allow_nan=False)+'\n')
         return {"message": message, "usage": reply.get("usage"), "finish_reason": choice.get("finish_reason")}
 
 

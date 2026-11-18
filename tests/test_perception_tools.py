@@ -7,11 +7,9 @@ from PIL import Image
 import pytest
 
 from sketchik.agent import transcript_copy
-from sketchik.grasp_trial import SKETCH_SCHEMA, planning_dialogue, restore_planning_images
 from sketchik.perception import SavedObservationRobot, image_part
 from sketchik.tools import ToolHub, PERCEPTION_TOOLS, tool_schemas
 from test_agent import FakeRobot, FakeExecutor, call
-from test_grasp_trial import sketch
 
 
 def candidate(number, score, shape=(16, 16)):
@@ -113,44 +111,3 @@ def test_static_observation_has_no_fake_remaining_motion_budget(tmp_path):
     assert description['static_observation'] and description['state']['remaining_actions'] is None
     assert 'official_success' not in json.dumps(description)
     assert not any(s['function']['name'].startswith('move_') for s in hub.schemas)
-
-
-def test_grasp_planning_can_inspect_then_submit_with_full_tool_history(hub):
-    hub.schemas = [s for s in hub.schemas if s['function']['name'] in PERCEPTION_TOOLS]
-    hub.validators = {s['function']['name']: hub.validators[s['function']['name']] for s in hub.schemas}
-    submit = {'type':'function', 'function': {'name':'submit_grasp_sketch', 'parameters':SKETCH_SCHEMA}}
-    class Client:
-        turn = 0
-        def complete(self, messages, tools):
-            self.turn += 1
-            names = {t['function']['name'] for t in tools}
-            assert {'segment', 'look', 'back_project', 'get_state', 'submit_grasp_sketch'} <= names
-            assert not {'measure', 'depth', 'move'} & names
-            if self.turn == 1:
-                calls = [call('segment', {'observation_id':'obs_00000', 'prompt':'visible handle'}, 'one')]
-            else:
-                assert any(m['role']=='tool' for m in messages)
-                assert messages[-1]['role']=='user' and any(p['type']=='image_url' for p in messages[-1]['content'])
-                calls = [call('submit_grasp_sketch', sketch(), 'two')]
-            return {'message':{'role':'assistant','tool_calls':calls}, 'finish_reason':'tool_calls'}
-    messages = [{'role':'system', 'content':'fixture'}]
-    actual, _, timing = planning_dialogue(Client(), hub, messages, submit)
-    assert actual == sketch() and timing['rounds'] == 2 and hub.executor.calls == 0
-    assert messages[-1]['tool_call_id'] == 'two'
-    copied = transcript_copy(messages)
-    restored = restore_planning_images(copied, [hub.run/'observations'])
-    assert restored == messages
-
-
-def test_grasp_planner_rejects_action_batch_before_dispatch(hub):
-    hub.schemas = [s for s in hub.schemas if s['function']['name'] in PERCEPTION_TOOLS]
-    submit = {'type':'function', 'function': {'name':'submit_grasp_sketch', 'parameters':SKETCH_SCHEMA}}
-    class Client:
-        def complete(self, messages, tools):
-            return {'message':{'role':'assistant','tool_calls':[
-                call('segment', {'observation_id':'obs_00000','prompt':'object'}, 'one'),
-                call('move_relative', {'source_step':0,'params':{'delta_m':[0,0,.1]}}, 'two')]}}
-    from sketchik.agent import ProviderError
-    with pytest.raises(ProviderError, match='motion is not exposed'):
-        planning_dialogue(Client(), hub, [], submit)
-    assert not hub.requests and hub.executor.calls == 0

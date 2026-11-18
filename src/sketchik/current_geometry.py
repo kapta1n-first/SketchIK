@@ -119,7 +119,7 @@ def inspect_snapshot(inputs, source_step, folder, *, non_robot_mask=None,
             'scope': 'Narrow measured tabletop band only; raw points stay saved. Not a semantic floor or cavity detector.'},
         'scope': 'Current native-image rectangles are search windows; G groups are visible geometric fragments, not object identities.',
         'semantic_identity_verified': False, 'complete_shape_known': False,
-        'old_world_points_merged': False, 'sam_requests': 0, 'molmo_requests': 0,
+        'old_world_points_merged': False, 'sam_requests': 0,
         'view_eye_direction_world': (-np.asarray(inputs[0]['frame']['world_from_camera'])[:3, 2]).tolist(),
         'wall_s': time.perf_counter()-started}
     (folder/'inspection.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))

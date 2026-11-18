@@ -820,7 +820,7 @@ class EpisodeArtifacts:
             self.geometry_inspections[identity] = inspection
             result = {key: deepcopy(inspection[key]) for key in ('evidence_id', 'source_step', 'sources',
                 'image_paths', 'components', 'point_count', 'robot_filter', 'table_reference', 'scope', 'semantic_identity_verified',
-                'complete_shape_known', 'old_world_points_merged', 'sam_requests', 'molmo_requests', 'wall_s')}
+                'complete_shape_known', 'old_world_points_merged', 'sam_requests', 'wall_s')}
             for key, public_key in [('cloud_file', 'point_cloud_path'), ('point_group_ids_file', 'point_groups_path')]:
                 relative = public_folder+'/data/'+Path(inspection[key]).name
                 self.files.publish(relative, source=inspection[key], metadata={
@@ -1074,7 +1074,7 @@ class EpisodeArtifacts:
             'evidence_id': result['evidence_id'], 'wall_s': time.perf_counter()-started,
             'geometry_and_publication_wall_s': result['wall_s'],
             'trigger': reason, 'old_cloud_relocalization': registration,
-            'sam_requests': 0, 'molmo_requests': 0, 'robot_actions': 0, 'extra_a_requests': 0})
+            'sam_requests': 0, 'robot_actions': 0, 'extra_a_requests': 0})
         self.publish_available_sources()
         return result
 
@@ -1420,6 +1420,34 @@ class EpisodeArtifacts:
             'cloud_views': len(self.views), 'wall_s': time.perf_counter()-started,
             'root': 'agent_public'})
         return self.reference_image_paths()
+
+    def inherit_shown_native_images(self, messages):
+        """Carry acquisition displays into the same A's execution evidence ledger.
+
+        Match actual image parts, not textual observation claims or merely saved
+        frames. This grants historical display provenance, never current geometry.
+        """
+        shown = {json.dumps(part, sort_keys=True) for message in messages
+            if message.get('role') in ('user', 'tool') and isinstance(message.get('content'), list)
+            for part in message['content'] if part.get('type') == 'image_url'}
+        self.sync_observations()
+        inherited = []
+        for key, (_, picture) in getattr(self.hub, '_display_cache', {}).items():
+            if json.dumps(picture, sort_keys=True) not in shown:
+                continue
+            identity, camera = key
+            path = f'observations/{identity}/{camera}.png'
+            entry = self.files.entries.get(path, {})
+            if (entry.get('kind') != 'native_rgb' or entry.get('observation_id') != identity
+                    or entry.get('camera') != camera):
+                continue
+            self.seen_rgb.add(key)
+            inherited.append({'observation_id': identity, 'camera': camera,
+                'source_step': entry['source_step'], 'path': path})
+        self.files.publish('acquisition/shown_native_images.json', value={
+            'images': inherited,
+            'scope': 'Native images already displayed in this same acquisition conversation. Historical display only; geometry freshness checks still apply.'})
+        return inherited
 
     def sync_observations(self):
         for folder in sorted((self.hub.run/'observations').glob('obs_*')):
@@ -1871,6 +1899,7 @@ def run_single_agent(hub, client, messages, handoff, *, max_turns, max_batches, 
                 'scope': 'Same A; normal sketches continue directly. Actual failures return to A; terminal proposals use actual feedback. Overlap is not measured speedup.'}}
     artifacts = EpisodeArtifacts(hub, handoff)
     hub.single_a_artifacts = artifacts
+    artifacts.inherit_shown_native_images(messages)
     executor = DirectExecutor(hub, handoff, artifacts)
     initial = artifacts.prepare()
     from .stage_context import archived_messages

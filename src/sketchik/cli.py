@@ -10,7 +10,6 @@ def main():
     parser = argparse.ArgumentParser(description="Independent LIBERO IK primitives")
     parser.add_argument("command", choices=["probe", "smoke", "execute", "agent", "agent-smoke"])
     parser.add_argument("--gpu-uuid", required=True, help="Exact GPU UUID; renderer only")
-    parser.add_argument("--peer-pid", type=int, action="append", default=[], help="Allow this project's resident model PID on the renderer GPU")
     parser.add_argument("--variant", choices=["pro", "standard"], default="pro")
     parser.add_argument("--suite", default="libero_10")
     parser.add_argument("--task", type=int, default=0)
@@ -43,7 +42,7 @@ def main():
     run = root / "runs" / (time.strftime("%Y%m%dT%H%M%S") + "_" + args.command)
     run.mkdir(parents=True, exist_ok=False)
     from .runtime import configure
-    gpu = configure(root, args.gpu_uuid, args.variant, args.peer_pid)
+    gpu = configure(root, args.gpu_uuid, args.variant)
     from .libero import LiberoRobot
     import numpy as np
     from PIL import Image

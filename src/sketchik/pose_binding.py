@@ -60,8 +60,8 @@ def compile_binding(binding, packet, resolve_frame, carried_local=None, cloud_vi
     """No task-specific coordinates; all references come from public evidence."""
     from .libero import back_project
     from .kinematics import quaternion, vector, rotation_from_directions
-    # Historical numeric control probes can still be read; the live B schema
-    # no longer asks a language model to produce a unit quaternion.
+    # Numeric callers may supply an explicit quaternion; model-facing
+    # tools describe orientation through the declared structured schema.
     legacy=isinstance(binding.get('orientation'),list)
     Draft202012Validator(BINDING).validate({**binding,'orientation':'preserve'} if legacy else binding)
     state=packet['eef']
@@ -104,7 +104,7 @@ def compile_binding(binding, packet, resolve_frame, carried_local=None, cloud_vi
     elif anchor['kind']=='image_point':
         key=(anchor.get('observation_id'),anchor.get('camera'))
         allowed={(v['observation_id'],v['camera']) for v in packet.get('image_references',[])}
-        if key not in allowed:raise ValueError('B may select a pixel only on a supplied native RGB image')
+        if key not in allowed:raise ValueError('Select a pixel only on a supplied native RGB image')
         if 'pixel_xy' not in anchor:raise ValueError('image_point requires pixel_xy')
         point=back_project(resolve_frame(*key),anchor['pixel_xy'])
     else:

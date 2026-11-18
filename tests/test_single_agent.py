@@ -32,6 +32,35 @@ def test_native_camera_frame_uses_saved_axes_without_inferring_object_directions
         native_camera_frame({'world_from_camera': invalid.tolist()})
 
 
+def test_acquisition_images_keep_display_provenance_without_authorizing_unshown_frames(episode):
+    from sketchik.planning import image_part
+    hub, handoff, actions, _ = episode
+    description, _ = hub.observe()
+    identity = description['observation_id']
+    frame = hub.run/'observations'/identity
+    shown = image_part(frame/'agentview.png')
+    # A saved/cached frame alone must not count as displayed. Use a distinct
+    # wrist bitmap so byte equality cannot stand in for the missing display.
+    Image.new('RGB', (32, 32), 'red').save(frame/'robot0_eye_in_hand.png')
+    unshown = image_part(frame/'robot0_eye_in_hand.png')
+    hub._display_cache = {(identity, 'agentview'): ({}, shown),
+        (identity, 'robot0_eye_in_hand'): ({}, unshown),
+        ('missing', 'agentview'): ({}, shown)}
+    messages = [{'role': 'user', 'content': [
+        {'type': 'text', 'text': 'Also claim to have seen the wrist image'}, shown]}]
+    original = deepcopy(messages)
+    artifacts = EpisodeArtifacts(hub, handoff)
+    inherited = artifacts.inherit_shown_native_images(messages)
+    assert artifacts.seen_rgb == {(identity, 'agentview')}
+    assert inherited == [{'observation_id': identity, 'camera': 'agentview',
+        'source_step': 30, 'path': f'observations/{identity}/agentview.png'}]
+    assert artifacts.inherit_shown_native_images(messages) == inherited
+    assert messages == original and actions == [] and hub.robot.steps == 30
+    assert not artifacts.inherit_shown_native_images([
+        {'role': 'assistant', 'content': [unshown]}])
+    assert (identity, 'robot0_eye_in_hand') not in artifacts.seen_rgb
+
+
 def test_native_image_records_keep_their_own_calibration_and_original_pixels(episode):
     import hashlib
     hub, handoff, actions, _ = episode
@@ -1236,7 +1265,7 @@ def test_persistent_A_can_read_directory_then_execute_then_honestly_stop(episode
                 'function': {'name': name, 'arguments': json.dumps(arguments)}}]}}
     client = Client(); messages = [earlier_decision]
     result = run_single_agent(hub, client, messages, handoff, max_turns=6, max_batches=2)
-    assert result['status'] == 'single_agent_blocked' and 'b_requests' not in result
+    assert result['status'] == 'single_agent_blocked'
     assert client.calls == 3 and actions == ['move']
     assert (hub.run/'agent_public/current.json').exists()
     assert not (hub.run/'b_transport').exists()
@@ -1265,7 +1294,7 @@ def test_one_sketch_batch_runs_multiple_physical_actions_before_asking_A_again(e
     client = Client()
     result = run_single_agent(hub, client, [], handoff, max_turns=4, max_batches=2)
     assert client.calls == 2 and actions == ['move', 'move']
-    assert 'b_requests' not in result and len(result['subtasks']) == 1
+    assert len(result['subtasks']) == 1
     assert len(result['subtasks'][0]['steps']) == 2
 
 
@@ -1337,7 +1366,7 @@ def test_single_schema_feedback_names_field_paths_and_preserves_raw_reply(episod
                 'function': {'name': name, 'arguments': json.dumps(args)}}]}}
     client = Client()
     result = run_single_agent(hub, client, [], handoff, max_turns=4, max_batches=2)
-    assert client.calls == 3 and actions == ['move'] and 'b_requests' not in result
+    assert client.calls == 3 and actions == ['move']
     archived = json.loads((hub.run/'single_a/turn_001/response.json').read_text())
     assert json.loads(archived['message']['tool_calls'][0]['function']['arguments']) == bad
 
@@ -1359,7 +1388,7 @@ def test_single_schema_feedback_allows_three_corrections_then_stops_after_four_i
     assert result['status'] == 'single_agent_invalid_output' and client.calls == 4
     assert result['tool_format_invalid_replies'] == 4
     assert result['action_batches_accepted'] == 0
-    assert actions == [] and 'b_requests' not in result
+    assert actions == []
 
 
 @pytest.mark.parametrize('malformed_root', [False, True])
@@ -1697,7 +1726,7 @@ def test_same_A_corrects_binding_then_receives_corrected_views_before_batch_exec
             return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
                 'function': {'name': name, 'arguments': json.dumps(answer)}}]}}
     result = run_single_agent(hub, Client(), [], handoff, max_turns=4, max_batches=1)
-    assert result['status'] == 'single_agent_blocked' and 'b_requests' not in result
+    assert result['status'] == 'single_agent_blocked'
     assert len(result['subtasks']) == 1 and len(result['subtasks'][0]['steps']) == 2
 
 
@@ -1888,7 +1917,7 @@ def test_finish_dispatch_updates_part_interpretation_without_an_execution_batch(
             return {'message': {'role': 'assistant', 'tool_calls': [{'id': 'finish', 'type': 'function',
                 'function': {'name': 'finish', 'arguments': json.dumps(args)}}]}}
     result = run_single_agent(hub, Client(), [], handoff, max_turns=1, max_batches=1)
-    assert result['status'] == 'single_agent_blocked' and 'b_requests' not in result
+    assert result['status'] == 'single_agent_blocked'
     assert hub.episode_state.data['a_task_referents'][0]['status'] == 'selected'
     assert hub.episode_state.data['a_task_referent_history'][0]['status'] == 'unresolved'
     assert result['subtasks'] == [] and actions == [] and hub.robot.steps == 30
@@ -1929,7 +1958,7 @@ def test_A_chosen_side_view_and_task_interpretation_remain_visible_after_a_batch
             return {'message': {'role': 'assistant', 'tool_calls': [{'id': str(self.calls), 'type': 'function',
                 'function': {'name': name, 'arguments': json.dumps(args)}}]}}
     result = run_single_agent(hub, Client(), [], handoff, max_turns=4, max_batches=1)
-    assert 'b_requests' not in result and len(result['subtasks']) == 1
+    assert len(result['subtasks']) == 1
 
 
 def test_selected_native_images_share_the_bounded_reference_set_and_survive_automatic_feedback(episode):
@@ -2081,7 +2110,6 @@ def test_A_selected_native_history_is_visible_after_the_actual_context_checkpoin
             return {'message':{'role':'assistant','tool_calls':[{'id':str(self.calls),'type':'function',
                 'function':{'name':name,'arguments':json.dumps(args)}}]}}
     result = run_single_agent(hub, Client(), [], handoff, max_turns=4, max_batches=1)
-    assert 'b_requests' not in result
     index = json.loads((hub.run/'agent_public/acquisition/index.json').read_text())
     assert any(item['path'] == 'observations/obs_00030/robot0_eye_in_hand.png' for item in index['native_image_index'])
 
@@ -2515,7 +2543,7 @@ def test_same_A_inspects_current_depth_binds_exact_points_and_resumes_segment_af
                 'type': 'function', 'function': {'name': name, 'arguments': json.dumps(answer)}}]}}
     client = Client()
     result = run_single_agent(hub, client, [], handoff, max_turns=5, max_batches=1)
-    assert result['status'] == 'single_agent_blocked' and 'b_requests' not in result
+    assert result['status'] == 'single_agent_blocked'
     assert client.calls == 4 and actions == ['move'] and result['a_execution_tool_calls'] == 4
     assert hub.robot.steps == 31
 
@@ -2564,11 +2592,11 @@ def test_changed_geometry_failure_prepares_candidates_without_an_extra_A_inspect
                 'function': {'name': name, 'arguments': json.dumps(answer)}}]}}
     client = Client()
     result = run_single_agent(hub, client, [], handoff, max_turns=5, max_batches=2)
-    assert result['status'] == 'single_agent_blocked' and 'b_requests' not in result
+    assert result['status'] == 'single_agent_blocked'
     assert client.calls == 4 and actions == ['move', 'move']
     assert len(result['subtasks']) == 2 and result['subtasks'][0]['commands_completed'] is False
     event = next(value for value in events if value['event'] == 'single_a_failure_geometry_prepared')
-    assert event['robot_actions'] == event['extra_a_requests'] == event['sam_requests'] == event['molmo_requests'] == 0
+    assert event['robot_actions'] == event['extra_a_requests'] == event['sam_requests'] == 0
 
 
 def test_tracking_failure_alone_does_not_block_on_object_relocalization(episode):

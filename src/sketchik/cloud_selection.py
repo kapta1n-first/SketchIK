@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 
 
 def _draw_metric_legend(image, mapping, right, down, forward, scale):
-    """Screen directions are computed from the projection, never guessed by B."""
+    """Screen directions are computed from the projection, derived from calibrated geometry."""
     size=image.width
     if size<512:
         return {'world_positive_axes_screen_xy':{name:[float(axis@right),float(axis@down)]
@@ -264,7 +264,7 @@ def resolve_cloud_point(anchor, allowed_views, local_views):
     allowed={v['view_id']:v for v in allowed_views}
     local={v['view_id']:v for v in local_views}
     if identity not in allowed or identity not in local:
-        raise ValueError('Cloud view was not supplied to B')
+        raise ValueError('Cloud view was not supplied to the agent')
     view=local[identity]
     if not allowed[identity]['selectable'] or not view['selectable']:
         raise ValueError('Historical shape is stale; select a current cloud point')

@@ -9,21 +9,7 @@ import sys
 import uuid
 
 
-def validate_model_peers(root: Path, pids) -> set[int]:
-    peers = set()
-    for pid in pids:
-        proc = Path(f"/proc/{pid}")
-        argv = (proc/"cmdline").read_bytes().split(b"\0")
-        if (proc.stat().st_uid != os.getuid() or b"sketchik.perception_service" not in argv
-                or (proc/"cwd").resolve() != root.resolve()):
-            raise RuntimeError("Peer PID is not this project's resident model service")
-        peers.add(pid)
-    return peers
-
-
-
-
-def configure(root: Path, gpu_uuid: str, variant="pro", peer_pids=()) -> dict:
+def configure(root: Path, gpu_uuid: str, variant="pro") -> dict:
     if "mujoco" in sys.modules:
         raise RuntimeError("Configure renderer before importing MuJoCo / primitives")
     root = root.resolve()
@@ -44,9 +30,8 @@ def configure(root: Path, gpu_uuid: str, variant="pro", peer_pids=()) -> dict:
     apps = subprocess.check_output([
         "nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader,nounits"
     ], text=True)
-    peers = validate_model_peers(root, peer_pids)
     occupied = {int(row.split(',')[1]) for row in apps.splitlines() if row.split(',')[0].strip() == gpu_uuid}
-    if occupied-peers or (not occupied and (int(selected[2]) > 512 or int(selected[3]) > 5)):
+    if occupied or (not occupied and (int(selected[2]) > 512 or int(selected[3]) > 5)):
         raise RuntimeError(f"GPU is busy; refusing launch: {selected}")
     os.environ["MUJOCO_GL"] = "egl"
     os.environ["PYOPENGL_PLATFORM"] = "egl"

@@ -118,7 +118,7 @@ def save_scene(frames, folder, observation_id):
         'scene_span_xyz_m': np.ptp(xyz, axis=0).tolist(), 'scene_span_is_object_dimensions': False,
         'frames': timings, 'point_save_wall_s': save_s, 'render_wall_s': time.perf_counter()-start,
         'wall_s': time.perf_counter()-begin, 'display_points': len(sample),
-        'sam_requests': 0, 'molmo_requests': 0, 'object_gt_used': False,
+        'sam_requests': 0, 'object_gt_used': False,
         'hidden_surface_completion': False, 'robot_points_filtered': False}
     (folder / 'scene.json').write_text(json.dumps(report, indent=2))
     return report

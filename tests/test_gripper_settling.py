@@ -51,20 +51,3 @@ def test_legacy_duration_and_insufficient_settling_budget_are_preserved():
     with pytest.raises(ValueError, match='settling budget'):
         value.set_gripper('close', steps=1)
     assert value.robot.steps == 0
-
-
-def test_recorded_closing_requires_explicit_episode_continuation(tmp_path):
-    import json
-    from sketchik.grasp_trial import replay_observation_prelude
-    controls = [{'source_step': 1, 'joint_target': [0.]*7, 'gripper_command': 1.}]
-    (tmp_path/'controls.jsonl').write_text(json.dumps(controls[0])+'\n')
-    calls = []
-    class Robot:
-        max_steps = 10
-        def step(self, q, command): calls.append((q, command))
-    metadata = {'observation_prelude': {'kind': 'recorded_observation_controls', 'steps': 1,
-                                      'controls_file': 'controls.jsonl'}}
-    with pytest.raises(ValueError): replay_observation_prelude(Robot(), metadata, tmp_path)
-    assert not calls
-    replay_observation_prelude(Robot(), metadata, tmp_path, allow_recorded_closing=True)
-    assert calls == [([0.]*7, 1.)]

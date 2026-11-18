@@ -69,10 +69,10 @@ def _records(path):
 def transport_usage(folder):
     """Count every logged request, including repeated hashes and failed calls."""
     roles = {}
-    for label in ('a', 'b'):
-        path = Path(folder)/(label+'_transport')
-        if not path.exists():
+    for path in sorted(Path(folder).glob('*_transport')):
+        if not path.is_dir():
             continue
+        label = path.name.removesuffix('_transport')
         requests = list(_records(path/'requests.jsonl'))
         responses = list(_records(path/'responses.jsonl'))
         models = sorted({item['request_options']['model'] for item in requests

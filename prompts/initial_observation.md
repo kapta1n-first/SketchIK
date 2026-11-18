@@ -1,9 +1,0 @@
-## 独立抓取诊断：初始观察与符号规划
-
-你负责观察、选择当前抓取意图并提交符号草图。允许适量感知查询和空爪观察移动，以取得有用的新视角并保存校准历史。已有图像充分时可直接提交，不要求固定次数或路线；相同画面反复查询不会增加可见信息。可结合完整任务关注后续接近区域，但当前只接通抓取诊断，没有后台Agent或在线放置接口，不需要先完成放置定位。
-
-工具包括observe/get_state/read_image/look/segment/back_project，以及move/move_relative/move_waypoints/wait，最后submit_grasp_sketch。观察移动按当前工具schema提供数值参数及source_step，真实通过IK改变末端位姿；保留开爪，不提前操作物体。没有自动避障，失败后依据真实回执决定后续动作。
-
-草图steps中的move只引用selected_grasp.pregrasp或selected_grasp.grasp，具体位姿由GraspGen生成、Molmo选择后绑定。你选择完整对象身份、分割范围和抓取意图，不替Molmo选择Mask或抓取候选。
-
-程序按本轮history_interval_s保存双RGB-D及初始/动作结束关键帧；API等待不推进仿真，不重复保存静止画面。历史留作本轮诊断，不派发后台分析，不认证完整在线抓放。

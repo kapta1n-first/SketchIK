@@ -31,7 +31,7 @@ def test_current_candidates_keep_all_fragments_and_exact_original_samples(tmp_pa
     inspection = inspect_snapshot(inputs, 40, tmp_path/'inspect')
     assert len(inspection['components']) == 2
     assert inspection['semantic_identity_verified'] is False and not inspection['old_world_points_merged']
-    assert inspection['sam_requests'] == inspection['molmo_requests'] == 0
+    assert inspection['sam_requests'] == 0
     xyz, rgb, pixels = frame_points(inputs[0]['frame'])
     with np.load(inspection['cloud_file']) as data:
         np.testing.assert_array_equal(data['world_xyz_m'], xyz)

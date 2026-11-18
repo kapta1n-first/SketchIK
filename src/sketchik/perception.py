@@ -6,11 +6,20 @@ from copy import deepcopy
 from io import BytesIO
 import json
 import time
+import urllib.request
 
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-from .grasp_preview import CAMERAS, request
+CAMERAS = ("agentview", "robot0_eye_in_hand")
+
+
+def request(url, data=None, timeout=180):
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    encoded = None if data is None else json.dumps(data, allow_nan=False).encode()
+    req = urllib.request.Request(url, data=encoded, headers={"Content-Type": "application/json"})
+    with opener.open(req, timeout=timeout) as response:
+        return json.load(response)
 
 
 def image_part(image):
@@ -21,7 +30,7 @@ def image_part(image):
 
 
 class SavedObservationRobot:
-    """Read-only camera/state adapter for the existing static grasp trial."""
+    """Read-only camera/state adapter for saved RGB-D observations."""
     cameras = CAMERAS
     static_observation = True
 

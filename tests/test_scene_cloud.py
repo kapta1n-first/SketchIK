@@ -29,7 +29,7 @@ def test_whole_scene_file_keeps_provenance_and_is_not_object_dimensions(tmp_path
     frames = {'front': frame(), 'wrist': frame()}
     report = save_scene(frames,tmp_path,'saved')
     assert report['point_count'] == 54
-    assert report['sam_requests'] == report['molmo_requests'] == 0
+    assert report['sam_requests'] == 0
     assert not report['scene_span_is_object_dimensions']
     with np.load(report['point_cloud_file']) as data:
         assert len(data['world_xyz_m']) == 54

@@ -80,7 +80,7 @@ PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 
 私有配置项为 `SKETCHIK_BASE_URL`、`SKETCHIK_MODEL`、`SKETCHIK_API_KEY` 和可选 `SKETCHIK_REASONING`。输出上限与预算字段通过 `--api-max-tokens`、`--api-budget-field` 按接口能力设置。
 
-原生工具接口为默认传输。增加 `--api-json-tools` 可将当前工作上下文和工具 schema 封装为多模态文本请求，要求严格 JSON `tool_calls` 信封；解析后仍经过同一套动作、几何和预算校验。原响应与解析记录分别保存。
+主线固定使用原生工具调用接口及现有 XML 网关通道，不提供 JSON 文本模拟工具调用。面向仅支持 JSON 文本工具协议的 Bytecat/Kimi 接入，使用 `codex/json-bytecat-kimi` 分支。
 
 连接异常或不完整流会保留原仿真、同一会话和请求边界，等待恢复；等待期间物理步保持不变。原进程仍存活时可执行：
 

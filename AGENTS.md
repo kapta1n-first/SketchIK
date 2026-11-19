@@ -8,7 +8,7 @@
 - 观察阶段仅 submit_scene_requirements；执行阶段 execute_actions/list_dir/read_text_file/read_image/get_state/refresh_object/finish。异步提前阶段开放 draft_next_sketch，预算足够时每段提交 ready 完整动作，或在预计终态提交 finish_review。模型请求串行，机器人和几何由执行线程独占。
 - 草图动作是 move、三个世界轴 rotate、set_gripper 和 wait。move 包含完整位姿路点，夹爪事件独立。仅 set_gripper 可用 target_id=null 表示配置改变；实际夹爪事件退役原持物参考，无关静物保持。
 - execute_actions/refresh_object/finish 独占回复。重复或混用时同时反馈能独立验证的问题，不执行、不自动去重或修写 JSON。默认连续4条无效回复结束，允许3次纠正；计 API/工具次数，不占草图段与物理步。
-- --api-json-tools 是可选严格 JSON 文本传输：当前上下文与工具 schema 发送给模型，原响应和解析记录分别留档，解析后的调用经过同一执行校验。默认原生工具传输。当前模型配置以明确的运行参数及用户选择为准；Sol low/65536 与 Kimi low/32000 分别记录，不互相冒充。
+- 主线固定使用原生工具调用接口及现有 XML 网关通道；JSON 文本工具传输仅保留在 `codex/json-bytecat-kimi` 分支。当前模型配置以明确的运行参数及用户选择为准；Sol low/65536 与 Kimi low/32000 分别记录，不互相冒充。
 
 ## 执行和恢复
 

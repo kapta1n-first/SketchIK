@@ -426,7 +426,6 @@ def make_task_client(args, folder, settings=None):
         timeout=getattr(args, 'api_timeout_s', 180.),
         max_tokens=getattr(args, 'api_max_tokens', None), stream=getattr(args, 'api_stream', False),
         budget_field=getattr(args, 'api_budget_field', 'max_tokens'),
-        json_tools=getattr(args, 'api_json_tools', False),
         transport_dir=Path(folder)/'a_transport', **common)
 
 
@@ -671,8 +670,6 @@ def main():
     parser.add_argument('--api-budget-field',choices=['max_tokens','max_completion_tokens'],default='max_tokens',
         help='Explicit compatible API field for the output budget; changes transport only.')
     parser.add_argument('--env-file', type=Path)
-    parser.add_argument('--api-json-tools', action='store_true',
-        help='Explicit JSON-text tool envelope for APIs without compatible native tool history; original engine validation remains.')
     parser.add_argument('--credits-config', type=Path,
         help='Optional private local Flowith gateway config for before/after account credits. '
              'Operator-only usage records; no retries, account identities or credentials in public files.')

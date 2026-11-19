@@ -2017,3 +2017,5 @@ Task9 v179完整初态最终官方true、A success；16段草图、18次执行A�
 2026-11-19：用新版开局三点云图在本机空闲 2 号 RTX 3090 跑 Kimi 3.1 Pro low/32000，JSON 工具传输，异步 Task0 seed0/init0。开局实际发送 18 张图，按传输哈希确认三张新总图均在请求中。首轮将 G5 绑为汤罐、G4 橙色 ketchup 瓶绑为番茄酱，漏掉 G6 蓝罐。首段草图前未改绑。用户要求停止后原进程退出，结果为 interrupted。随后冻结第一条请求，重建并校验原请求体 SHA256，经 Bytecat 分别让 6.1 Sol low 和 6.2 Sol low 各提交一次绑定，沿用同一正文、18 张图、JSON 格式和 32000 上限。两条回复均通过 schema，均将 G5 当汤罐、G4 当番茄酱、G7 当篮子，未调用工具或执行动作。复判归档 /var/tmp/sketchik_task0_frozen_sol_comparison_bcdcwvhf。11 月 17 日异步成功轮开局为 16 图，正确将 G6、G5 分别绑定为汤罐和番茄酱，本次未做单变量归因。
 
 2026-11-19：用新版三张开局点云，在本机空闲 2 号 RTX 3090 跑 Kimi 3.1 Pro low/32000 异步 Task8 seed0/init0。开局请求实际发送 16 张图，已按归档图片哈希核对三张新版总图均发出。初始正确绑定炉灶 G1 和两把摩卡壶 G2/G3，未要求补拍。第一份草图把点云图坐标填为 image_point，零动作拒绝，改用 cloud_point 后进入真实执行与多次抓取恢复。用户要求停止，物理步 1920 中断，墙钟 598.12 秒，官方未达成成功；进程已退出，日志、终帧和录像留在 /var/tmp/sketchik_task8_kimi_async_json_20261119_020424。
+
+2026-11-20：主线固定原生工具调用及现有 XML 网关通道，移除 JSON 文本工具适配器、CLI 开关和专属测试；README/AGENTS 指向 `codex/json-bytecat-kimi` 分支，历史运行记录保留。该 JSON 分支从共同多视角/恢复提示提交 `1eaf233` 创建，保留原 JSON 实现。主线验证：62 项客户端、任务入口及观察阶段测试通过；`compileall` 和 `task_trial --help` 通过。HarnessVLA 评测改动未纳入提交，继续留在工作区。

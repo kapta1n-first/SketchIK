@@ -266,6 +266,7 @@ def table_observation(client,hub,messages,*,max_turns,max_tool_calls):
     messages.append({'role':'user','content':[{'type':'text','text':json.dumps({
         'phase':ACQUISITION_RECORD,'kind':'baseline_catalog','instruction':
         'Whole-table baseline scan is finished and the arm has returned to its initial full pose. '
+        'The point-cloud images show one full-table oblique, then an opposite oblique and overhead view framed around tabletop objects when possible, followed by RGB observations. G IDs stay consistent across the views. '
         'All G groups and ungrouped tabletop geometry remain, including unrelated obstacles. '
         'G labels are observed geometric fragments, not object identities: touching objects can merge '
         'and one object can split. Bind ALL task contact objects/parts to one or more component_ids; '
@@ -274,7 +275,7 @@ def table_observation(client,hub,messages,*,max_turns,max_tool_calls):
         'camera poses, plan or coverage certification now. The program will acquire complementary '
         'real views in one bounded batch, then return all target geometry for semantic review and sketch. '
         ,'catalog':public_catalog(catalog)},ensure_ascii=False)},
-        image_part(Path(catalog['views'][0]['image_file'])),*pictures]})
+        *(image_part(Path(view['image_file'])) for view in catalog['views']),*pictures]})
     hub.schemas=[];hub.validators={}
     tool={'type':'function','function':{'name':'submit_scene_requirements',
         'description':'Bind all task contact parts to measured scene groups and name missing surfaces. Program chooses cameras.',

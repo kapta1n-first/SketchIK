@@ -74,5 +74,4 @@ def configure(root: Path, gpu_uuid: str, variant="pro") -> dict:
     # No ML inference is needed; renderer uses the separately selected EGL device.
     os.environ["CUDA_VISIBLE_DEVICES"] = ""
     return {"uuid": gpu_uuid, "name": selected[1].strip(), "driver_ordinal": ordinal,
-            "egl_device": matches[0], "preflight": rows.strip(),
-            "allowed_model_pids": sorted(peers)}
+            "egl_device": matches[0], "preflight": rows.strip()}

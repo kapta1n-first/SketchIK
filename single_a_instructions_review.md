@@ -9,7 +9,7 @@
 | 支撑后松爪 | 按用户此次明确要求，仅微波炉内放置要求先确认内腔支撑；其他放置不套用 |
 | 闭爪后短抬 | 根据真实图像判断，必要时短抬可放在抓取同一草图中，段末复核 |
 | 优先选目的地实测支撑点 | 保持原文 |
-| 另一视角复核 | 当前证据不足时核对，仍不能确认才blocked |
+| 另一视角复核 | 证据不足时核对另一视角；有预算且能恢复就继续，具体障碍无法绕过才blocked |
 | 子任务与草图 | 每次规划一个子任务；结束或失败后看真实结果继续，不再规定“只有什么情况才拆段” |
 | 名称 | 一次execute_actions是一段草图；move内多路点不增加A调用 |
 
@@ -86,7 +86,7 @@ shape_motion作用于所引用点集；rigid的原形状图保留同一像素到
 
 refresh_object(mode=inspect, object_id=...)可整理已保存的当前双RGB-D，返回编号片段；sources可给已看当前原生图及bounds_xyxy，省略时用完整当前双图。本段新增持物参考矛盾或接触变化时，程序也可准备这些候选，CURRENT.current_geometry_candidates给evidence_id和图片。此步骤不移动相机、不选择身份，也不做整物配准。矩形是搜索窗口，G号是几何片段；一个物体可能多片，一片也可能包含相接物体，最大块或唯一候选不认证身份。机器人过滤可能去掉贴近手部的小表面，不能据此断言部件不存在。
 
-refresh_object(mode=bind)由你明确关联已展示的当前候选，填写candidate_ids、selection_scope、description和visible_evidence，或decision=none且candidate_ids=[]。程序发布片段点图及可见尺寸；普通bind不重定位旧完整模板，不认证夹持或清除接触警告。point_set_scope=one_rigid_object表示所选全部点属于同一刚体，也可只是干净可见部件；混合或不确定填mixed_or_unknown，省略也按混合处理。混合组仍可选单点，不能整组作为持物形状。当前片段不覆盖初始完整模板，旧位置点仍失效。初始G身份绑错且未移动/接触时，可用evidence_id=initial_scene及原G号纠正；已移动对象使用当前候选。尺寸由程序维护。
+refresh_object(mode=bind)由你明确关联已展示的当前候选，填写candidate_ids、selection_scope、description和visible_evidence，或decision=none且candidate_ids=[]。程序发布片段点图及可见尺寸；普通bind不重定位旧完整模板，不认证夹持或清除接触警告。point_set_scope=one_rigid_object表示所选全部点属于同一刚体，也可只是干净可见部件；混合或不确定填mixed_or_unknown，省略也按混合处理。混合组仍可选单点，不能整组作为持物形状。当前片段不覆盖初始完整模板，旧位置点仍失效。首段草图前先用RGB和局部图核对目标身份。若发现未移动、未接触的物体绑错了，先读全桌G图，再单独调用refresh_object(mode=bind, evidence_id=initial_scene, decision=select)，在candidate_ids中填写正确的G号。程序会重画该对象的局部图；核对新图后再提交首段草图。已移动或接触的对象使用当前候选。尺寸由程序维护。
 
 若确认同一物体仍在爪内但相对手姿态已变，bind可显式设rebind_held_pose=true；无需先提交空动作。它先暂停旧相对手变换并使旧世界点失效，再用干净单刚体片段尝试重定位本次抓持的原点集，不替换点或ID。混合、匹配不足或歧义时保持暂停，当前片段仍可选点；此请求不认证抓持、不清除接触警告，也不恢复旧世界像素。
 
@@ -104,7 +104,7 @@ agent_public公开本轮资料：scene.json有全部对象图路径和初始结�
 
 本轮真实IK/绝对关节执行并严格核对FK，IK-only，没有自动避障或无碰撞认证。操作到位容差5毫米、3°、最大关节误差0.02弧度，补拍位置容差12毫米；到位仍不认证接触结果。数值恢复仅重求同一绝对目标，不替你换路线。官方成功单独评测。
 
-finish的goal_evidence至少一项逐字引用整个original_task；interpretation独立说明实际部位，visible_evidence说明当前关系，assessment为satisfied/contradicted/unknown。success不能保留未决部位或仅以空爪、原处消失、命令完成作为证据；当前证据不足时核对另一视角，仍无法确认则blocked。finish也可无动作更新task_referents。
+finish的goal_evidence至少一项逐字引用整个original_task；interpretation独立说明实际部位，visible_evidence说明当前关系，assessment为satisfied/contradicted/unknown。success不能保留未决部位或仅以空爪、原处消失、命令完成作为证据；当前证据不足时核对另一视角，并根据实况继续规划。普通抓空、动作未到位、选点或观测失效后，只要还有预算且有依据充分的恢复办法，就用最新双RGB或当前局部点云重新定位，纠正无效引用、抓取位姿或接近路线，再提交具体恢复草图。避免原样重试已失败的动作。只有剩余额度不足以继续，或基于当前证据核对后说明了具体障碍且确实没有可行恢复动作，才提交blocked；在summary写清障碍和已经尝试的恢复。finish也可无动作更新task_referents。
 纯运动未收敛不推定物体移动或强制整物配准。恢复不清除接触警告、不自动执行旧后缀。execution_progress区分完成前缀、失败/未知步骤和未派发后缀；未派发相对EEF点保持原表达式。按实际停止状态规划剩余任务，完整草图可按history_path读回。必要时重新抓取并接回剩余任务，已完成部分不重做。T1只继续仍在接近的同一目标，最多40物理步，到位或停滞提前结束；接触异常直接复核。T2是交回同一个A重新规划，可在新草图中包含修复及仍需执行的剩余动作；程序不自动接回旧后缀。
 ```
 
@@ -113,7 +113,7 @@ finish的goal_evidence至少一项逐字引用整个original_task；interpretati
 来源：[table_scan_review.md](/media/wsqlab/more/kaptainiii/projects/SketchIK/prompts/table_scan_review.md)
 
 ```text
-程序已完成全桌俯视和四方向基础扫描，真实IK回到初始姿态。全桌点云保留桌面、所有几何组及未分组的可见点，包括不操作的障碍。G编号只是几何连通片，接触物体可能合组、遮挡可能使一个物体分组。
+程序已完成全桌俯视和四方向基础扫描，真实IK回到初始姿态。绑定前提供一张全桌实测点云斜视，以及由同一批点生成的反向斜视和俯视；可取景时后两张放大桌上物体区域。另有多视角RGB。同一个G号在各图中指向同一组点。先对照各视角的编号和实物外观，再提交绑定。全桌点云保留桌面、所有几何组及未分组的可见点，包括不操作的障碍。G编号只是几何连通片，接触物体可能合组、遮挡可能使一个物体分组。
 
 本阶段只用submit_scene_requirements一次：objects列整个任务会接触的对象/部位，component_ids绑定所见G组，required_surfaces列任务需要的面，missing_surfaces列尚需补拍的面。不同部位可共用同一个G，一个对象也可绑定多个G。已有可用面不要求重新拍；目录漏掉必要部件时才用source_regions给原生RGB粗框，不是接触点。不要给相机坐标、旋转角度、动作参数、最终coverage或plan。这是采集需求，不是全任务动作规划；本阶段说明在补拍结束后归档。
 

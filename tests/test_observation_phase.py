@@ -38,7 +38,11 @@ def test_view_feedback_keeps_provenance_without_numeric_camera_search():
 @pytest.fixture
 def catalog_stub(tmp_path,monkeypatch):
     from PIL import Image
-    photo=tmp_path/'overview.png';Image.new('RGB',(1024,1024)).save(photo)
+    photos=[]
+    for name,color in [('overview','red'),('opposite','green'),('top','blue')]:
+        photo=tmp_path/f'{name}.png'
+        Image.new('RGB',(1024,1024),color).save(photo)
+        photos.append({'image_file':str(photo)})
     catalog={'source_step':0,'source_steps':[10],'table_height_m':.8,
         'table_sources':[{'observation_id':'source','camera':'agentview','source_step':10}],
         'scope':'whole observed table','components':{'G1':{'component_id':'G1',
@@ -47,7 +51,7 @@ def catalog_stub(tmp_path,monkeypatch):
                 'source_step':10,'bounds_xyxy':[1,1,50,50]}],
             'patches':[],'source_steps':[10],'last_observed_step':10,
             'semantic_identity_verified':False,'complete_dimensions_known':False}},
-        'views':[{'image_file':str(photo)}]}
+        'views':photos}
     (tmp_path/'scene_catalog').mkdir()
     (tmp_path/'scan_evidence.json').write_text(json.dumps({'sources':catalog['table_sources']}))
     def build(hub):catalog['source_step']=hub.robot.steps;return catalog
@@ -69,11 +73,14 @@ def test_fixed_table_scan_and_reset_finish_before_first_a_request(tmp_path,monke
         order.append('reset');robot.steps=70
         return {'wall_s':1.,'execution':{'converged':True}},[{'type':'text','text':'actual home pictures'}]
     def dialogue(client,actual_hub,messages,submit,**kwargs):
+        from sketchik.planning import image_part
         order.append('first_a_request')
         assert robot.steps==70 and actual_hub.schemas==[]
         assert submit['function']['name']=='submit_scene_requirements'
         assert 'all actual scan pictures' in json.dumps(messages)
         assert 'actual home pictures' in json.dumps(messages)
+        assert [part for part in messages[-1]['content'] if part['type']=='image_url']==[
+            image_part(Path(view['image_file'])) for view in catalog_stub['views']]
         return {'source_step':70,'objects':[{'object_id':'item','component_ids':['G1'],
             'description':'item','interactions':['grasp'],'required_surfaces':['contact_surface'],
             'missing_surfaces':[]}]},None,{'rounds':1,'api_wall_s':.1,'tool_calls':1}

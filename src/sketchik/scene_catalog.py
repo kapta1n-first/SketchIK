@@ -4,6 +4,7 @@ All components remain in the scene inventory. A binds semantic objects to one
 or more groups; grouping itself does not identify objects or certify free space.
 """
 from copy import deepcopy
+from itertools import product
 import json
 from pathlib import Path
 import time
@@ -79,9 +80,24 @@ def build_scene_catalog(hub):
                 np.linalg.norm(np.asarray(patch['look_at_world_m'])-v['look_at_world_m'])<.06 for v in kept):continue
             kept.append(patch)
         component['patches']=kept[:6]
+    table_height = table['observed_table_height_m']
+    # Broad, low fragments can be parts of the tabletop. Keep them in the
+    # full view and use the raised groups to frame the two detail views.
+    component_bounds = [item['observed_bounds_world_m'] for item in components.values()]
+    raised_bounds = [bounds for bounds in component_bounds if bounds[1][2] > table_height + .04]
+    detail_viewports = None
+    if raised_bounds:
+        low = np.min([bounds[0] for bounds in raised_bounds], axis=0) - [.06,.06,.02]
+        high = np.max([bounds[1] for bounds in raised_bounds], axis=0) + [.06,.06,.02]
+        viewport = np.array(list(product(*zip(low, high))))
+        detail_viewports = {'opposite': viewport, 'top': viewport}
     views=write_views(table['point_cloud_file'],table['sources'],folder,'whole_scene',(1,-1,.8),
         role='all observed tabletop components, including non-task objects',selectable=False,
-        group_ids=labels,directions=[('overview',(1,-1,.8))])
+        group_ids=labels,directions=[
+            ('overview',(1,-1,.8)),
+            ('opposite',(-1,1,.8)),
+            ('top',(0,0,1)),
+        ],viewports=detail_viewports)
     report={'source_step':hub.robot.steps,'source_steps':table['source_steps'],
         'table_height_m':table['observed_table_height_m'],'components':components,
         'candidates':candidates,'views':views,'all_components_retained':True,

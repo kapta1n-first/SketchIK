@@ -162,7 +162,8 @@ def annotate_groups(image, mapping, group_ids):
 
 
 def write_views(cloud_file, sources, folder, prefix, eye, *, role, selectable=True,
-                group_ids=None, directions=None, footprint_pixels=9, viewport_points=None):
+                group_ids=None, directions=None, footprint_pixels=9, viewport_points=None,
+                viewports=None):
     """Selected projections share an unchanged point table and exact local maps."""
     folder=Path(folder);folder.mkdir(parents=True,exist_ok=True)
     cloud_file=Path(cloud_file).resolve()
@@ -184,8 +185,9 @@ def write_views(cloud_file, sources, folder, prefix, eye, *, role, selectable=Tr
     views=[]
     for name,direction in directions:
         view_id=prefix+'_'+name
+        viewport = viewport_points if viewports is None else viewports.get(name, viewport_points)
         picture,mapping,meta=rasterize(points,rgb,'rgb',tuple(direction),
-            footprint_pixels=footprint_pixels, viewport_points=viewport_points)
+            footprint_pixels=footprint_pixels, viewport_points=viewport)
         if group_ids is not None:
             meta['component_label_bounds_xyxy']=annotate_groups(picture,mapping,group_ids)
             meta['point_group_ids_file']=str(group_file)

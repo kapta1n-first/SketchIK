@@ -80,7 +80,7 @@ PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
 
 私有配置项为 `SKETCHIK_BASE_URL`、`SKETCHIK_MODEL`、`SKETCHIK_API_KEY` 和可选 `SKETCHIK_REASONING`。输出上限与预算字段通过 `--api-max-tokens`、`--api-budget-field` 按接口能力设置。
 
-主线固定使用原生工具调用接口及现有 XML 网关通道，不提供 JSON 文本模拟工具调用。面向仅支持 JSON 文本工具协议的 Bytecat/Kimi 接入，使用 `codex/json-bytecat-kimi` 分支。
+主线使用原生工具调用接口，可通过 XML 网关连接模型。
 
 连接异常或不完整流会保留原仿真、同一会话和请求边界，等待恢复；等待期间物理步保持不变。原进程仍存活时可执行：
 
@@ -96,9 +96,7 @@ PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 <python> -m pytest -q
 
 ## 实验记录
 
-结果中的模型自报、动作收敛和官方评测分别记录。评测真值只用于初始化与评测，操作 Agent 使用公开观测进行定位和判断。逐次 API 尝试保存请求体积、时间、用量及可取得的余额；共享账户窗口差额与独占请求费用分别表述。
+公开记录覆盖 LIBERO-10 的同步、异步 seed0/init0 套件，以及协议 66 的五次 Task3 复跑。同步和异步各有 10 轮，官方均通过 8 轮。Task3 复跑官方通过 4/5。各组均保留每轮官方结果，模型自报与官方评测分别记录。
 
-- [异步整套实验记录](reports/async74-seed0-20261117/README.md)
-- [外部对照复现审计](reports/harness-audit-20261117/README.md)
-- [外部对照工具](tools/harness_eval/README.md)
-- [修改与验证记录](changes.md)
+- [评测结果、源码指纹与关键执行事件](reports/seed0-execution-records/README.md)
+- [异步实验录像](reports/async74-seed0-20261117/README.md)

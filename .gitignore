@@ -1,5 +1,10 @@
 .runtime/
 runs/
+/changes.md
+/reports/async74-seed0-20261117/task[0-9]/
+/reports/async74-seed0-20261117/manifest.json
+/reports/async74-seed0-20261117/results.json
+/reports/harness-audit-20261117/
 __pycache__/
 *.egg-info/
 .pytest_cache/

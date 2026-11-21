@@ -19,5 +19,3 @@ Offline checks (loopback mock HTTP only; no provider/GPU calls):
 ```sh
 python -m pytest tools/harness_eval/test_empty_memory.py tools/harness_eval/test_network_recovery.py tools/harness_eval/test_primitive_guard.py -q
 ```
-
-See [the audit](../../reports/harness-audit-20261117/README.md) for native configuration differences and limits of the conversion checks.

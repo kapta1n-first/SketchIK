@@ -96,7 +96,7 @@ PYTHONPATH=src OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 <python> -m pytest -q
 
 ## 实验记录
 
-公开记录覆盖 LIBERO-10 的同步、异步 seed0/init0 套件，以及协议 66 的五次 Task3 复跑。同步和异步各有 10 轮，官方均通过 8 轮。Task3 复跑官方通过 4/5。各组均保留每轮官方结果，模型自报与官方评测分别记录。
+实验报告记录 LIBERO-10 seed0/init0 的同步、异步套件和 Task3 复跑，包含各组的官方成绩与关键执行事件。
 
 - [评测结果、源码指纹与关键执行事件](reports/seed0-execution-records/README.md)
 - [异步实验录像](reports/async74-seed0-20261117/README.md)

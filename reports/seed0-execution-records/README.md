@@ -29,6 +29,6 @@
 
 ## 文件
 
-- 25 轮的官方结果、实际模型、物理步数、计时扣除项与源码指纹。 [结果 JSON](results.json)
+- 各组的逐轮官方结果、实际模型、物理步数、计时扣除项与源码指纹。 [结果 JSON](results.json)
 - 两套通过轮次和全部五次 Task3 的关键事件，附试验编号、原始行号与时间。 [执行事件 JSONL](execution-events.jsonl)
 - 异步 Task0–9 各轮视频。 [录像索引](../async74-seed0-20261117/README.md)

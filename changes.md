@@ -2019,3 +2019,13 @@ Task9 v179完整初态最终官方true、A success；16段草图、18次执行A�
 2026-11-19：用新版三张开局点云，在本机空闲 2 号 RTX 3090 跑 Kimi 3.1 Pro low/32000 异步 Task8 seed0/init0。开局请求实际发送 16 张图，已按归档图片哈希核对三张新版总图均发出。初始正确绑定炉灶 G1 和两把摩卡壶 G2/G3，未要求补拍。第一份草图把点云图坐标填为 image_point，零动作拒绝，改用 cloud_point 后进入真实执行与多次抓取恢复。用户要求停止，物理步 1920 中断，墙钟 598.12 秒，官方未达成成功；进程已退出，日志、终帧和录像留在 /var/tmp/sketchik_task8_kimi_async_json_20261119_020424。
 
 2026-11-20：主线固定原生工具调用及现有 XML 网关通道，移除 JSON 文本工具适配器、CLI 开关和专属测试；README/AGENTS 指向 `codex/json-bytecat-kimi` 分支，历史运行记录保留。该 JSON 分支从共同多视角/恢复提示提交 `1eaf233` 创建，保留原 JSON 实现。主线验证：62 项客户端、任务入口及观察阶段测试通过；`compileall` 和 `task_trial --help` 通过。HarnessVLA 评测改动未纳入提交，继续留在工作区。
+
+2026-11-20：在 Bytecat 专用分支实现 `--api-json-text-tools`。JSON 模式不合并或重写历史对话：每条 system/user/assistant/tool 消息、工具回执和图片顺序保持原样；仅 system 末尾加入 JSON envelope 指令及原工具 schema 文本，不向 Bytecat 发送原生 `tools` 字段。解出的调用仍进入原工具参数验证、预算和派发入口；意外原生调用、无效 JSON 不执行。此前误发到 Flowith XML 网关的请求有一次 401、两次 SSE 错误，均未派发工具，不计作 Bytecat 验证。
+
+2026-11-20：使用 Bytecat 私有配置、GPT-6.1-Sol low、65536 completion 上限和同一冻结 Task0 请求做单次 JSON 协议探针。保留原 8 条消息角色序列及 15 张原图，收到完整 JSON 文本并解码为 `execute_actions`；请求用量 44974 prompt / 754 completion tokens，首 token 21.16 秒。探针没有连接执行器，工具派发 0、机器人动作 0。结论仅证明该冻结输入上的 Bytecat JSON 文本协议可用，不证明动作 schema 全量验证、任务成功率或 JSON 相对 XML 的因果效果。新增客户端测试覆盖消息/图像保持、schema 文本传输、解码和无效/意外原生回复闭锁；`tests/test_agent.py` 43 项通过。
+
+2026-11-21 对照 11 月 17 日异步全套和干净 XML 主线 `bb39e54`。十轮原始源码清单相同，基线 69 个文件逐一匹配 `45ae1c3`。异步调度、IK、执行和恢复、上下文裁剪代码相同。主线增加开局两张点云视角、观察图凭据继承和身份纠正及恢复提示，清理旧抓取与诊断入口。Task0 首段原生版、早期 JSON 版和保角色 JSON 版分别有 8、2、8 条消息，实际均含 15 张图片。早期 JSON 版合并了非系统消息，保留图片部件。Flowith 将原生工具 schema、调用与回执转换为 XML，普通多模态消息保持原样。本次独立复核由 6.2 Astra xhigh 进行，逐文件和请求比对见 `/var/tmp/sketchik-xml-sol61-OFjzKPJn/baseline_comparison.json`。
+
+2026-11-21 用干净 `bb39e54` 完成一次 Task0 seed0/init0 异步 IK-only。6.1 Sol low 子代理通过本机原生工具适配器在同一会话处理全部 6 个请求，实际提交观察需求一次、执行草图一次、提前草图四次（其中含终态预审）。GPU 均忙，本轮使用 CPU llvmpipe 软件 EGL 生成原生 1024×1024 观测，模型响应走本机适配器，未经过 Flowith。首轮绑定蓝罐 G6、番茄酱罐 G5、篮子 G7。4 段草图接受，3 次异步接续，零工具格式拒绝。官方在第二罐开爪后第 2363 步判定成功并终止，末段撤手未派发，模型未再调用 finish。882.55 秒，录像为 2363 帧、20 fps。58 个运行源码哈希与 `bb39e54` 一致，6 条原生请求、回包关联及 108 个图片实例逐一核验，相关离线测试 103 项通过。结果、最终双视图、录像及回执归档于 `/var/tmp/sketchik-xml-sol61-OFjzKPJn/task0`。
+
+2026-11-21 将工作区切回 `main`，撤下未提交的 JSON 文本工具适配、CLI 开关、专属测试和对应使用说明。11 月 20 日两条记录对应已撤下的 Bytecat 实验。客户端、异步调度、恢复与观察阶段的 108 项离线测试通过。
